@@ -94,6 +94,7 @@ export default function StudentView({ dni, onBack, isStaff }) {
     if (n.includes('FEB')) return 'FEB.';
     if (n.includes('MAR')) return 'MAR.';
     if (n.includes('DEF') || n.includes('DEFINITIVA')) return 'DEF.';
+    if (n.includes('OTRAS')) return 'OTRAS INST.';
     
     return n;
   };
@@ -121,7 +122,10 @@ export default function StudentView({ dni, onBack, isStaff }) {
     return a.id - b.id;
   });
 
-  const hasModular = data.config.subjects.some(s => s.tipo === 'modular');
+  const hasModular = data.config.subjects.some(s => 
+    s.tipo?.toLowerCase().includes('modular') || 
+    s.tipo?.toLowerCase().includes('taller')
+  );
 
   return (
     <div className="boletin-container">
