@@ -112,6 +112,17 @@ export default function StudentView({ dni, onBack, isStaff }) {
   const subCount = data.config.subjects.length;
   const dynamicRowHeight = subCount <= 8 ? '14mm' : subCount <= 11 ? '11mm' : subCount <= 14 ? '8.5mm' : '7mm';
 
+  // Ordenar periodos: Asegurar que DEF esté al final y OTRAS INST antes
+  const sortedPeriodos = [...data.config.periodos].sort((a, b) => {
+    const nA = a.nombre.toUpperCase();
+    const nB = b.nombre.toUpperCase();
+    if (nA.includes('DEF') || nA.includes('DEFINITIVA')) return 1;
+    if (nB.includes('DEF') || nB.includes('DEFINITIVA')) return -1;
+    return a.id - b.id;
+  });
+
+  const hasModular = data.config.subjects.some(s => s.tipo === 'modular');
+
   return (
     <div className="boletin-container">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -253,8 +264,9 @@ export default function StudentView({ dni, onBack, isStaff }) {
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.08)' }}>
               <th style={{ width: '220px', padding: '10px 12px', textAlign: 'left', borderBottom: '2px solid var(--primary)', ...borderStyle }}>ESPACIOS CURRICULARES</th>
-              {data.config.periodos.map(p => {
+              {sortedPeriodos.map(p => {
                 const isDivider = [2, 4, 6].includes(p.id);
+                const isTrimester = p.nombre.toUpperCase().includes('TRIMESTRE');
                 return (
                   <th key={p.id} style={{ 
                     textAlign: 'center', 
@@ -265,7 +277,17 @@ export default function StudentView({ dni, onBack, isStaff }) {
                     whiteSpace: 'nowrap',
                     ...(isDivider ? dividerStyle : borderStyle)
                   }}>
-                    {shortenPeriodName(p.nombre)}
+                    <div>{shortenPeriodName(p.nombre)}</div>
+                    {hasModular && isTrimester && (
+                      <div style={{ fontSize: '0.5rem', fontWeight: 'normal', opacity: 0.6, marginTop: '2px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2px' }}>
+                        T | P | Pond
+                      </div>
+                    )}
+                    {hasModular && !isTrimester && p.id <= 6 && (
+                      <div style={{ fontSize: '0.5rem', fontWeight: 'normal', opacity: 0.6, marginTop: '2px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2px' }}>
+                        T | P
+                      </div>
+                    )}
                   </th>
                 );
               })}
@@ -282,7 +304,7 @@ export default function StudentView({ dni, onBack, isStaff }) {
                     </div>
                   )}
                 </td>
-                {data.config.periodos.map(p => {
+                {sortedPeriodos.map(p => {
                   const isDivider = [2, 4, 6].includes(p.id);
                   const isFinalStage = p.id > 6;
                   const isTrimester = [2, 4, 6].includes(p.id);
