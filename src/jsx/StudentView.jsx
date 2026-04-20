@@ -312,20 +312,20 @@ export default function StudentView({ dni, onBack, isStaff }) {
                       {sub.tipo?.toLowerCase().includes('modular') || sub.tipo?.toLowerCase().includes('taller') ? (
                         !isFinalStage ? (
                           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '0.3rem' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '18px' }}>
-                              <span style={{ fontSize: '0.42rem', opacity: 0.4, marginBottom: '2px' }}>T</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20px' }}>
+                              <span style={{ fontSize: '0.55rem', opacity: 0.5, fontWeight: 'bold', marginBottom: '1px' }}>T</span>
                               <span style={{ fontSize: '0.75rem', color: '#fff' }}>{getGradeValue(sub.id, p.id, 'valor_t')}</span>
                             </div>
                             <span style={{ color: 'var(--text-muted)', opacity: 0.2, alignSelf: 'flex-end', marginBottom: '2px' }}>|</span>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '18px' }}>
-                              <span style={{ fontSize: '0.42rem', opacity: 0.4, marginBottom: '2px' }}>P</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '20px' }}>
+                              <span style={{ fontSize: '0.55rem', opacity: 0.5, fontWeight: 'bold', marginBottom: '1px' }}>P</span>
                               <span style={{ fontSize: '0.75rem', color: '#fff' }}>{getGradeValue(sub.id, p.id, 'valor_p')}</span>
                             </div>
                             {isTrimester && (
                               <>
                                 <span style={{ color: 'var(--text-muted)', opacity: 0.2, alignSelf: 'flex-end', marginBottom: '2px' }}>|</span>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '24px' }}>
-                                  <span style={{ fontSize: '0.42rem', opacity: 0.4, marginBottom: '2px' }}>POND</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '28px' }}>
+                                  <span style={{ fontSize: '0.52rem', opacity: 0.5, fontWeight: 'bold', marginBottom: '1px' }}>POND</span>
                                   <span style={{ fontSize: '0.75rem', color: '#2ecc71', fontWeight: 'bold' }}>{getGradeValue(sub.id, p.id, 'valor_pond')}</span>
                                 </div>
                               </>
