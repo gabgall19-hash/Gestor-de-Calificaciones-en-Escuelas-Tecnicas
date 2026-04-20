@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Printer, FileText } from 'lucide-react';
+import { ArrowLeft, Printer, FileText, AlertCircle } from 'lucide-react';
 
-export default function StudentView({ dni, onBack, isStaff }) {
+export default function StudentView({ dni, password, onBack, isStaff }) {
   useEffect(() => {
     const handleContextMenu = (e) => e.preventDefault();
     const handleKeyDown = (e) => {
@@ -47,7 +47,16 @@ export default function StudentView({ dni, onBack, isStaff }) {
     // Limpiar DNI de puntos o espacios antes de la consulta
     const cleanDNI = dni ? dni.toString().replace(/\D/g, '') : '';
     
-    fetch(`/api/student?dni=${cleanDNI}`)
+    const headers = {};
+    if (isStaff) {
+      const stored = localStorage.getItem('currentUser');
+      if (stored) {
+        const userId = JSON.parse(stored).id;
+        headers['Authorization'] = `Bearer auth-token-${userId}`;
+      }
+    }
+
+    fetch(`/api/student?dni=${cleanDNI}&password=${password || ''}`, { headers })
       .then(res => res.json())
       .then(json => {
         if (json.error) setError(json.error);
@@ -58,13 +67,23 @@ export default function StudentView({ dni, onBack, isStaff }) {
         setError("Error de conexión");
         setLoading(false);
       });
-  }, [dni]);
+  }, [dni, password]);
 
   if (loading) return <div className="glass-card">Cargando boletín...</div>;
   if (error) return (
-    <div className="glass-card" style={{ textAlign: 'center' }}>
-      <p style={{ color: 'var(--danger)', marginBottom: '1rem' }}>{error}</p>
-      <button className="btn btn-primary" onClick={onBack}><ArrowLeft size={16}/> Volver</button>
+    <div className="glass-card" style={{ textAlign: 'center', maxWidth: '500px', margin: '4rem auto' }}>
+      {error === 'PASSWORD_NOT_SET' ? (
+        <div style={{ color: '#ef4444', padding: '1rem', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)' }}>
+          <AlertCircle size={40} style={{ marginBottom: '1rem' }} />
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Contraseña no definida</h2>
+          <p style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>
+            Solicite la contraseña mediante atención directa en el horario de <b>8:00 a 13:00 de Lunes a Viernes</b>.
+          </p>
+        </div>
+      ) : (
+        <p style={{ color: 'var(--danger)', marginBottom: '1.5rem', fontSize: '1.1rem' }}>{error}</p>
+      )}
+      <button className="btn btn-primary" onClick={onBack} style={{ marginTop: '1.5rem' }}><ArrowLeft size={16}/> Volver</button>
     </div>
   );
 

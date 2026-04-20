@@ -219,7 +219,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
   const loadData = async (courseId = selectedCourseId, yearId = selectedYearId) => {
     setLoading(true);
     try {
-      const json = await apiLoadData(user.id, yearId, courseId, page === 'students' && !courseId);
+      const isGlobal = page === 'students' || ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol);
+      const json = await apiLoadData(user.id, yearId, courseId, isGlobal);
       setData(json);
       setSelectedYearId(json.selectedYearId);
       setSelectedCourseId(json.selectedCourseId);
@@ -645,6 +646,18 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     }
   };
 
+  const handleSetPassword = async (student) => {
+    const newPass = window.prompt(`Establecer contraseña de boletín para ${student.apellido}, ${student.nombre}:`, '');
+    if (newPass === null) return;
+    try {
+      await post('students', { action: 'update_password', studentId: student.id, password: newPass });
+      showToast('Contraseña de boletín actualizada', 'success');
+      await loadData(selectedCourseId, selectedYearId);
+    } catch (err) {
+      showToast('Error al actualizar contraseña: ' + err.message, 'error');
+    }
+  };
+
   const startEndCycle = () => {
     setIsSelectionMode(true);
     setPage('students');
@@ -1017,6 +1030,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           dniError={dniError} setDniError={setDniError}
           setSelectedStudentIds={setSelectedStudentIds}
           onEndCycle={() => setShowEndCycleModal(true)}
+          onSetPassword={handleSetPassword}
         />
       )}
 

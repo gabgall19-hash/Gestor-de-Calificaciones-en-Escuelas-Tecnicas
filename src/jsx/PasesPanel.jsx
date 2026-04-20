@@ -3,6 +3,19 @@ import { ArrowRightLeft, Search, Wrench, RotateCcw, Eye } from 'lucide-react';
 import { formatDNI } from './PreceptorHelpers';
 
 const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, undoPase, onPreviewStudent }) => {
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 30;
+
+  const filteredPases = data.pases.filter(p => 
+    `${p.nombre_apellido} ${p.dni} ${p.institucion_destino}`.toLowerCase().includes(pasesSearch.toLowerCase())
+  );
+
+  const paginatedPases = filteredPases.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalPages = Math.ceil(filteredPases.length / itemsPerPage);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [pasesSearch]);
   return (
     <section className="page-section">
       <div className="section-title"><ArrowRightLeft size={16} /><h2>Gestión de Pases de Alumnos</h2></div>
@@ -25,7 +38,7 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
               </tr>
             </thead>
             <tbody>
-              {data.pases.filter(p => `${p.nombre_apellido} ${p.dni} ${p.institucion_destino}`.toLowerCase().includes(pasesSearch.toLowerCase())).map((p) => (
+              {paginatedPases.map((p) => (
                 <tr key={p.id}>
                   <td><strong>{p.nombre_apellido}</strong></td>
                   <td>{formatDNI(p.dni)}</td>
@@ -45,6 +58,28 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
             </tbody>
           </table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+            <button 
+              className="page-btn" 
+              disabled={currentPage === 1} 
+              onClick={() => { setCurrentPage(p => p - 1); document.querySelector('.table-container').scrollTo(0,0); }}
+              style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'white', cursor: 'pointer', fontSize: '0.85rem' }}
+            >
+              Anterior
+            </button>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Página {currentPage} de {totalPages}</span>
+            <button 
+              className="page-btn" 
+              disabled={currentPage === totalPages} 
+              onClick={() => { setCurrentPage(p => p + 1); document.querySelector('.table-container').scrollTo(0,0); }}
+              style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'white', cursor: 'pointer', fontSize: '0.85rem' }}
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

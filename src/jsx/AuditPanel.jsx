@@ -5,7 +5,8 @@ const AuditPanel = ({ data, user, onDelete }) => {
   const [selectedLog, setSelectedLog] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all'); // all, add, edit, delete
-  const [visibleCount, setVisibleCount] = useState(50);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
 
   const abbreviateRole = (role) => {
     const roles = {
@@ -63,6 +64,16 @@ const AuditPanel = ({ data, user, onDelete }) => {
       (h.alumno_nombre || '').toLowerCase().includes(lower)
     );
   }, [data.historial, searchTerm, filterType]);
+
+  const paginatedHistorial = useMemo(() => {
+    return filteredHistorial.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  }, [filteredHistorial, currentPage]);
+
+  const totalPages = Math.ceil(filteredHistorial.length / itemsPerPage);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterType]);
 
   const handleDeleteAll = () => {
     if (window.confirm('¿ESTÁS COMPLETAMENTE SEGURO? Se borrará TODO el historial de este curso. Esta acción no se puede deshacer.')) {
@@ -139,7 +150,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
             <p style={{ textAlign: 'center', opacity: 0.5, padding: '2rem' }}>No se encontraron registros.</p>
           ) : (
             <>
-              {filteredHistorial.slice(0, visibleCount).map((h) => {
+              {paginatedHistorial.map((h) => {
                 const hasDetail = h.detalle.includes('[DETALLE]');
                 const mainDetail = h.detalle.split('Desglose:')[0].replace('[DETALLE]', '').trim();
                 const action = getActionInfo(mainDetail);
@@ -216,14 +227,25 @@ const AuditPanel = ({ data, user, onDelete }) => {
                   </div>
                 );
               })}
-              {filteredHistorial.length > visibleCount && (
-                <div style={{ textAlign: 'center', padding: '1rem' }}>
+              
+              {totalPages > 1 && (
+                <div className="pagination-controls" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
                   <button 
-                    className="btn" 
-                    onClick={() => setVisibleCount(prev => prev + 50)}
-                    style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.8rem' }}
+                    className="page-btn" 
+                    disabled={currentPage === 1} 
+                    onClick={() => { setCurrentPage(p => p - 1); document.querySelector('.audit-list').scrollTo(0,0); }}
+                    style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'white', cursor: 'pointer', fontSize: '0.85rem' }}
                   >
-                    Cargar más registros ({filteredHistorial.length - visibleCount} restantes)
+                    Anterior
+                  </button>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Página {currentPage} de {totalPages}</span>
+                  <button 
+                    className="page-btn" 
+                    disabled={currentPage === totalPages} 
+                    onClick={() => { setCurrentPage(p => p + 1); document.querySelector('.audit-list').scrollTo(0,0); }}
+                    style={{ padding: '0.5rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: 'white', cursor: 'pointer', fontSize: '0.85rem' }}
+                  >
+                    Siguiente
                   </button>
                 </div>
               )}

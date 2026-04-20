@@ -127,11 +127,13 @@ async function handleGrid(env, request, url) {
     if (includeAllStudents) {
       idx.allStudents = statements.length;
       statements.push(env.DB.prepare(`
-        SELECT id, nombre, apellido, dni, course_id, observaciones, estado
-        FROM alumnos 
-        WHERE course_id IS NOT NULL
-        AND estado = 1
-        ORDER BY apellido, nombre
+        SELECT a.id, a.nombre, a.apellido, a.dni, a.course_id, a.observaciones, a.estado, a.genero, a.password,
+               (c.ano || ' ' || c.division || ' · ' || c.turno) as course_label
+        FROM alumnos a
+        JOIN cursos c ON a.course_id = c.id
+        WHERE a.course_id IS NOT NULL
+        AND a.estado = 1
+        ORDER BY a.apellido, a.nombre
       `));
     }
   } else {
@@ -467,17 +469,9 @@ async function handleGradeUpdates(env, request, userId, body) {
       const pair = `${student.course_id}-${u.materia_id}`;
       const isAssignedAsProfessor = p_subjects.includes(pair);
 
-      if (user.rol === 'preceptor') {
-        const isHisCourse = Number(user.preceptor_course_id) === student.course_id;
-        const isNotTaller = materia.es_taller === 0;
-        if (!((isHisCourse && isNotTaller) || isAssignedAsProfessor)) {
-          throw new Error(`Permiso denegado para materia ${materia.nombre} en alumno ${student.apellido}`);
-        }
-      } else if (user.rol === 'preceptor_taller') {
-        const isHisCourse = Number(user.preceptor_course_id) === student.course_id;
-        const isTaller = materia.es_taller === 1;
-        if (!((isHisCourse && isTaller) || isAssignedAsProfessor)) {
-          throw new Error(`Permiso denegado: solo taller para ${student.apellido}`);
+      if (user.rol === 'preceptor' || user.rol === 'preceptor_taller') {
+        if (!isAssignedAsProfessor) {
+          throw new Error(`Permiso denegado: los preceptores no pueden modificar calificaciones de forma directa.`);
         }
       } else if (user.rol === 'profesor' && !isAssignedAsProfessor) {
         throw new Error(`No tienes asignada la materia ${materia.nombre} en este curso.`);
@@ -634,6 +628,8 @@ async function handleStudents(env, request, userId, body) {
         await env.DB.prepare(
           'UPDATE alumnos SET nombre = ?, apellido = ?, course_id = ?, estado = 1, genero = ?, observaciones = ? WHERE id = ?'
         ).bind(finalNombre, finalApellido, course_id, body.genero, newObs, existing.id).run();
+        
+        await logHistory(env, userId, course_id, 'alta_alumno', `Re-incorporación de alumno: ${finalApellido}, ${finalNombre}`, existing.id);
         return json({ success: true, reincorporated: true });
       }
     }
@@ -741,6 +737,22 @@ async function handleStudents(env, request, userId, body) {
       tutor_parentesco || null, tutor_dni || null, tutor_contacto || null,
       tutor_mail || null, domicilio || null, studentId
     ).run();
+
+    await logHistory(env, userId, student.course_id, 'ficha_edit', `Actualización de ficha de alumno: ${finalApellido}, ${finalNombre}`, studentId);
+
+    return json({ success: true });
+  }
+
+  if (action === 'update_password') {
+    const { studentId, password: newPassword } = body;
+    if (!studentId) throw new Error('ID de alumno requerido');
+    
+    const student = await env.DB.prepare('SELECT apellido, nombre, course_id FROM alumnos WHERE id = ?').bind(studentId).first();
+    await env.DB.prepare('UPDATE alumnos SET password = ? WHERE id = ?').bind(newPassword || null, studentId).run();
+    
+    if (student) {
+      await logHistory(env, userId, student.course_id, 'password_edit', `Cambio de contraseña para: ${student.apellido}, ${student.nombre}`, studentId);
+    }
     return json({ success: true });
   }
 
@@ -834,6 +846,11 @@ async function handleStudents(env, request, userId, body) {
         const newObs = (student.observaciones || "").split("\n").filter(l => !l.startsWith(marker)).join("\n").trim();
         // Restaurar curso y estado activo
         await env.DB.prepare('UPDATE alumnos SET course_id = ?, estado = 1, observaciones = ? WHERE id = ?').bind(pase.course_id_origen, newObs, pase.alumno_id).run();
+        
+        const studentData = await env.DB.prepare('SELECT apellido, nombre FROM alumnos WHERE id = ?').bind(pase.alumno_id).first();
+        if (studentData) {
+          await logHistory(env, userId, pase.course_id_origen, 'pase_undo', `Se deshizo el pase de: ${studentData.apellido}, ${studentData.nombre}`, pase.alumno_id);
+        }
       }
       await env.DB.prepare('DELETE FROM pases WHERE id = ?').bind(paseId).run();
     }

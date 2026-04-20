@@ -11,7 +11,7 @@ export async function onRequestGet({ env, request }) {
     // Nota: Seleccionamos c.tecnicatura_id explícitamente porque no está en la tabla alumnos
     const alumno = await env.DB.prepare(`
       SELECT 
-        a.id, a.nombre, a.apellido, a.dni, a.observaciones, a.estado,
+        a.id, a.nombre, a.apellido, a.dni, a.observaciones, a.estado, a.password,
         COALESCE(c.ano, hc.ano) as ano,
         COALESCE(c.division, hc.division) as division,
         COALESCE(c.turno, hc.turno) as turno,
@@ -35,6 +35,21 @@ export async function onRequestGet({ env, request }) {
 
     if (!alumno) {
       return new Response(JSON.stringify({ error: "Alumno no encontrado. Verifique el DNI." }), { status: 404 });
+    }
+
+    const providedPassword = url.searchParams.get("password");
+    const authHeader = request.headers.get("Authorization") || "";
+    const isStaffRequest = authHeader.startsWith("Bearer auth-token-");
+
+    // Lógica de validación de contraseña (Bypass si es staff)
+    if (!isStaffRequest) {
+      if (!alumno.password || alumno.password.trim() === "") {
+        return new Response(JSON.stringify({ error: "PASSWORD_NOT_SET" }), { status: 403 });
+      }
+
+      if (alumno.password !== providedPassword) {
+        return new Response(JSON.stringify({ error: "Contraseña incorrecta." }), { status: 401 });
+      }
     }
 
     // Obtener información de pase si existe

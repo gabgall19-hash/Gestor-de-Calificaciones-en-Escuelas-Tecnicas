@@ -10,6 +10,8 @@ function App() {
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const [dniSearch, setDniSearch] = useState('');
+  const [boletinPassword, setBoletinPassword] = useState('');
+  const [showBoletinPassword, setShowBoletinPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loginData, setLoginData] = useState({ username: '', password: '' });
@@ -222,17 +224,40 @@ function App() {
               <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Eye size={20} color="var(--success)" /> Ver Boletín
               </h3>
-              <form onSubmit={handleStudentSearch} style={{ display: 'flex', gap: '8px' }}>
-                <input 
-                  type="text" 
-                  value={dniSearch}
-                  onChange={(e) => setDniSearch(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                  className="input-field" 
-                  placeholder="DNI del Alumno" 
-                  style={{ flex: 1, padding: '0.6rem' }}
-                />
-                <button type="submit" className="btn" style={{ background: 'var(--success)', padding: '0.6rem 1rem' }} disabled={dniSearch.length !== 8}>
-                  Ver
+              <form onSubmit={handleStudentSearch}>
+                <div className="input-group" style={{ marginBottom: '1rem' }}>
+                  <label style={{ fontSize: '0.85rem' }}>Usuario (DNI)</label>
+                  <input 
+                    type="text" 
+                    value={dniSearch}
+                    onChange={(e) => setDniSearch(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                    className="input-field" 
+                    placeholder="DNI del Alumno" 
+                    style={{ width: '100%', padding: '0.6rem' }}
+                  />
+                </div>
+                <div className="input-group" style={{ marginBottom: '1rem' }}>
+                  <label style={{ fontSize: '0.85rem' }}>Contraseña</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type={showBoletinPassword ? "text" : "password"} 
+                      value={boletinPassword}
+                      onChange={(e) => setBoletinPassword(e.target.value)}
+                      className="input-field" 
+                      placeholder="••••••••" 
+                      style={{ width: '100%', padding: '0.6rem', paddingRight: '40px' }}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowBoletinPassword(!showBoletinPassword)} 
+                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+                    >
+                      {showBoletinPassword ? <Eye size={16} /> : <span>👁️</span>}
+                    </button>
+                  </div>
+                </div>
+                <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem' }} disabled={dniSearch.length !== 8}>
+                  Ver Boletín
                 </button>
               </form>
             </div>
@@ -325,7 +350,7 @@ function App() {
         } />
 
         <Route path="/boletin" element={
-          <StudentView dni={dniSearch} isStaff={!!user} onBack={() => navigate(user ? '/dashboard' : '/')} />
+          <StudentView dni={dniSearch} password={boletinPassword} isStaff={!!user} onBack={() => navigate(user ? '/dashboard' : '/')} />
         } />
 
         <Route path="*" element={<Navigate to="/" replace />} />

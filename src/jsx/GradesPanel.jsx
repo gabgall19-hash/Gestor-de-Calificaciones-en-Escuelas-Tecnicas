@@ -235,12 +235,14 @@ const GradesPanel = ({
                       const currentSub = filteredSubjects.find(s => s.id === selectedSubjectId) || filteredSubjects[0];
                       const sid = currentSub?.id;
                       if (!sid) return <td colSpan="13">No hay materias vinculadas</td>;
-                      const sub = currentSub;
-                      const isModular = (sub?.tipo || '').toLowerCase().includes('modular');
+                      const isModular = (currentSub?.tipo || '').toLowerCase().includes('modular');
                       const mode = data.config?.period_view_mode || 'completo';
-                      const isWorkshopReadOnly = user.rol === 'preceptor' && sub?.es_taller === 1;
-                      const isLocked = isWorkshopReadOnly;
-                      const isTallerSimple = sub?.es_taller === 1 && !(sub?.tipo || '').toLowerCase().includes('modular');
+                      
+                      const p_subjects = (user.professor_subject_ids ?? '').split(',');
+                      const isAssignedAsProfessor = p_subjects.includes(`${data.selectedCourseId}-${sid}`);
+                      const isPreceptorReadOnly = (user.rol === 'preceptor' || user.rol === 'preceptor_taller') && !isAssignedAsProfessor;
+                      const isLocked = isPreceptorReadOnly;
+                      const isTallerSimple = currentSub?.es_taller === 1 && !(currentSub?.tipo || '').toLowerCase().includes('modular');
                       const isPassed = (pId) => {
                         const f = [7, 8, 9, 10].includes(pId) ? 'valor_t' : (isModular ? 'valor_pond' : 'valor_t');
                         const val = gradeValue(student.id, sid, f, pId);
@@ -348,34 +350,38 @@ const GradesPanel = ({
                   ) : (
                     filteredSubjects.map((subject) => {
                       const isLocked = (data.locks || []).some(l => l.materia_id === subject.id && l.periodo_id === selectedPeriod);
-                      const isWorkshopReadOnly = user.rol === 'preceptor' && subject.es_taller === 1;
+                      
+                      const p_subjects = (user.professor_subject_ids ?? '').split(',');
+                      const isAssignedAsProfessor = p_subjects.includes(`${data.selectedCourseId}-${subject.id}`);
+                      const isPreceptorReadOnly = (user.rol === 'preceptor' || user.rol === 'preceptor_taller') && !isAssignedAsProfessor;
+                      const isFinalLocked = isLocked || isPreceptorReadOnly;
 
                       return (subject.tipo || '').toLowerCase().includes('modular') ? (
                         <React.Fragment key={subject.id}>
                           {[1, 3, 5].includes(selectedPeriod) ? (
                             <>
                               <td className="cell-t" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                                <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isLocked || (user.rol === 'preceptor' && subject.es_taller === 1 && false)} onChange={(e) => { const v = e.target.value; if (v !== '' && !/^[A-Za-z]+$/.test(v)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v.toUpperCase()) }} />
+                                <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && !/^[A-Za-z]+$/.test(v)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v.toUpperCase()) }} />
                               </td>
                               <td className="cell-p" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                                <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_p') || ''} disabled={isLocked || isWorkshopReadOnly} onChange={(e) => { const v = e.target.value; if (v !== '' && !/^[A-Za-z]+$/.test(v)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_p', v.toUpperCase()) }} />
+                                <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_p') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && !/^[A-Za-z]+$/.test(v)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_p', v.toUpperCase()) }} />
                               </td>
                             </>
                           ) : [2, 4, 6].includes(selectedPeriod) ? (
                             <>
                               <td className="cell-t" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isLocked || (user.rol === 'preceptor' && subject.es_taller === 1 && false)} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v) }} />
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v) }} />
                               </td>
                               <td className="cell-p" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, subject.id, 'valor_p') || ''} disabled={isLocked || isWorkshopReadOnly} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_p', v) }} />
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, subject.id, 'valor_p') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_p', v) }} />
                               </td>
                               <td className="cell-pond" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, subject.id, 'valor_pond') || ''} disabled={isLocked || (user.rol === 'preceptor' && subject.es_taller === 1 && false)} onChange={(e) => { const v = e.target.value; if (v !== '' && isNaN(v)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_pond', v) }} />
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, subject.id, 'valor_pond') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && isNaN(v)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_pond', v) }} />
                               </td>
                             </>
                           ) : (
                             <td className="cell-t" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                              <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isLocked || isWorkshopReadOnly} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v) }} />
+                              <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v) }} />
                             </td>
                           )}
                         </React.Fragment>
@@ -383,15 +389,15 @@ const GradesPanel = ({
                         <React.Fragment key={subject.id}>
                           {[1, 3, 5].includes(selectedPeriod) ? (
                             <td className="cell-t" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                              <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isLocked || isWorkshopReadOnly} onChange={(e) => { const v = e.target.value; if (v !== '' && !/^[A-Za-z]+$/.test(v)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v.toUpperCase()) }} />
+                              <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && !/^[A-Za-z]+$/.test(v)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v.toUpperCase()) }} />
                             </td>
                           ) : [2, 4, 6].includes(selectedPeriod) ? (
                             <td className="cell-t" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                              <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isLocked || isWorkshopReadOnly} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v) }} />
+                              <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v) }} />
                             </td>
                           ) : (
                             <td className="cell-t" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.05)' } : {}}>
-                              <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isLocked || isWorkshopReadOnly} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v) }} />
+                              <input type="text" className="cell-input" value={gradeValue(student.id, subject.id, 'valor_t') || ''} disabled={isFinalLocked} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, subject.id, selectedPeriod, 'valor_t', v) }} />
                             </td>
                           )}
                         </React.Fragment>
