@@ -281,17 +281,7 @@ export default function StudentView({ dni, onBack, isStaff }) {
                     whiteSpace: 'nowrap',
                     ...(isDivider ? dividerStyle : borderStyle)
                   }}>
-                    <div>{shortenPeriodName(p.nombre)}</div>
-                    {hasModular && isTrimester && (
-                      <div style={{ fontSize: '0.5rem', fontWeight: 'normal', opacity: 0.6, marginTop: '2px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2px' }}>
-                        T | P | Pond
-                      </div>
-                    )}
-                    {hasModular && !isTrimester && p.id <= 6 && (
-                      <div style={{ fontSize: '0.5rem', fontWeight: 'normal', opacity: 0.6, marginTop: '2px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2px' }}>
-                        T | P
-                      </div>
-                    )}
+                    {shortenPeriodName(p.nombre)}
                   </th>
                 );
               })}
@@ -319,24 +309,35 @@ export default function StudentView({ dni, onBack, isStaff }) {
                       borderBottom: '1px solid rgba(255,255,255,0.05)',
                       ...(isDivider ? dividerStyle : borderStyle)
                     }}>
-                      {sub.tipo === 'modular' && !isFinalStage ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.2rem', fontSize: '0.75rem' }}>
-                          <span title="Teoría" style={{ minWidth: '16px', color: '#fff' }}>
+                      {sub.tipo?.toLowerCase().includes('modular') || sub.tipo?.toLowerCase().includes('taller') ? (
+                        !isFinalStage ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <div style={{ fontSize: '0.45rem', opacity: 0.4, textTransform: 'uppercase', marginBottom: '1px', display: 'flex', gap: '0.3rem' }}>
+                              <span>T</span> <span>P</span> {isTrimester && <span>Pond</span>}
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.2rem', fontSize: '0.75rem' }}>
+                              <span title="Teoría" style={{ minWidth: '16px', color: '#fff' }}>
+                                {getGradeValue(sub.id, p.id, 'valor_t')}
+                              </span>
+                              <span style={{ color: 'var(--text-muted)', opacity: 0.2 }}>|</span>
+                              <span title="Práctica" style={{ minWidth: '16px', color: '#fff' }}>
+                                {getGradeValue(sub.id, p.id, 'valor_p')}
+                              </span>
+                              {isTrimester && (
+                                <>
+                                  <span style={{ color: 'var(--text-muted)', opacity: 0.2 }}>|</span>
+                                  <span title="Ponderación" style={{ minWidth: '16px', color: '#2ecc71', fontSize: '0.7rem' }}>
+                                    {getGradeValue(sub.id, p.id, 'valor_pond')}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ fontWeight: 'normal', color: '#fff', fontSize: '0.8rem' }}>
                             {getGradeValue(sub.id, p.id, 'valor_t')}
                           </span>
-                          <span style={{ color: 'var(--text-muted)', opacity: 0.2 }}>|</span>
-                          <span title="Práctica" style={{ minWidth: '16px', color: '#fff' }}>
-                            {getGradeValue(sub.id, p.id, 'valor_p')}
-                          </span>
-                          {isTrimester && (
-                            <>
-                              <span style={{ color: 'var(--text-muted)', opacity: 0.2 }}>|</span>
-                              <span title="Ponderación" style={{ minWidth: '16px', color: '#2ecc71', fontSize: '0.7rem' }}>
-                                {getGradeValue(sub.id, p.id, 'valor_pond')}
-                              </span>
-                            </>
-                          )}
-                        </div>
+                        )
                       ) : (
                         <span style={{ 
                           fontWeight: 'normal', 
