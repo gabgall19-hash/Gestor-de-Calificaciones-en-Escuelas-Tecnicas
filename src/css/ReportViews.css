@@ -1,0 +1,81 @@
+/* Report and Document Views (RAC, Boletin) */
+
+.boletin-header {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.boletin-field {
+  border-bottom: 1px dashed var(--text-muted);
+  padding-bottom: 0.25rem;
+}
+
+/* Institutional Boletin / Report Specifics */
+.boletin-view img {
+  height: 60px;
+  margin-bottom: 1rem;
+}
+
+.boletin-view h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.boletin-view h1 {
+  font-size: 1.2rem;
+  padding-top: 10px;
+}
+
+.observations-box {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 0.5rem;
+}
+
+@media print {
+  .boletin-view img {
+    height: 45px !important;
+    margin-bottom: 5px !important;
+  }
+
+  .boletin-view h2 {
+    font-size: 1rem !important;
+    margin-bottom: 5px !important;
+  }
+
+  .boletin-view h1 {
+    font-size: 0.8rem !important;
+    padding-top: 5px !important;
+  }
+
+  .boletin-header {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 4px;
+    margin-bottom: 10px !important;
+  }
+
+  .boletin-field {
+    border-bottom: 1px solid #eee !important;
+  }
+
+  .boletin-footer, tr {
+    page-break-inside: avoid;
+  }
+
+  .boletin-footer {
+    margin-top: 2rem !important;
+    gap: 2rem !important;
+  }
+
+  .observations-box {
+    margin-top: 10px !important;
+    padding: 5px !important;
+    border: 1px solid #ccc !important;
+  }
+}
