@@ -15,6 +15,8 @@ function App() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loginData, setLoginData] = useState({ username: '', password: '' });
+  const [appVersion, setAppVersion] = useState(null);
+  const [newVersionAvailable, setNewVersionAvailable] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,6 +25,15 @@ function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [mobileLoginEnabled, setMobileLoginEnabled] = useState(true);
   const [publicAnuncios, setPublicAnuncios] = useState([]);
+  
+  const checkVersion = (serverVersion) => {
+    if (!serverVersion) return;
+    if (!appVersion) {
+      setAppVersion(serverVersion);
+    } else if (appVersion !== serverVersion) {
+      setNewVersionAvailable(true);
+    }
+  };
   
   const showToast = (message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
@@ -46,7 +57,10 @@ function App() {
   React.useEffect(() => {
     fetch('/api/settings')
       .then(res => res.json())
-      .then(data => setMobileLoginEnabled(data.mobile_login_enabled))
+      .then(data => {
+        setMobileLoginEnabled(data.mobile_login_enabled);
+        checkVersion(data.version);
+      })
       .catch(err => console.error("Error fetching settings:", err));
 
     fetch('/api/data?type=public_anuncios')
@@ -149,6 +163,42 @@ function App() {
           type={toast.type} 
           onExited={() => setToast(null)} 
         />
+      )}
+
+      {newVersionAvailable && (
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          background: '#f59e0b', 
+          color: 'black', 
+          padding: '10px', 
+          textAlign: 'center', 
+          zIndex: 10001,
+          fontWeight: 'bold',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '15px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+        }}>
+          🚀 Hay una nueva actualización disponible para mejorar el sistema.
+          <button 
+            onClick={() => window.location.reload()} 
+            style={{ 
+              background: 'black', 
+              color: 'white', 
+              border: 'none', 
+              padding: '5px 15px', 
+              borderRadius: '5px', 
+              cursor: 'pointer',
+              fontSize: '0.8rem'
+            }}
+          >
+            Actualizar ahora
+          </button>
+        </div>
       )}
 
       <Routes>

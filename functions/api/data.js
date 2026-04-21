@@ -5,6 +5,8 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+const SYSTEM_VERSION = '2.7.0';
+
 function toTitleCase(str) {
   if (!str) return '';
   return str.trim().toLowerCase().split(/\s+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -290,6 +292,7 @@ async function handleGrid(env, request, url) {
     config,
     locks,
     pases,
+    version: SYSTEM_VERSION
   });
 }
 // ─── POST /api/data?type=config ─────────────────────────────────────────────

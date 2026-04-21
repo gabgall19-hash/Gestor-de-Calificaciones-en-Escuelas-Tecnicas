@@ -2,7 +2,8 @@ export async function onRequestGet({ env }) {
   try {
     const setting = await env.DB.prepare("SELECT valor FROM ajustes WHERE clave = 'mobile_login_enabled'").first();
     return new Response(JSON.stringify({ 
-      mobile_login_enabled: setting ? setting.valor === 'true' : true 
+      mobile_login_enabled: setting ? setting.valor === 'true' : true,
+      version: '2.7.0'
     }), {
       headers: { "Content-Type": "application/json" }
     });
