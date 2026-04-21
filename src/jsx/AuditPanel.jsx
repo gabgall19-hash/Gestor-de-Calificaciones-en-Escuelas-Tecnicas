@@ -18,6 +18,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
       'secretaria_de_alumnos': 'SEC',
       'profesor': 'PROF',
       'preceptor_taller': 'P.TAL',
+      'preceptor_ef': 'P.EF',
       'visualizador': 'VIS'
     };
     return roles[role] || role.substring(0, 3).toUpperCase();
@@ -32,6 +33,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
       'vicedirector': '#a78bfa',
       'preceptor': '#10b981',
       'preceptor_taller': '#f59e0b',
+      'preceptor_ef': '#14b8a6',
       'profesor': '#6366f1'
     };
     return colors[role] || 'var(--primary)';

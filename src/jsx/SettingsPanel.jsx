@@ -10,6 +10,7 @@ const SettingsPanel = ({
   activeTecId, setActiveTecId,
   startEditUser, deleteUser, setViewingProf,
   handleUpdateSystemMode, handleUpdatePeriods,
+  handleUpdatePreceptorMode,
   addYear, editYear, deleteYear,
   startCreateTec, startEditTec, duplicateTec, removeTec,
   prepareEditCourse, toggleCourseActive,
@@ -81,7 +82,7 @@ const SettingsPanel = ({
                         <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>
                           · {u.username}
                         </span>
-                        {(u.rol === 'preceptor' || u.rol === 'preceptor_taller') && u.preceptor_course_id && (
+                        {(u.rol === 'preceptor' || u.rol === 'preceptor_taller' || u.rol === 'preceptor_ef') && u.preceptor_course_id && (
                           <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold' }}>
                             · {data.allCourses.find(c => c.id === Number(u.preceptor_course_id))?.label || 'Curso no encontrado'}
                           </span>
@@ -324,30 +325,65 @@ const SettingsPanel = ({
       <section className="management-card" style={{ gridColumn: 'span 2' }}>
         <div className="section-title">
           <Smartphone size={16} />
-          <h2>Seguridad y Dispositivos</h2>
+          <h2>Otras Opciones</h2>
         </div>
-        <div style={{ marginTop: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ flex: 1, paddingRight: '1rem' }}>
-            <strong style={{ display: 'block', fontSize: '1rem' }}>Inicio de sesión en dispositivos móviles</strong>
-            <p style={{ fontSize: '0.85rem', opacity: 0.6, marginTop: '4px' }}>
-              Habilita o deshabilita el acceso al panel de gestión desde teléfonos y tablets.
-            </p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1.5rem', marginTop: '1.2rem' }}>
+          {/* Configuración de Preceptores */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <h3 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Users size={16} /> Configuración de Preceptores
+            </h3>
+            
+            <div className="stack-form" style={{ gap: '15px' }}>
+              {[
+                { id: 'preceptor', label: 'Preceptores (General)' },
+                { id: 'preceptor_taller', label: 'Preceptores de Taller' },
+                { id: 'preceptor_ef', label: 'Preceptores de Educación Física' }
+              ].map(pRole => (
+                <div key={pRole.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>{pRole.label}:</span>
+                  <select 
+                    className="input-field" 
+                    style={{ width: '160px', padding: '5px 10px', fontSize: '0.8rem', height: 'auto' }}
+                    value={data.config[`${pRole.id}_mode`] || 'view'}
+                    onChange={(e) => handleUpdatePreceptorMode(pRole.id, e.target.value)}
+                  >
+                    <option value="view">Modo Visualización</option>
+                    <option value="edit">Modo Edición</option>
+                  </select>
+                </div>
+              ))}
+            </div>
           </div>
-          <button 
-            className={`btn ${data.config.mobile_login_enabled === 'true' ? 'btn-primary' : ''}`} 
-            style={{ 
-              background: data.config.mobile_login_enabled === 'true' ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
-              minWidth: '140px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
-            onClick={() => handleUpdateMobileLogin(data.config.mobile_login_enabled === 'true' ? 'false' : 'true')}
-          >
-            {data.config.mobile_login_enabled === 'true' ? <Unlock size={16} /> : <Lock size={16} />}
-            <span>{data.config.mobile_login_enabled === 'true' ? 'Habilitado' : 'Deshabilitado'}</span>
-          </button>
+
+          {/* Seguridad / Dispositivos */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <h3 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Smartphone size={16} /> Acceso Móvil
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <p style={{ fontSize: '0.8rem', opacity: 0.6, flex: 1, paddingRight: '1rem' }}>
+                Habilita o deshabilita el acceso desde teléfonos y tablets.
+              </p>
+              <button 
+                className={`btn ${data.config.mobile_login_enabled === 'true' ? 'btn-primary' : ''}`} 
+                style={{ 
+                  background: data.config.mobile_login_enabled === 'true' ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                  minWidth: '130px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '8px 12px'
+                }}
+                onClick={() => handleUpdateMobileLogin(data.config.mobile_login_enabled === 'true' ? 'false' : 'true')}
+              >
+                {data.config.mobile_login_enabled === 'true' ? <Unlock size={14} /> : <Lock size={14} />}
+                <span style={{ fontSize: '0.8rem' }}>{data.config.mobile_login_enabled === 'true' ? 'Habilitado' : 'Deshabilitado'}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </section>

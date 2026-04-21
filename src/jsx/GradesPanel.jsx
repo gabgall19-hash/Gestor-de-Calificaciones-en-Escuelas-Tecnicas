@@ -240,7 +240,8 @@ const GradesPanel = ({
                       
                       const p_subjects = (user.professor_subject_ids ?? '').split(',');
                       const isAssignedAsProfessor = p_subjects.includes(`${data.selectedCourseId}-${sid}`);
-                      const isPreceptorReadOnly = (user.rol === 'preceptor' || user.rol === 'preceptor_taller') && !isAssignedAsProfessor;
+                      const configMode = data.config[`${user.rol}_mode`] || 'view';
+                      const isPreceptorReadOnly = (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) && (configMode === 'view') && !isAssignedAsProfessor;
                       const isLocked = isPreceptorReadOnly;
                       const isTallerSimple = currentSub?.es_taller === 1 && !(currentSub?.tipo || '').toLowerCase().includes('modular');
                       const isPassed = (pId) => {
@@ -353,7 +354,8 @@ const GradesPanel = ({
                       
                       const p_subjects = (user.professor_subject_ids ?? '').split(',');
                       const isAssignedAsProfessor = p_subjects.includes(`${data.selectedCourseId}-${subject.id}`);
-                      const isPreceptorReadOnly = (user.rol === 'preceptor' || user.rol === 'preceptor_taller') && !isAssignedAsProfessor;
+                      const configMode = data.config[`${user.rol}_mode`] || 'view';
+                      const isPreceptorReadOnly = (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) && (configMode === 'view') && !isAssignedAsProfessor;
                       const isFinalLocked = isLocked || isPreceptorReadOnly;
 
                       return (subject.tipo || '').toLowerCase().includes('modular') ? (

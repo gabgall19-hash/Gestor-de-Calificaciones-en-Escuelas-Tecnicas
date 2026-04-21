@@ -43,6 +43,7 @@ async function validateUser(env, request, userId, ...requiredRoles) {
   const user = await env.DB.prepare('SELECT id, nombre, username, rol, preceptor_course_id, professor_course_ids, professor_subject_ids, is_professor_hybrid FROM usuarios WHERE id = ?').bind(userId).first();
   if (!user) throw new Error('Usuario no encontrado');
 
+  const validRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector', 'profesor', 'visualizador'];
   if (requiredRoles.length > 0 && !requiredRoles.includes(user.rol)) {
     throw new Error(`Permiso denegado: tu rol (${user.rol}) no tiene autorización.`);
   }
@@ -323,6 +324,14 @@ async function handleConfig(env, request, userId, body) {
     return json({ success: true });
   }
 
+  if (action === 'update_preceptor_mode') {
+    const { role, mode } = body;
+    await env.DB.prepare('INSERT OR REPLACE INTO ajustes (clave, valor) VALUES (?, ?)')
+      .bind(`${role}_mode`, mode)
+      .run();
+    return json({ success: true });
+  }
+
   return json({ error: 'Accion no soportada' }, 400);
 }
 
@@ -342,6 +351,7 @@ async function handleLocks(env, request, userId, body) {
         let subjs_query = 'SELECT id FROM materias WHERE tecnicatura_id = (SELECT tecnicatura_id FROM cursos WHERE id = ?)';
         if (user.rol === 'preceptor') subjs_query += ' AND (es_taller = 0 OR (es_taller = 1 AND tipo LIKE "%modular%"))';
         if (user.rol === 'preceptor_taller') subjs_query += ' AND es_taller = 1';
+        if (user.rol === 'preceptor_ef') subjs_query += ' AND nombre LIKE "%EDUCACION FISICA%"';
 
         const subjs = await env.DB.prepare(subjs_query).bind(courseId).all();
         const statements = [];
@@ -359,6 +369,7 @@ async function handleLocks(env, request, userId, body) {
           let subjs_query = 'SELECT id FROM materias WHERE tecnicatura_id = (SELECT tecnicatura_id FROM cursos WHERE id = ?)';
           if (user.rol === 'preceptor') subjs_query += ' AND es_taller = 0';
           if (user.rol === 'preceptor_taller') subjs_query += ' AND es_taller = 1';
+          if (user.rol === 'preceptor_ef') subjs_query += ' AND nombre LIKE "%EDUCACION FISICA%"';
           const subjs = await env.DB.prepare(subjs_query).bind(courseId).all();
           const sids = subjs.results.map(s => s.id);
           if (sids.length) {
@@ -372,6 +383,7 @@ async function handleLocks(env, request, userId, body) {
       let subjs_query = 'SELECT id FROM materias WHERE tecnicatura_id = (SELECT tecnicatura_id FROM cursos WHERE id = ?)';
       if (user.rol === 'preceptor') subjs_query += ' AND es_taller = 0';
       if (user.rol === 'preceptor_taller') subjs_query += ' AND es_taller = 1';
+      if (user.rol === 'preceptor_ef') subjs_query += ' AND nombre LIKE "%EDUCACION FISICA%"';
       const subjs = await env.DB.prepare(subjs_query).bind(courseId).all();
 
       if (bloqueado) {
@@ -400,6 +412,7 @@ async function handleLocks(env, request, userId, body) {
         const sub = await env.DB.prepare('SELECT es_taller FROM materias WHERE id = ?').bind(materiaId).first();
         if (user.rol === 'preceptor' && sub?.es_taller === 1) throw new Error('No puedes bloquear materias de taller.');
         if (user.rol === 'preceptor_taller' && sub?.es_taller !== 1) throw new Error('Solo puedes bloquear materias de taller.');
+        if (user.rol === 'preceptor_ef' && !sub?.nombre?.includes('EDUCACION FISICA')) throw new Error('Solo puedes bloquear materias de Educación Física.');
       }
 
       if (bloqueado) {
@@ -472,9 +485,23 @@ async function handleGradeUpdates(env, request, userId, body) {
       const pair = `${student.course_id}-${u.materia_id}`;
       const isAssignedAsProfessor = p_subjects.includes(pair);
 
-      if (user.rol === 'preceptor' || user.rol === 'preceptor_taller') {
+      if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
         if (!isAssignedAsProfessor) {
-          throw new Error(`Permiso denegado: los preceptores no pueden modificar calificaciones de forma directa.`);
+          // Check for configurable edit mode
+          const ajustes = await env.DB.prepare('SELECT valor FROM ajustes WHERE clave = ?').bind(`${user.rol}_mode`).first();
+          const canEdit = ajustes ? ajustes.valor === 'edit' : false;
+
+          if (!canEdit) {
+            throw new Error(`Permiso denegado: el modo de edición para tu rol está deshabilitado.`);
+          }
+
+          // Specific role restrictions
+          if (user.rol === 'preceptor_ef' && !materia.nombre.includes('EDUCACION FISICA')) {
+            throw new Error(`Permiso denegado: solo puedes modificar calificaciones de Educación Física.`);
+          }
+          if (user.rol === 'preceptor_taller' && !materia.es_taller) {
+            throw new Error(`Permiso denegado: solo puedes modificar calificaciones de Taller.`);
+          }
         }
       } else if (user.rol === 'profesor' && !isAssignedAsProfessor) {
         throw new Error(`No tienes asignada la materia ${materia.nombre} en este curso.`);
@@ -575,11 +602,11 @@ async function handleGradeUpdates(env, request, userId, body) {
 // ─── POST /api/data?type=students ────────────────────────────────────────────
 
 async function handleStudents(env, request, userId, body) {
-  const user = await validateUser(env, request, userId, 'admin', 'preceptor', 'preceptor_taller');
+  const user = await validateUser(env, request, userId, 'admin', 'preceptor', 'preceptor_taller', 'preceptor_ef');
   const { action, nombre, apellido, dni, course_id, studentId } = body;
 
   // Para preceptores, validamos que sean dueños del curso del alumno (o del curso destino si es creación)
-  if (user.rol === 'preceptor' || user.rol === 'preceptor_taller') {
+  if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
     const ids = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
     if (user.preceptor_course_id) ids.push(Number(user.preceptor_course_id));
 

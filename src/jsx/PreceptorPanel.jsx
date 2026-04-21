@@ -42,14 +42,14 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     if (user.rol !== 'profesor') {
       list.push({ id: 'materias', label: 'Materias', icon: <Book size={16} /> });
     }
-    if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller') {
+    if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
       list.push({ id: 'students', label: 'Alumnos', icon: <Users size={16} /> });
     }
     if (user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares' || user.rol === 'director' || user.rol === 'vicedirector') {
       list.push({ id: 'pases', label: 'Pases', icon: <ArrowRightLeft size={16} /> });
     }
-    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'director', 'vicedirector'].includes(user.rol)) {
-      if (user.rol !== 'preceptor_taller') {
+    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector'].includes(user.rol)) {
+      if (user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
         list.push({ id: 'rac', label: 'RAC', icon: <FileText size={16} /> });
       }
       list.push({ id: 'historial', label: 'Historial', icon: <History size={16} /> });
@@ -78,7 +78,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
   const [selectedYearId, setSelectedYearId] = useState(() => Number(localStorage.getItem('selectedYearId')) || 1);
   const [selectedCourseId, setSelectedCourseId] = useState(() => Number(localStorage.getItem('selectedCourseId')) || null);
   const [selectedPeriod, setSelectedPeriod] = useState(() => Number(localStorage.getItem('selectedPeriod')) || 2);
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('viewMode') || (user.rol === 'profesor' ? 'bySubject' : (user.rol === 'preceptor_taller' ? 'taller' : 'simple'))); // 'simple' | 'bySubject'
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('viewMode') || (user.rol === 'profesor' ? 'bySubject' : (user.rol === 'preceptor_taller' || user.rol === 'preceptor_ef' ? 'bySubject' : 'simple'))); // 'simple' | 'bySubject'
 
   useEffect(() => {
     localStorage.setItem('selectedYearId', String(selectedYearId));
@@ -175,6 +175,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     let base = all;
     if (user.rol === 'preceptor_taller') {
       base = all.filter(s => s.es_taller === 1);
+    } else if (user.rol === 'preceptor_ef') {
+      base = all.filter(s => (s.nombre || '').toUpperCase().includes('EDUCACION FISICA'));
     } else if (user.rol === 'preceptor') {
       if (viewMode === 'taller') {
         base = all.filter(s => s.es_taller === 1 && (s.tipo || '').toLowerCase().includes('modular'));
@@ -212,9 +214,11 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       ? 'Jefe de Auxiliares: acceso y edición en todos los cursos y listados.'
       : user.rol === 'preceptor_taller'
         ? 'Preceptor de Taller: gestiona exclusivamente materias de taller en sus cursos.'
-        : user.rol === 'preceptor'
-          ? 'Preceptor: gestiona alumnos y notas en sus cursos asignados.'
-          : 'Profesor: carga notas en sus cursos y materias asignadas.';
+        : user.rol === 'preceptor_ef'
+          ? 'Preceptor de Educación Física: gestiona exclusivamente la materia de Educación Física en sus cursos.'
+          : user.rol === 'preceptor'
+            ? 'Preceptor: gestiona alumnos y notas en sus cursos asignados.'
+            : 'Profesor: carga notas en sus cursos y materias asignadas.';
 
   const loadData = async (courseId = selectedCourseId, yearId = selectedYearId) => {
     setLoading(true);
@@ -230,9 +234,9 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       const hasModularWorkshops = (json.subjects || []).some(s => s.es_taller === 1 && (s.tipo || '').toLowerCase().includes('modular'));
 
       let currentMode = viewMode;
-      if (user.rol === 'preceptor_taller') {
-        setViewMode('taller');
-        currentMode = 'taller';
+      if (user.rol === 'preceptor_taller' || user.rol === 'preceptor_ef') {
+        setViewMode('bySubject');
+        currentMode = 'bySubject';
       } else if (user.rol === 'profesor') {
         setViewMode('bySubject');
         currentMode = 'bySubject';
@@ -258,6 +262,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           initialSub = json.subjects.find(s => s.es_taller !== 1);
         } else {
           if (user.rol === 'preceptor_taller') initialSub = json.subjects.find(s => s.es_taller === 1);
+          else if (user.rol === 'preceptor_ef') initialSub = json.subjects.find(s => (s.nombre || '').toUpperCase().includes('EDUCACION FISICA'));
           else initialSub = json.subjects.find(s => s.es_taller !== 1);
         }
 
@@ -330,9 +335,9 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
   const gradeUnits = (data.subjects || []).reduce((sum, s) => sum + getSubjectUnits(s), 0) || 1;
   const gradeWidth = `calc((100% - 148px) / ${gradeUnits})`;
   const canManageStudents = user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares' || user.rol === 'director' || user.rol === 'vicedirector' ||
-    ((user.rol === 'preceptor' || user.rol === 'preceptor_taller') &&
+    ((user.rol === 'preceptor' || user.rol === 'preceptor_taller' || user.rol === 'preceptor_ef') &&
       (Number(user.preceptor_course_id) === selectedCourseId || (user.professor_course_ids || '').split(',').map(Number).includes(selectedCourseId)));
-  const canTransfer = user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares' || user.rol === 'director' || user.rol === 'vicedirector' || user.rol === 'preceptor' || user.rol === 'preceptor_taller';
+  const canTransfer = user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares' || user.rol === 'director' || user.rol === 'vicedirector' || user.rol === 'preceptor' || user.rol === 'preceptor_taller' || user.rol === 'preceptor_ef';
 
   const gradeValue = (alumnoId, materiaId, field, pidOverride) => {
     const pid = pidOverride || selectedPeriod;
@@ -578,7 +583,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     e.preventDefault();
     const payload = {
       ...userForm,
-      preceptor_course_id: (userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller') ? Number(userForm.preceptor_course_id) : null,
+      preceptor_course_id: (userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller' || userForm.rol === 'preceptor_ef') ? Number(userForm.preceptor_course_id) : null,
       professor_course_ids: Array.isArray(userForm.professor_course_ids) ? userForm.professor_course_ids : [],
       professor_subject_ids: Array.isArray(userForm.professor_subject_ids) ? userForm.professor_subject_ids : [],
       is_professor_hybrid: !!userForm.is_professor_hybrid
@@ -590,7 +595,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     e.preventDefault();
     const payload = {
       ...userForm,
-      preceptor_course_id: (userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller') ? Number(userForm.preceptor_course_id) : null,
+      preceptor_course_id: (userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller' || userForm.rol === 'preceptor_ef') ? Number(userForm.preceptor_course_id) : null,
       professor_course_ids: Array.isArray(userForm.professor_course_ids) ? userForm.professor_course_ids : [],
       professor_subject_ids: Array.isArray(userForm.professor_subject_ids) ? userForm.professor_subject_ids : [],
       is_professor_hybrid: !!userForm.is_professor_hybrid
@@ -805,6 +810,14 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     try {
       await post('config', { action: 'update_mobile', valor: String(enabled) });
       showToast('Configuración de acceso móvil actualizada', 'success');
+      await loadData(selectedCourseId, selectedYearId);
+    } catch (err) { alert(err.message); }
+  };
+
+  const handleUpdatePreceptorMode = async (role, mode) => {
+    try {
+      await post('config', { action: 'update_preceptor_mode', role, mode });
+      showToast(`Modo de ${role} actualizado`, 'success');
       await loadData(selectedCourseId, selectedYearId);
     } catch (err) { alert(err.message); }
   };
@@ -1090,7 +1103,10 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           yearForm={yearForm} setYearForm={setYearForm}
           activeTecId={activeTecId} setActiveTecId={setActiveTecId}
           startEditUser={startEditUser} deleteUser={deleteUser} setViewingProf={setViewingProf}
-          handleUpdateSystemMode={handleUpdateSystemMode} handleUpdatePeriods={handleUpdatePeriods}
+          handleUpdateSystemMode={handleUpdateSystemMode} 
+          handleUpdatePreceptorMode={handleUpdatePreceptorMode}
+          handleUpdateMobileLogin={handleUpdateMobileLogin}
+          handleUpdatePeriods={handleUpdatePeriods}
           addYear={addYear} editYear={editYear} deleteYear={deleteYear}
           startCreateTec={startCreateTec} startEditTec={startEditTec} duplicateTec={duplicateTec} removeTec={removeTec}
           prepareEditCourse={prepareEditCourse} toggleCourseActive={toggleCourseActive}
@@ -1436,10 +1452,11 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
               <option value="vicedirector">Vicedirector</option>
               <option value="preceptor">Preceptor</option>
               <option value="preceptor_taller">Preceptor Taller</option>
+              <option value="preceptor_ef">Preceptor Ed. Física</option>
               <option value="profesor">Profesor</option>
             </select>
 
-            {(userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller') && (
+            {(userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller' || userForm.rol === 'preceptor_ef') && (
               <div className="stack-form" style={{ background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <label className="label" style={{ color: 'var(--primary)' }}>Asignación de Preceptoría</label>
                 <div className="stack-form">
