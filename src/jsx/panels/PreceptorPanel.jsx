@@ -43,6 +43,7 @@ import PasesPanel from './PasesPanel';
 import AnunciosPanel from './AnunciosPanel';
 import StudentFichaModal from '../components/StudentFichaModal';
 import { apiRequest, apiLoadData } from '../functions/apiService';
+import '../../css/PreceptorPanel.css';
 
 export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showToast }) {
   const tabs = useMemo(() => {
@@ -96,8 +97,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
 
   if (viewingFichaStudent) {
     return (
-      <div className="full-page-view" style={{ minHeight: '100vh', padding: isMobile ? '1rem' : '2.5rem', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
-        <div className="glass-card" style={{ maxWidth: '1000px', width: '100%', padding: isMobile ? '1.5rem' : '3.5rem', backdropFilter: 'blur(20px)', background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(255,255,255,0.1)' }}>
+      <div className="full-page-view preceptor-panel-full-page" style={{ padding: isMobile ? '1rem' : '2.5rem' }}>
+        <div className="glass-card preceptor-panel-full-page-inner" style={{ padding: isMobile ? '1.5rem' : '3.5rem' }}>
           <StudentFichaModal 
             student={viewingFichaStudent}
             onClose={() => setViewingFichaStudent(null)}
@@ -114,26 +115,26 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
   }
 
   return (
-    <div className="glass-card compact-panel" style={{ width: '100%', maxWidth: 'none' }}>
+    <div className="glass-card compact-panel preceptor-panel-compact">
       <div className="panel-toolbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <img src="/logo.png" alt="Logo" style={{ height: '45px' }} />
+        <div className="preceptor-panel-header-logo-container">
+          <img src="/logo.png" alt="Logo" className="preceptor-panel-header-logo" />
           <div>
-            <h1 style={{ fontSize: '1.2rem', marginBottom: '0.1rem', fontWeight: '800' }}>
+            <h1 className="preceptor-panel-header-title">
               INDUSTRIAL N°6 "X BRIGADA AEREA"
             </h1>
-            <h2 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500' }}>
+            <h2 className="preceptor-panel-header-subtitle">
               Gestión de Calificaciones
             </h2>
           </div>
         </div>
-        <div style={{ textAlign: 'right', flex: 1, paddingRight: '1rem' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Bienvenido, {user.nombre}</p>
-          {currentCourse && <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Curso: {currentCourse.year_nombre} · {currentCourse.label}</p>}
-          {status && <p className="panel-status" style={{ display: 'inline-block', marginTop: '0.25rem' }}>{status}</p>}
+        <div className="preceptor-panel-user-info">
+          <p className="preceptor-panel-user-welcome">Bienvenido, {user.nombre}</p>
+          {currentCourse && <p className="preceptor-panel-course-info">Curso: {currentCourse.year_nombre} · {currentCourse.label}</p>}
+          {status && <p className="panel-status preceptor-panel-status-msg">{status}</p>}
         </div>
         <div className="panel-actions">
-          <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={onLogout}>Cerrar Sesión</button>
+          <button className="btn preceptor-panel-logout-btn" onClick={onLogout}>Cerrar Sesión</button>
         </div>
       </div>
       <div className="tab-nav">
@@ -141,7 +142,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           <button
             key={tab.id}
             type="button"
-            className={`tab-btn${page === tab.id ? ' active' : ''}`}
+            className={`tab-btn${page === tab.id ? ' active' : ''} preceptor-panel-tab-btn`}
             onClick={() => setPage(tab.id)}
             style={{
               display: 'flex',
@@ -150,7 +151,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
               ...(tab.id === 'settings' ? { marginLeft: 'auto' } : {})
             }}
           >
-            {tab.icon && <span style={{ marginRight: '6px', display: 'flex', alignItems: 'center' }}>{tab.icon}</span>}
+            {tab.icon && <span className="preceptor-panel-tab-icon">{tab.icon}</span>}
             {tab.label}
             {((tab.id === 'pases' && unseenPases) || (tab.id === 'historial' && unseenHistorial)) && (
               <span style={{
@@ -353,21 +354,21 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
             <table className="nomenclatura-table">
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'left', padding: '10px' }}>Sigla</th>
-                  <th style={{ textAlign: 'left', padding: '10px' }}>Descripción</th>
+                  <th className="preceptor-panel-nomenclatura-th">Sigla</th>
+                  <th className="preceptor-panel-nomenclatura-th">Descripción</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td style={{ padding: '8px' }}><strong>AE</strong></td><td style={{ padding: '8px' }}>Acredita con Excelencia (10)</td></tr>
-                <tr><td style={{ padding: '8px' }}><strong>AD</strong></td><td style={{ padding: '8px' }}>Acredita con Distinción (9)</td></tr>
-                <tr><td style={{ padding: '8px' }}><strong>AMS</strong></td><td style={{ padding: '8px' }}>Acredita Muy Satisfactoriamente (8)</td></tr>
-                <tr><td style={{ padding: '8px' }}><strong>A</strong></td><td style={{ padding: '8px' }}>Acredita (7)</td></tr>
-                <tr><td style={{ padding: '8px' }}><strong>NA</strong></td><td style={{ padding: '8px' }}>No Acredita (1-6)</td></tr>
-                <tr><td style={{ padding: '8px' }}><strong>S/C</strong></td><td style={{ padding: '8px' }}>Sin Calificar (*)</td></tr>
+                <tr><td className="preceptor-panel-nomenclatura-td"><strong>AE</strong></td><td className="preceptor-panel-nomenclatura-td">Acredita con Excelencia (10)</td></tr>
+                <tr><td className="preceptor-panel-nomenclatura-td"><strong>AD</strong></td><td className="preceptor-panel-nomenclatura-td">Acredita con Distinción (9)</td></tr>
+                <tr><td className="preceptor-panel-nomenclatura-td"><strong>AMS</strong></td><td className="preceptor-panel-nomenclatura-td">Acredita Muy Satisfactoriamente (8)</td></tr>
+                <tr><td className="preceptor-panel-nomenclatura-td"><strong>A</strong></td><td className="preceptor-panel-nomenclatura-td">Acredita (7)</td></tr>
+                <tr><td className="preceptor-panel-nomenclatura-td"><strong>NA</strong></td><td className="preceptor-panel-nomenclatura-td">No Acredita (1-6)</td></tr>
+                <tr><td className="preceptor-panel-nomenclatura-td"><strong>S/C</strong></td><td className="preceptor-panel-nomenclatura-td">Sin Calificar (*)</td></tr>
               </tbody>
             </table>
-            <div style={{ marginTop: '1.5rem', padding: '0.8rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '8px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
-              <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold', margin: 0 }}>
+            <div className="preceptor-panel-role-info">
+              <p className="preceptor-panel-role-text">
                 Nota: Las calificaciones definitivas se expresan en números enteros (1 al 10).
               </p>
             </div>

@@ -1,0 +1,138 @@
+.preceptor-panel-full-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.preceptor-panel-full-page-inner {
+  max-width: 1000px;
+  width: 100%;
+  backdrop-filter: blur(20px);
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.preceptor-panel-full-page {
+  padding: 2.5rem;
+}
+
+.preceptor-panel-full-page-inner {
+  padding: 3.5rem;
+}
+
+@media (max-width: 768px) {
+  .preceptor-panel-full-page {
+    padding: 1rem;
+  }
+  .preceptor-panel-full-page-inner {
+    padding: 1.5rem;
+  }
+}
+
+.preceptor-panel-compact {
+  width: 100%;
+  max-width: none;
+}
+
+.preceptor-panel-header-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.preceptor-panel-header-logo {
+  height: 45px;
+}
+
+.preceptor-panel-header-title {
+  font-size: 1.2rem;
+  margin-bottom: 0.1rem;
+  font-weight: 800;
+}
+
+.preceptor-panel-header-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.preceptor-panel-user-info {
+  text-align: right;
+  flex: 1;
+  padding-right: 1rem;
+}
+
+.preceptor-panel-user-welcome {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.preceptor-panel-course-info {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.preceptor-panel-status-msg {
+  display: inline-block;
+  margin-top: 0.25rem;
+}
+
+.preceptor-panel-logout-btn {
+  background: rgba(255,255,255,0.1);
+}
+
+.preceptor-panel-tab-btn {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.preceptor-panel-tab-icon {
+  margin-right: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.preceptor-panel-tab-unseen {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #ff4757;
+  border-radius: 50%;
+  border: 2px solid #1e1b4b;
+  box-shadow: 0 0 5px rgba(255, 71, 87, 0.5);
+}
+
+.preceptor-panel-nomenclatura-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.2rem;
+  line-height: 1.5;
+}
+
+.preceptor-panel-nomenclatura-th {
+  text-align: left;
+  padding: 10px;
+}
+
+.preceptor-panel-nomenclatura-td {
+  padding: 8px;
+}
+
+.preceptor-panel-role-info {
+  margin-top: 1.5rem;
+  padding: 0.8rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.preceptor-panel-role-text {
+  font-size: 0.8rem;
+  color: var(--primary);
+  font-weight: bold;
+  margin: 0;
+}
