@@ -78,12 +78,14 @@ async function handleGrid(env, request, url) {
     env.DB.prepare('SELECT * FROM ajustes'),
     env.DB.prepare(`
       SELECT c.*, t.nombre AS tecnicatura_nombre, t.detalle AS tecnicatura_detalle, y.nombre AS year_nombre,
+               COALESCE(u.nombre, '---') AS preceptor_nombre,
                COALESCE(stats.total, 0) as student_count,
                COALESCE(stats.female, 0) as female_count,
                COALESCE(stats.male, 0) as male_count
         FROM cursos c
         JOIN tecnicaturas t ON t.id = c.tecnicatura_id
         JOIN años_lectivos y ON y.id = c.year_id
+        LEFT JOIN usuarios u ON u.preceptor_course_id = c.id AND u.rol = 'preceptor'
         LEFT JOIN (
           SELECT course_id,
                  COUNT(*) as total,

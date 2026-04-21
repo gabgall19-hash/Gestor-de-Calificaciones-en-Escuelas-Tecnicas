@@ -17,6 +17,7 @@ import { handlePrintAllCourses } from '../prints/SeguimientoA4';
 import { handlePrintSeguimientoGlobal } from '../prints/SeguimientoAllA4';
 import { handlePrintPlanillasCurso } from '../prints/CalificacionesA4';
 import { handlePrintRAC } from '../prints/RACA4';
+import { handlePrintParteDiario, handlePrintParteDiarioGlobal } from '../prints/ParteDiarioA4';
 
 import MultiSelect from '../UI/MultiSelect';
 import PreviasModal from '../components/PreviasModal';
@@ -32,7 +33,7 @@ import PasesPanel from './PasesPanel';
 import AnunciosPanel from './AnunciosPanel';
 import HorariosPanel from './HorariosPanel';
 import StudentFichaModal from '../components/StudentFichaModal';
-import { apiRequest, apiLoadData } from '../functions/apiService';
+import apiService, { apiRequest, apiLoadData } from '../functions/apiService';
 
 export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showToast }) {
   const tabs = useMemo(() => {
@@ -865,6 +866,36 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
   const onPrintSeguimientoGlobal = () => handlePrintSeguimientoGlobal(data, selectedYearId, user, setStatus);
   const onPrintPlanillasCurso = () => handlePrintPlanillasCurso(data, selectedCourseId);
   const onPrintRAC = (student) => handlePrintRAC(data, student);
+  
+  const onPrintParteDiario = async () => {
+    if (!selectedCourseId) return;
+    const course = data.allCourses.find(c => c.id === selectedCourseId);
+    if (!course) return;
+
+    setLoading(true);
+    try {
+      const scheduleRes = await apiService.get('horarios', { courseId: selectedCourseId, userId: user.id });
+      handlePrintParteDiario(data, course, scheduleRes);
+    } catch (err) {
+      console.error('Error fetching schedule for parte:', err);
+      showToast('Error al obtener el horario del curso', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onPrintParteDiarioGlobal = async () => {
+    setLoading(true);
+    try {
+      const allSchedules = await apiService.get('horarios', { userId: user.id });
+      handlePrintParteDiarioGlobal(data, allSchedules);
+    } catch (err) {
+      console.error('Error fetching all schedules for global parte:', err);
+      showToast('Error al obtener los horarios institucionales', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (viewingFichaStudent) {
     return (
@@ -1025,6 +1056,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           handlePrintPlanillasCurso={onPrintPlanillasCurso}
           handlePrintAllCourses={onPrintAllCourses}
           handlePrintSeguimientoGlobal={onPrintSeguimientoGlobal}
+          handlePrintParteDiario={onPrintParteDiario}
+          handlePrintParteDiarioGlobal={onPrintParteDiarioGlobal}
         />
       )}
 
