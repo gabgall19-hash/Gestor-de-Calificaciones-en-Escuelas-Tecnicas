@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Users, Settings, Plus, Eye, Wrench, Trash2, Smartphone, Unlock, Lock, Copy, BookOpen, Check, ArrowUpCircle, AlertTriangle } from 'lucide-react';
 import { simplifyTecName } from '../functions/PreceptorHelpers';
 
@@ -15,6 +15,7 @@ const SettingsPanel = ({
   startCreateTec, startEditTec, duplicateTec, removeTec,
   prepareEditCourse, toggleCourseActive,
   handleUpdateMobileLogin, handleResetPassword,
+  handleUpdateRACModular,
   setYearAsCurrent, copyYearInfo, startEndCycle
 }) => {
   const [userSearch, setUserSearch] = React.useState('');
@@ -358,29 +359,42 @@ const SettingsPanel = ({
           </div>
 
           {/* Seguridad / Dispositivos */}
-          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h3 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Smartphone size={16} /> Acceso Móvil
-            </h3>
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <p style={{ fontSize: '0.8rem', opacity: 0.6, flex: 1, paddingRight: '1rem' }}>
-                Habilita o deshabilita el acceso desde teléfonos y tablets.
-              </p>
+              <div>
+                <h3 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Smartphone size={16} /> Acceso Móvil
+                </h3>
+                <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>Habilitar/Deshabilitar acceso desde celulares.</p>
+              </div>
               <button 
                 className={`btn ${data.config.mobile_login_enabled === 'true' ? 'btn-primary' : ''}`} 
                 style={{ 
                   background: data.config.mobile_login_enabled === 'true' ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
-                  minWidth: '130px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  padding: '8px 12px'
+                  minWidth: '120px', padding: '8px'
                 }}
                 onClick={() => handleUpdateMobileLogin(data.config.mobile_login_enabled === 'true' ? 'false' : 'true')}
               >
-                {data.config.mobile_login_enabled === 'true' ? <Unlock size={14} /> : <Lock size={14} />}
-                <span style={{ fontSize: '0.8rem' }}>{data.config.mobile_login_enabled === 'true' ? 'Habilitado' : 'Deshabilitado'}</span>
+                {data.config.mobile_login_enabled === 'true' ? 'Habilitado' : 'Deshabilitado'}
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <BookOpen size={16} /> RAC Modular
+                </h3>
+                <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>T / P / Pond en materias de taller.</p>
+              </div>
+              <button 
+                className={`btn ${data.config.rac_modular_enabled === 'true' ? 'btn-primary' : ''}`} 
+                style={{ 
+                  background: data.config.rac_modular_enabled === 'true' ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                  minWidth: '120px', padding: '8px'
+                }}
+                onClick={() => handleUpdateRACModular(data.config.rac_modular_enabled === 'true' ? 'false' : 'true')}
+              >
+                {data.config.rac_modular_enabled === 'true' ? 'Activado' : 'Desactivado'}
               </button>
             </div>
           </div>

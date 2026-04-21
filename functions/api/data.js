@@ -334,6 +334,13 @@ async function handleConfig(env, request, userId, body) {
     return json({ success: true });
   }
 
+  if (action === 'update_rac_modular') {
+    await env.DB.prepare('INSERT OR REPLACE INTO ajustes (clave, valor) VALUES (?, ?)')
+      .bind('rac_modular_enabled', valor)
+      .run();
+    return json({ success: true });
+  }
+
   return json({ error: 'Accion no soportada' }, 400);
 }
 

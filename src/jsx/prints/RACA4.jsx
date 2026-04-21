@@ -1,4 +1,4 @@
-﻿import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
+import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
 
 export const handlePrintRAC = (data, singleStudent = null) => {
   const activeCourse = data.selectedCourse;
@@ -42,18 +42,30 @@ export const handlePrintRAC = (data, singleStudent = null) => {
       const getV = (pid, f = 'valor_t') => getG(sub.id, pid, f);
 
       const periodCells = (pid) => {
+        const isRACModular = data.config?.rac_modular_enabled === 'true';
+        const cellHeight = isRACModular ? '48px' : '30px';
+
         if (isMod) {
-          if (sub.es_taller === 1) {
-            return `<td colspan="3" class="grade-cell">${getV(pid, 'valor_pond')}</td>`;
+          if (sub.es_taller === 1 && !isRACModular) {
+            return `<td colspan="3" class="grade-cell" style="min-height: ${cellHeight};">${getV(pid, 'valor_pond')}</td>`;
           } else {
             return `
-              <td class="grade-cell" style="font-size: 7pt; width: 20px;">${getV(pid, 'valor_t')}</td>
-              <td class="grade-cell" style="font-size: 7pt; width: 20px;">${getV(pid, 'valor_p')}</td>
-              <td class="grade-cell gray" style="font-size: 7pt; width: 25px;">${getV(pid, 'valor_pond')}</td>
+              <td class="grade-cell" style="font-size: 7.5pt; width: 22px; vertical-align: top; padding: 2px 0; height: ${cellHeight};">
+                <div style="font-size: 5.5pt; font-weight: bold; opacity: 0.8; border-bottom: 0.5px solid #bbb; margin-bottom: 2px; padding-bottom: 1px;">T</div>
+                ${getV(pid, 'valor_t')}
+              </td>
+              <td class="grade-cell" style="font-size: 7.5pt; width: 22px; vertical-align: top; padding: 2px 0; height: ${cellHeight};">
+                <div style="font-size: 5.5pt; font-weight: bold; opacity: 0.8; border-bottom: 0.5px solid #bbb; margin-bottom: 2px; padding-bottom: 1px;">P</div>
+                ${getV(pid, 'valor_p')}
+              </td>
+              <td class="grade-cell gray" style="font-size: 7.5pt; width: 30px; vertical-align: top; padding: 2px 0; height: ${cellHeight};">
+                <div style="font-size: 5.5pt; font-weight: bold; opacity: 0.8; border-bottom: 0.5px solid #bbb; margin-bottom: 2px; padding-bottom: 1px;">Pnd</div>
+                ${getV(pid, 'valor_pond')}
+              </td>
             `;
           }
         } else {
-          return `<td colspan="3" class="grade-cell">${getV(pid, 'valor_t')}</td>`;
+          return `<td colspan="3" class="grade-cell" style="height: ${cellHeight};">${getV(pid, 'valor_t')}</td>`;
         }
       };
 

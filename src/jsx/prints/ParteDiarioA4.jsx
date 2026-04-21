@@ -426,7 +426,7 @@ export const handlePrintParteDiarioGlobal = (data, allSchedules) => {
           body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; background: #eee; color: black; }
           .no-print-toolbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #333; color: white; display: flex; align-items: center; justify-content: center; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
           .btn-print { background: #10b981; color: white; border: none; padding: 10px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-          .printable-page { width: 210mm; min-height: 297mm; padding: 8mm 8mm; margin: 80px auto 20px; background: white; box-sizing: border-box; page-break-after: always; }
+          .printable-page { width: 210mm; min-height: 297mm; padding: 8mm 8mm; margin: 80px auto 20px; background: white; box-sizing: border-box; }
           .header-main { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; margin-bottom: 5px; }
           .header-left, .header-right { text-align: center; }
           .shield-img { height: 70px; }
@@ -457,9 +457,11 @@ export const handlePrintParteDiarioGlobal = (data, allSchedules) => {
           .suplente-box { border-right: 1px solid black; padding: 2px; font-size: 0.58rem; font-weight: 900; text-align: center; }
           .suplente-box:last-child { border-right: none; }
           @media print {
-            body { background: white; padding: 0; }
+            @page { margin: 0; size: A4; }
+            body { background: white; padding: 0; margin: 0; }
             .no-print-toolbar { display: none; }
-            .printable-page { margin: 0; box-shadow: none; width: 100%; height: auto; padding: 5mm; }
+            .printable-page { margin: 0; box-shadow: none; width: 100%; height: 297mm; min-height: 297mm; padding: 5mm; page-break-after: always; overflow: hidden; position: relative; }
+            .printable-page:last-child { page-break-after: auto; }
             .row-break { background: #cccccc !important; -webkit-print-color-adjust: exact; }
           }
         </style>

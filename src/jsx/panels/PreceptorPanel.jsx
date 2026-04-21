@@ -816,6 +816,14 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     } catch (err) { alert(err.message); }
   };
 
+  const handleUpdateRACModular = async (enabled) => {
+    try {
+      await post('config', { action: 'update_rac_modular', valor: String(enabled) });
+      showToast('Configuración de RAC Modular actualizada', 'success');
+      await loadData(selectedCourseId, selectedYearId);
+    } catch (err) { alert(err.message); }
+  };
+
   const handleUpdatePreceptorMode = async (role, mode) => {
     try {
       await post('config', { action: 'update_preceptor_mode', role, mode });
@@ -1148,8 +1156,9 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           startEditUser={startEditUser} deleteUser={deleteUser} setViewingProf={setViewingProf}
           handleUpdateSystemMode={handleUpdateSystemMode} 
           handleUpdatePreceptorMode={handleUpdatePreceptorMode}
-          handleUpdateMobileLogin={handleUpdateMobileLogin}
+          handleUpdateMobileLogin={handleUpdateMobileLogin} 
           handleUpdatePeriods={handleUpdatePeriods}
+          handleUpdateRACModular={handleUpdateRACModular}
           addYear={addYear} editYear={editYear} deleteYear={deleteYear}
           startCreateTec={startCreateTec} startEditTec={startEditTec} duplicateTec={duplicateTec} removeTec={removeTec}
           prepareEditCourse={prepareEditCourse} toggleCourseActive={toggleCourseActive}

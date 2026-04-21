@@ -6,15 +6,16 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🛡️ [2.8.0] - 2026-04-21 (Versión Actual)
-**"Parte Diario Institucional y Generación Masiva"**
+### 🛡️ [2.8.5] - 2026-04-21 (Versión Actual)
+**"RAC Modular y Optimización de Impresión"**
 
-*   **📋 Parte Diario A4 Oficial**: Implementación de la planilla institucional definitiva para la Industrial N°6, con grilla de asistencia adaptable (1 o 2 columnas según cantidad de alumnos) y diseño optimizado para impresión.
-*   **🗓️ Horarios Dinámicos Integrados**: Inclusión automática del horario semanal en el parte diario, incluyendo nombres de profesores, bloques de recreo visualmente diferenciados y espacios para firmas docentes.
-*   **🚀 Generación Institucional Masiva**: Nuevo motor de impresión global que permite generar los partes diarios de TODOS los cursos de la institución en un solo documento consolidado con saltos de página automáticos.
-*   **📅 Control de Fechas Manual**: Espacios dedicados para la consignación manual de fechas tanto en la grilla de asistencia como en el cronograma de materias.
-*   **🎨 Rediseño del Panel de Planillas**: Reorganización estética de los botones de generación de reportes, agrupando funciones por tipo (Individual vs Global) y estandarizando la paleta de colores institucional.
-*   **🏗️ Refactorización de Datos**: Optimización de las consultas a la API para recuperar horarios y listados de forma eficiente durante el procesamiento masivo de reportes.
+*   **🧩 RAC Modular Configurable**: Nueva opción en los ajustes del sistema para habilitar la visualización detallada (**T / P / Pnd**) en materias de taller modulares, con diseño adaptativo y nomenclaturas claras integradas en la celda.
+*   **📐 Diseño de Celdas Adaptativo**: Implementación de celdas con alto dinámico (48px) vinculado al ajuste del sistema, asegurando simetría visual y legibilidad profesional en reportes complejos.
+*   **🖨️ Fix de Impresión Global (Partes)**: Resolución del error de hojas en blanco en la generación masiva de partes diarios, mediante la optimización de saltos de página CSS (`page-break`) y fijación de dimensiones A4 (`297mm`) con `overflow: hidden`.
+*   **💾 Persistencia de Ajustes**: Integración de los nuevos ajustes institucionales de impresión en la base de datos Cloudflare D1 para su persistencia global.
+
+### 🛡️ [2.8.0] - 2026-04-21
+**"Parte Diario Institucional y Generación Masiva"**
 
 ### 🛡️ [2.7.0] - 2026-04-21
 **"Acceso Seguro, Auditoría Avanzada y Paginación"**
