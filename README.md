@@ -6,7 +6,7 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🛡️ [2.7.0] - 2026-04-20 (Versión Actual)
+### 🛡️ [2.7.0] - 2026-04-21 (Versión Actual)
 **"Acceso Seguro, Auditoría Avanzada y Paginación"**
 
 *   **🔐 Acceso Estudiante con Contraseña**: Implementación de un portal de boletines protegido por contraseña. Los alumnos ahora requieren DNI + Clave (gestionada por el preceptor) para visualizar sus notas.
@@ -14,6 +14,7 @@
 *   **📜 Auditoría Detallada (Historial)**: Registro exhaustivo de acciones críticas: cambios de contraseña, edición de fichas de alumnos, re-incorporaciones y reversión de pases.
 *   **🚫 Restricción de Permisos (Preceptores)**: Los preceptores ahora tienen un rol de "Solo Lectura" para las calificaciones (a menos que sean profesores de la materia), pero mantienen permisos de edición sobre la Ficha del Alumno.
 *   **📑 Paginación en Listados**: Implementación de paginación (30 resultados por página) en los paneles de Alumnos, Historial y Pases, optimizando el rendimiento y la carga del navegador.
+*   **🚀 Notificación de Actualizaciones**: Banner interactivo que alerta a los usuarios cuando hay una nueva versión disponible, permitiendo recargar el sistema instantáneamente.
 *   **🔍 Buscador Global Potenciado**: El buscador global ahora incluye etiquetas de género, estado de contraseña y el curso al que pertenece cada alumno para una identificación inmediata.
 *   **🎨 Refinamiento UX/UI**: Sincronización estética de los formularios de acceso y mejora de la densidad visual en los listados con auto-scroll integrado al cambiar de página.
 
