@@ -17,6 +17,13 @@
 ### 🛡️ [2.8.0] - 2026-04-21
 **"Parte Diario Institucional y Generación Masiva"**
 
+*   **📋 Parte Diario A4 Oficial**: Implementación de la planilla institucional definitiva para la Industrial N°6, con grilla de asistencia adaptable (1 o 2 columnas según cantidad de alumnos) y diseño optimizado para impresión.
+*   **🗓️ Horarios Dinámicos Integrados**: Inclusión automática del horario semanal en el parte diario, incluyendo nombres de profesores, bloques de recreo visualmente diferenciados y espacios para firmas docentes.
+*   **🚀 Generación Institucional Masiva**: Nuevo motor de impresión global que permite generar los partes diarios de TODOS los cursos de la institución en un solo documento consolidado con saltos de página automáticos.
+*   **📅 Control de Fechas Manual**: Espacios dedicados para la consignación manual de fechas tanto en la grilla de asistencia como en el cronograma de materias.
+*   **🎨 Rediseño del Panel de Planillas**: Reorganización estética de los botones de generación de reportes, agrupando funciones por tipo (Individual vs Global) y estandarizando la paleta de colores institucional.
+*   **🏗️ Refactorización de Datos**: Optimización de las consultas a la API para recuperar horarios y listados de forma eficiente durante el procesamiento masivo de reportes.
+
 ### 🛡️ [2.7.0] - 2026-04-21
 **"Acceso Seguro, Auditoría Avanzada y Paginación"**
 
