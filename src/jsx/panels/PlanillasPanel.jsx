@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Save } from 'lucide-react';
 
 const PlanillasPanel = ({ user, handlePrintPlanillasCurso, handlePrintAllCourses, handlePrintSeguimientoGlobal }) => {

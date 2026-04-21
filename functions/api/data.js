@@ -1299,6 +1299,46 @@ async function handleAnuncios(env, request, userId, body) {
   return json({ success: true });
 }
 
+// ─── POST /api/data?type=horarios ───────────────────────────────────────────
+
+async function handleSchedules(env, request, userId, body) {
+  const { action, course_id, grid_data } = body;
+  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor_ef', 'preceptor_taller');
+
+  if (action === 'save') {
+    if (!course_id) throw new Error('ID de curso requerido');
+    await env.DB.prepare(`
+      INSERT INTO course_schedules (course_id, grid_data) VALUES (?, ?)
+      ON CONFLICT(course_id) DO UPDATE SET grid_data = excluded.grid_data, last_updated = CURRENT_TIMESTAMP
+    `).bind(course_id, grid_data).run();
+    await logHistory(env, userId, course_id, 'horarios_save', `Se actualizó el horario del curso.`);
+    return json({ success: true });
+  }
+
+  if (action === 'delete') {
+    if (!course_id) throw new Error('ID de curso requerido');
+    await env.DB.prepare('DELETE FROM course_schedules WHERE course_id = ?').bind(course_id).run();
+    await logHistory(env, userId, course_id, 'horarios_delete', `Se eliminó el horario del curso.`);
+    return json({ success: true });
+  }
+
+  if (action === 'import_batch') {
+    const { schedules } = body; // Array of { course_id, grid_data }
+    if (!Array.isArray(schedules)) throw new Error('Se requiere un array de horarios');
+    
+    const statements = schedules.map(s => env.DB.prepare(`
+      INSERT INTO course_schedules (course_id, grid_data) VALUES (?, ?)
+      ON CONFLICT(course_id) DO UPDATE SET grid_data = excluded.grid_data, last_updated = CURRENT_TIMESTAMP
+    `).bind(s.course_id, s.grid_data));
+    
+    await env.DB.batch(statements);
+    await logHistory(env, userId, null, 'horarios_import', `Se importaron ${schedules.length} horarios en lote.`);
+    return json({ success: true });
+  }
+
+  return json({ error: 'Acción no soportada' }, 400);
+}
+
 // ─── Router ──────────────────────────────────────────────────────────────────
 
 export async function onRequestGet({ env, request }) {
@@ -1314,6 +1354,15 @@ export async function onRequestGet({ env, request }) {
       const studentId = url.searchParams.get('studentId');
       const res = await env.DB.prepare('SELECT * FROM historial_escolar WHERE alumno_id = ? ORDER BY id DESC').bind(studentId).all();
       return json(res.results);
+    }
+    if (type === 'horarios') {
+      const courseId = url.searchParams.get('courseId');
+      if (courseId) {
+        const schedule = await env.DB.prepare('SELECT * FROM course_schedules WHERE course_id = ?').bind(courseId).first();
+        return json(schedule || { course_id: courseId, grid_data: '[]' });
+      }
+      const { results } = await env.DB.prepare('SELECT * FROM course_schedules').all();
+      return json(results);
     }
     return json({ error: 'Tipo no especificado' }, 400);
   } catch (err) {
@@ -1340,6 +1389,7 @@ export async function onRequestPost({ env, request }) {
     if (type === 'historial_delete') return await handleHistorialDelete(env, request, userId, body);
     if (type === 'anuncios') return await handleAnuncios(env, request, userId, body);
     if (type === 'end_cycle') return await handleEndCycle(env, request, userId, body);
+    if (type === 'horarios') return await handleSchedules(env, request, userId, body);
     return json({ error: 'Tipo no soportado' }, 400);
   } catch (err) {
     return json({ error: err.message }, 500);

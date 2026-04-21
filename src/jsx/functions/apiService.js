@@ -48,7 +48,7 @@ export const apiLoadData = async (userId, selectedYearId, selectedCourseId, incl
   const url = new URL(API_BASE, window.location.origin);
   url.searchParams.set('type', 'grid');
   url.searchParams.set('userId', userId);
-  url.searchParams.set('yearId', selectedYearId);
+  if (selectedYearId) url.searchParams.set('yearId', selectedYearId);
   if (selectedCourseId) url.searchParams.set('courseId', selectedCourseId);
   if (includeAllStudents) url.searchParams.set('includeAllStudents', 'true');
 
@@ -73,3 +73,29 @@ export const apiLoadData = async (userId, selectedYearId, selectedCourseId, incl
     throw error;
   }
 };
+
+const apiService = {
+  apiRequest,
+  apiLoadData,
+  getGrid: apiLoadData,
+  post: (type, userId, body) => apiRequest(type, body, userId, 'POST'),
+  get: async (type, params = {}) => {
+    const url = new URL(API_BASE, window.location.origin);
+    url.searchParams.set('type', type);
+    Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': getAuthToken(params.userId)
+      }
+    };
+
+    const response = await fetch(url.toString(), options);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'API GET Error');
+    return data;
+  }
+};
+
+export default apiService;

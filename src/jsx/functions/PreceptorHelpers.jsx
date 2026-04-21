@@ -75,7 +75,10 @@ export const PERIOD_GROUPS = {
 
 export const getCoursePreceptor = (data, courseId) => {
   return (data.users || [])
-    .filter(u => u.rol === 'preceptor' && String(u.preceptor_course_ids || '').split(',').includes(String(courseId)))
+    .filter(u => 
+      (u.rol === 'preceptor' || u.rol === 'preceptor_taller' || u.rol === 'preceptor_ef') && 
+      Number(u.preceptor_course_id) === Number(courseId)
+    )
     .map(u => u.nombre)
     .join(', ') || 'Sin asignar';
 };
