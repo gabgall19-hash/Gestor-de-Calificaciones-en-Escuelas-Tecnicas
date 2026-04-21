@@ -1,6 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import { Users, Settings, Plus, Eye, Wrench, Trash2, Smartphone, Unlock, Lock, Copy, BookOpen, Check, ArrowUpCircle, AlertTriangle } from 'lucide-react';
-import { simplifyTecName } from './PreceptorHelpers';
+import { simplifyTecName } from '../functions/PreceptorHelpers';
 
 const SettingsPanel = ({ 
   user, data, isMobile,

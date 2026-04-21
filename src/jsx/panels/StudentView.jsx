@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Printer, FileText, AlertCircle } from 'lucide-react';
 
 export default function StudentView({ dni, password, onBack, isStaff }) {

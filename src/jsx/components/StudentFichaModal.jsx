@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { User, Shield, Home, Phone, Mail, Calendar, BookOpen, Save, X, ArrowLeft, History } from 'lucide-react';
-import Modal from './Modal';
-import { formatDNI } from './PreceptorHelpers';
+import Modal from '../UI/Modal';
+import { formatDNI } from '../functions/PreceptorHelpers';
 
 const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, studentForm, setStudentForm, fullPage = false, getHistorial }) => {
   const [historial, setHistorial] = React.useState([]);

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { LogIn, ClipboardList, Eye, Megaphone } from 'lucide-react';
-import PreceptorPanel from './PreceptorPanel';
-import StudentView from './StudentView';
+import PreceptorPanel from './panels/PreceptorPanel';
+import StudentView from './panels/StudentView';
 
 function App() {
   const [user, setUser] = useState(() => {

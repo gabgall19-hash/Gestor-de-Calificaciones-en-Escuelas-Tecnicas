@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { ClipboardList, Search, Lock, Unlock } from 'lucide-react';
-import { truncateSubject } from './PreceptorHelpers';
-import '../css/AcademicManager.css';
+import { truncateSubject } from '../functions/PreceptorHelpers';
+import '../../css/AcademicManager.css';
 
 const AcademicManager = ({ 
   user, data, selectedCourseId, 

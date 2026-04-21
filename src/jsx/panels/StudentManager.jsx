@@ -1,9 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { Users, GraduationCap, Search, Plus, ArrowRightLeft, Trash2, FileText, Lock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-import { formatDNI, formatGender } from './PreceptorHelpers';
-import Skeleton from './Skeleton';
-import Modal from './Modal';
-import '../css/StudentManager.css';
+import { formatDNI, formatGender } from '../functions/PreceptorHelpers';
+import Skeleton from '../UI/Skeleton';
+import Modal from '../UI/Modal';
+import '../../css/StudentManager.css';
 
 const StudentManager = ({ 
   user, data, loading,

@@ -1,6 +1,6 @@
-import { FileText, Printer, Search, Users, Wrench, RotateCcw, Eye, ClipboardList, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { formatDNI } from './PreceptorHelpers';
-import '../css/ReportViews.css';
+﻿import { FileText, Printer, Search, Users, Wrench, RotateCcw, Eye, ClipboardList, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { formatDNI } from '../functions/PreceptorHelpers';
+import '../../css/ReportViews.css';
 
 const RACPanel = ({ 
   data, selectedYearId, racSearch, setRacSearch, 

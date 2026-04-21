@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { ClipboardList, Search, Save, BookOpen, Users } from 'lucide-react';
-import { truncate, truncateSubject, formatDNI, numberToWords } from './PreceptorHelpers';
-import { TableSkeleton } from './Skeleton';
-import '../css/GradesPanel.css';
+import { truncate, truncateSubject, formatDNI, numberToWords } from '../functions/PreceptorHelpers';
+import { TableSkeleton } from '../UI/Skeleton';
+import '../../css/GradesPanel.css';
 
 const GradesPanel = ({ 
   data, user, pending, loading, viewMode, setViewMode, 

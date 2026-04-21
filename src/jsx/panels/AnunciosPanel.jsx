@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Megaphone, Plus, Trash2, Edit2, CheckCircle, XCircle, Video, Type } from 'lucide-react';
 
 const AnunciosPanel = ({ data, post, loadData }) => {

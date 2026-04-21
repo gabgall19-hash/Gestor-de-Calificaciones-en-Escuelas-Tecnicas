@@ -72,3 +72,10 @@ export const PERIOD_GROUPS = {
   '3T': { label: '3° Trimestre', pids: [5, 6], letterPid: 6 },
   'Final': { label: 'Calificación Final', pids: [7, 8, 9, 10] }
 };
+
+export const getCoursePreceptor = (data, courseId) => {
+  return (data.users || [])
+    .filter(u => u.rol === 'preceptor' && String(u.preceptor_course_ids || '').split(',').includes(String(courseId)))
+    .map(u => u.nombre)
+    .join(', ') || 'Sin asignar';
+};

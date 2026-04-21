@@ -1,6 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import { ArrowRightLeft, Search, Wrench, RotateCcw, Eye } from 'lucide-react';
-import { formatDNI } from './PreceptorHelpers';
+import { formatDNI } from '../functions/PreceptorHelpers';
 
 const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, undoPase, onPreviewStudent }) => {
   const [currentPage, setCurrentPage] = React.useState(1);

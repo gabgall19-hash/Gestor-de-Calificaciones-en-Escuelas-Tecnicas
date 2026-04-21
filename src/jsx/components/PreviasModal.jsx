@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { X, Save } from 'lucide-react';
-import { workshopI, workshopII } from './PreceptorHelpers';
+import { workshopI, workshopII } from '../functions/PreceptorHelpers';
 
 const PreviasModal = ({ student, previas, subjects, onSave, onDelete, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { History, X, Search, Trash2, Info, Plus, Pencil, MinusCircle } from 'lucide-react';
 
 const AuditPanel = ({ data, user, onDelete }) => {
