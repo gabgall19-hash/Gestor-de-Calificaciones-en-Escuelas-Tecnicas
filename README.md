@@ -13,6 +13,7 @@
 *   **⏳ Expiración de Sesión**: Los tokens ahora incluyen una fecha de vencimiento (24 horas), mitigando riesgos de sesiones persistentes en dispositivos compartidos.
 *   **🛡️ Verificación de Integridad en Backend**: Validación centralizada en Cloudflare Functions que impide la suplantación de identidad mediante la manipulación manual de IDs de usuario.
 *   **🔄 Auto-Logout Inteligente**: El sistema detecta automáticamente sesiones inválidas o expiradas, redirigiendo al usuario al inicio de forma transparente para una mejor UX.
+*   **💬 Mensaje de Acceso Personalizable**: Nueva opción en Ajustes para modificar el texto legal/informativo que ven los alumnos cuando su contraseña aún no ha sido definida.
 *   **🔑 API Hardening**: Refuerzo de todos los endpoints (`data`, `auth`, `student`) para garantizar que la identidad del usuario provenga exclusivamente del token firmado.
 
 ### [2.8.6] - 2026-04-22
