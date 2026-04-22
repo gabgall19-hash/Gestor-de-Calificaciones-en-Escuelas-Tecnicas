@@ -1,4 +1,4 @@
-# 🎓 Sistema de Gestión Escolar - Industrial N°6
+# 🎓 Sistema de Gestión Escolar - Industrial Nº6
 
 > **Suite administrativa profesional para la gestión de calificaciones, alumnos y reportes institucionales.**
 
@@ -6,18 +6,27 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🛡️ [2.8.5] - 2026-04-21 (Versión Actual)
+### [2.8.6] - 2026-04-22 (Versión Actual)
+**"Refactorización del Panel Administrativo"**
+
+*   **Panel Modularizado**: PreceptorPanel fue aligerado para funcionar principalmente como contenedor de vistas, filtros y navegación.
+*   **Extracción de Modales**: Los modales operativos del panel administrativo fueron movidos a PreceptorModals dentro de src/jsx/components.
+*   **Hooks por Dominio**: La lógica del antiguo usePreceptorLogic se dividió en hooks especializados para notas, alumnos, administración y configuración.
+*   **Coordinador de Estado**: usePreceptorLogic ahora centraliza el estado compartido y delega las acciones pesadas a módulos más pequeños.
+*   **Mantenibilidad Mejorada**: La nueva estructura reduce el tamaño de los archivos críticos y facilita futuras correcciones.
+
+### 🛡️ [2.8.5] - 2026-04-21
 **"RAC Modular y Optimización de Impresión"**
 
 *   **🧩 RAC Modular Configurable**: Nueva opción en los ajustes del sistema para habilitar la visualización detallada (**T / P / Pnd**) en materias de taller modulares, con diseño adaptativo y nomenclaturas claras integradas en la celda.
-*   **📐 Diseño de Celdas Adaptativo**: Implementación de celdas con alto dinámico (48px) vinculado al ajuste del sistema, asegurando simetría visual y legibilidad profesional en reportes complejos.
+*   **📏 Diseño de Celdas Adaptativo**: Implementación de celdas con alto dinámico (48px) vinculado al ajuste del sistema, asegurando simetría visual y legibilidad profesional en reportes complejos.
 *   **🖨️ Fix de Impresión Global (Partes)**: Resolución del error de hojas en blanco en la generación masiva de partes diarios, mediante la optimización de saltos de página CSS (`page-break`) y fijación de dimensiones A4 (`297mm`) con `overflow: hidden`.
 *   **💾 Persistencia de Ajustes**: Integración de los nuevos ajustes institucionales de impresión en la base de datos Cloudflare D1 para su persistencia global.
 
 ### 🛡️ [2.8.0] - 2026-04-21
 **"Parte Diario Institucional y Generación Masiva"**
 
-*   **📋 Parte Diario A4 Oficial**: Implementación de la planilla institucional definitiva para la Industrial N°6, con grilla de asistencia adaptable (1 o 2 columnas según cantidad de alumnos) y diseño optimizado para impresión.
+*   **📋 Parte Diario A4 Oficial**: Implementación de la planilla institucional definitiva para la Industrial Nº6, con grilla de asistencia adaptable (1 o 2 columnas según cantidad de alumnos) y diseño optimizado para impresión.
 *   **🗓️ Horarios Dinámicos Integrados**: Inclusión automática del horario semanal en el parte diario, incluyendo nombres de profesores, bloques de recreo visualmente diferenciados y espacios para firmas docentes.
 *   **🚀 Generación Institucional Masiva**: Nuevo motor de impresión global que permite generar los partes diarios de TODOS los cursos de la institución en un solo documento consolidado con saltos de página automáticos.
 *   **📅 Control de Fechas Manual**: Espacios dedicados para la consignación manual de fechas tanto en la grilla de asistencia como en el cronograma de materias.
@@ -27,11 +36,11 @@
 ### 🛡️ [2.7.0] - 2026-04-21
 **"Acceso Seguro, Auditoría Avanzada y Paginación"**
 
-*   **🔐 Acceso Estudiante con Contraseña**: Implementación de un portal de boletines protegido por contraseña. Los alumnos ahora requieren DNI + Clave (gestionada por el preceptor) para visualizar sus notas.
-*   **🛂 Bypass de Seguridad para Personal**: Los administradores y docentes pueden visualizar boletines sin necesidad de la contraseña del alumno mediante tokens de sesión, facilitando la atención directa.
+*   **🔍 Acceso Estudiante con Contraseña**: Implementación de un portal de boletines protegido por contraseña. Los alumnos ahora requieren DNI + Clave (gestionada por el preceptor) para visualizar sus notas.
+*   **🔓 Bypass de Seguridad para Personal**: Los administradores y docentes pueden visualizar boletines sin necesidad de la contraseña del alumno mediante tokens de sesión, facilitando la atención directa.
 *   **📜 Auditoría Detallada (Historial)**: Registro exhaustivo de acciones críticas: cambios de contraseña, edición de fichas de alumnos, re-incorporaciones y reversión de pases.
 *   **🚫 Restricción de Permisos (Preceptores)**: Los preceptores ahora tienen un rol de "Solo Lectura" para las calificaciones (a menos que sean profesores de la materia), pero mantienen permisos de edición sobre la Ficha del Alumno.
-*   **📑 Paginación en Listados**: Implementación de paginación (30 resultados por página) en los paneles de Alumnos, Historial y Pases, optimizando el rendimiento y la carga del navegador.
+*   **📄 Paginación en Listados**: Implementación de paginación (30 resultados por página) en los paneles de Alumnos, Historial y Pases, optimizando el rendimiento y la carga del navegador.
 *   **🚀 Notificación de Actualizaciones**: Banner interactivo que alerta a los usuarios cuando hay una nueva versión disponible, permitiendo recargar el sistema instantáneamente.
 *   **🔍 Buscador Global Potenciado**: El buscador global ahora incluye etiquetas de género, estado de contraseña y el curso al que pertenece cada alumno para una identificación inmediata.
 *   **🎨 Refinamiento UX/UI**: Sincronización estética de los formularios de acceso y mejora de la densidad visual en los listados con auto-scroll integrado al cambiar de página.
@@ -49,21 +58,21 @@
 
 *   **🌐 Hash Routing Implementation**: Migración total a un sistema de enrutamiento profesional utilizando `HashRouter`. Ahora el sistema cuenta con URLs navegables (ej: `/#/dashboard`, `/#/boletin`) que no generan errores 404 al recargar.
 *   **💾 Persistencia de Sesión (F5 Proof)**: Implementación de inicialización sincrónica de estado desde `localStorage`. La sesión del usuario ahora sobrevive a recargas de página y cierres accidentales de pestaña.
-*   **📍 Sub-rutas de Panel**: Sincronización automática de las pestañas del panel administrativo (Notas, Alumnos, RAC, etc.) con la URL, permitiendo el uso de los botones "Atrás" y "Adelante" del navegador.
+*   **📏 Sub-rutas de Panel**: Sincronización automática de las pestañas del panel administrativo (Notas, Alumnos, RAC, etc.) con la URL, permitiendo el uso de los botones "Atrás" y "Adelante" del navegador.
 *   **🔒 Protected Routes**: Sistema de redirección inteligente que protege las rutas administrativas, redirigiendo automáticamente al login si no se detecta una sesión activa.
 
 ### 🛡️ [2.6.3] - 2026-04-20
 **"Bloqueos en Cascada y Refinamiento de Otras Instancias"**
 
-*   **🔐 Bloqueos en Cascada**: Implementación de lógica inteligente de habilitación de campos. Si un alumno aprueba (nota ≥ 7) en instancias finales (Marzo u Otras Instancias), se bloquean automáticamente los campos de 3° Trimestre, Dic. y Feb. para evitar inconsistencias.
-*   **📝 Observaciones Automáticas**: Al completar la columna "Otras Inst.", el sistema ahora solicita automáticamente al usuario si desea agregar observaciones al RAC, vinculando la información de manera inmediata.
+*   **🔍 Bloqueos en Cascada**: Implementación de lógica inteligente de habilitación de campos. Si un alumno aprueba (nota ≥ 7) en instancias finales (Marzo u Otras Instancias), se bloquean automáticamente los campos de 3° Trimestre, Dic. y Feb. para evitar inconsistencias.
+*   **📏 Observaciones Automáticas**: Al completar la columna "Otras Inst.", el sistema ahora solicita automáticamente al usuario si desea agregar observaciones al RAC, vinculando la información de manera inmediata.
 *   **📊 Optimización de Columnas**: Rediseño del ancho de columnas en el panel de notas para mejorar la densidad de información y facilitar la lectura en pantallas pequeñas.
 *   **🖨️ Impresión Avanzada**: Integración completa de "Otras Instancias" en todos los formatos de reporte (RAC y Planillas de Calificaciones), incluyendo ajustes de colspans y pies de firma.
 *   **🛡️ Seguridad en Sincronización**: Los botones de sincronización de datos desde años anteriores ahora se ocultan automáticamente si el sistema no detecta un ciclo académico previo disponible.
 
 ### 🛡️ [2.6.0] - 2026-04-20
 
-*   **🏁 Terminación de Ciclo (RAC)**: Nuevo flujo centralizado en el `RACPanel` para el cierre del año escolar con selección masiva de alumnos.
+*   **🎓 Terminación de Ciclo (RAC)**: Nuevo flujo centralizado en el `RACPanel` para el cierre del año escolar con selección masiva de alumnos.
 *   **🤖 Automatización de Repitencia**: Sistema inteligente que detecta y asigna automáticamente el curso homónimo en el ciclo siguiente para alumnos repitentes, eliminando la necesidad de selección manual.
 *   **📈 Control de Promoción**: Validación automática de materias previas durante el pase de año, con alertas de seguridad para alumnos con 3 o más materias adeudadas.
 *   **📋 Historial Escolar**: Automatización del registro histórico (Boletín snapshot) durante la transición de ciclo para la preservación íntegra de datos de años anteriores.
@@ -108,7 +117,7 @@
 
 *   **📂 Global Consolidation**: Reestructuración total del proyecto en carpetas planas `src/jsx/` y `src/css/` para una navegación y mantenimiento ultra-eficiente.
 *   **🧩 CSS Modular**: Fragmentación del núcleo estético en módulos independientes (`GradesPanel`, `StudentManager`, `ReportViews`) para evitar colisiones de estilos.
-- **🔗 Import Standardization**: Limpieza y estandarización de todas las rutas de importación del proyecto, eliminando dependencias de carpetas anidadas complejas.
+*   **🔗 Import Standardization**: Limpieza y estandarización de todas las rutas de importación del proyecto, eliminando dependencias de carpetas anidadas complejas.
 
 ---
 
@@ -155,7 +164,7 @@
 
 *   **🖨️ A4 Ready**: Ajuste de layouts de boletines para impresión estándar profesional.
 *   **🏷️ Branding Institucional**: Integración de logotipos y normalización de nombres de tecnicaturas.
-*   **🔤 Alphabetical Sync**: Ordenamiento automático garantizado en todos los listados del sistema.
+*   **🔡 Alphabetical Sync**: Ordenamiento alfabético automático garantizado en todos los listados del sistema.
 
 ---
 
@@ -178,7 +187,7 @@
 ### 📂 [1.2.0] - 2026-04-11
 **"Estructura y Limpieza"**
 
-*   **📁 Organización de Directorios**: Reubicación de assets en carpetas `/js` y `/css`.
+*   **📏 Organización de Directorios**: Reubicación de assets en carpetas `/js` y `/css`.
 *   **🧹 Asset Cleanup**: Eliminación de archivos huérfanos y optimización de la estructura del proyecto.
 
 ---
@@ -190,12 +199,12 @@
 
 ---
 
-### 🏁 [1.0.0] - 2026-04-10
+### 🏠 [1.0.0] - 2026-04-10
 **"Lanzamiento Inicial"**
 
 *   **🚀 Deployment**: Despliegue inicial en Cloudflare Pages.
 *   **🔍 Búsqueda por DNI**: Acceso rápido para padres y alumnos.
-*   **📝 Grade Input**: Interfaz básica de carga de notas.
+*   **📏 Grade Input**: Interfaz básica de carga de notas.
 
 ---
-*Desarrollado con ❤️ para la comunidad educativa de la Industrial N°6.*
+*Desarrollado con ❤️ para la comunidad educativa de la Industrial Nº6.*
