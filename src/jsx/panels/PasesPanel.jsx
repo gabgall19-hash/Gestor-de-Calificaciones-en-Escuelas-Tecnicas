@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ArrowRightLeft, Search, Wrench, RotateCcw, Eye } from 'lucide-react';
 import { formatDNI } from '../functions/PreceptorHelpers';
 
@@ -6,19 +6,45 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 30;
 
-  const filteredPases = data.pases.filter(p => 
-    `${p.nombre_apellido} ${p.dni} ${p.institucion_destino}`.toLowerCase().includes(pasesSearch.toLowerCase())
-  );
+  const [viewMode, setViewMode] = React.useState('global'); // 'global' or 'course'
+
+  const filteredPases = data.pases.filter(p => {
+    const matchesSearch = `${p.nombre_apellido} ${p.dni} ${p.institucion_destino}`.toLowerCase().includes(pasesSearch.toLowerCase());
+    const matchesCourse = viewMode === 'global' || p.course_id_origen === data.selectedCourseId;
+    return matchesSearch && matchesCourse;
+  });
 
   const paginatedPases = filteredPases.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const totalPages = Math.ceil(filteredPases.length / itemsPerPage);
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [pasesSearch]);
+  }, [pasesSearch, viewMode]);
+
   return (
     <section className="page-section">
-      <div className="section-title"><ArrowRightLeft size={16} /><h2>Gestión de Pases de Alumnos</h2></div>
+      <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <ArrowRightLeft size={16} />
+          <h2>Gestión de Pases de Alumnos</h2>
+        </div>
+        <div className="view-toggle" style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <button 
+            className={`toggle-btn ${viewMode === 'course' ? 'active' : ''}`} 
+            onClick={() => setViewMode('course')}
+            style={{ padding: '4px 12px', fontSize: '0.75rem', borderRadius: '6px', border: 'none', background: viewMode === 'course' ? 'var(--accent-primary)' : 'transparent', color: 'white', cursor: 'pointer' }}
+          >
+            Por Curso
+          </button>
+          <button 
+            className={`toggle-btn ${viewMode === 'global' ? 'active' : ''}`} 
+            onClick={() => setViewMode('global')}
+            style={{ padding: '4px 12px', fontSize: '0.75rem', borderRadius: '6px', border: 'none', background: viewMode === 'global' ? 'var(--accent-primary)' : 'transparent', color: 'white', cursor: 'pointer' }}
+          >
+            Global
+          </button>
+        </div>
+      </div>
       <div className="management-card" style={{ marginTop: '1rem' }}>
         <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
           <Search size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
