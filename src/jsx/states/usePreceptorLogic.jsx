@@ -1,47 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  ArrowRightLeft, Book, BookOpen, Calendar, ClipboardList, FileText,
-  GraduationCap, History, Megaphone, Save, UserCog, Users
-} from 'lucide-react';
 import { emptyStudent, emptyCourse, emptyYear, emptyUser, emptyTec, draftTec, numberToWords, truncate, truncateSubject, simplifyTecName, formatDNI } from '../functions/PreceptorHelpers';
-import apiService, { apiRequest, apiLoadData } from '../functions/apiService';
-import { handlePrintAllCourses } from '../prints/SeguimientoA4';
-import { handlePrintSeguimientoGlobal } from '../prints/SeguimientoAllA4';
-import { handlePrintPlanillasCurso } from '../prints/CalificacionesA4';
-import { handlePrintRAC } from '../prints/RACA4';
-import { handlePrintParteDiario, handlePrintParteDiarioGlobal } from '../prints/ParteDiarioA4';
+import { apiRequest, apiLoadData } from '../functions/apiService';
 
 export default function usePreceptorLogic({ user, onPreviewStudent, showToast }) {
-  const tabs = useMemo(() => {
-    const list = [{ id: 'grades', label: 'Notas', icon: <ClipboardList size={16} /> }];
-    if (user.rol !== 'profesor') {
-      list.push({ id: 'materias', label: 'Materias', icon: <Book size={16} /> });
-    }
-    if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
-      list.push({ id: 'students', label: 'Alumnos', icon: <Users size={16} /> });
-    }
-    if (user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares' || user.rol === 'director' || user.rol === 'vicedirector') {
-      list.push({ id: 'pases', label: 'Pases', icon: <ArrowRightLeft size={16} /> });
-    }
-    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector'].includes(user.rol)) {
-      if (user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
-        list.push({ id: 'rac', label: 'RAC', icon: <FileText size={16} /> });
-      }
-      list.push({ id: 'historial', label: 'Historial', icon: <History size={16} /> });
-    }
-    if (['admin', 'secretaria_de_alumnos', 'director', 'vicedirector'].includes(user.rol)) {
-      list.push({ id: 'anuncios', label: 'Anuncios', icon: <Megaphone size={16} /> });
-      list.push({ id: 'settings', label: 'Ajustes', icon: <UserCog size={16} /> });
-    }
-    if (user.rol !== 'profesor') {
-      list.push({ id: 'horarios', label: 'Horarios', icon: <Calendar size={16} /> });
-    }
-    list.push({ id: 'planillas', label: 'Generar Planillas', icon: <Save size={16} /> });
-    return list;
-  }, [user.rol]);
-
-  const location = useLocation();
+const location = useLocation();
   const navigate = useNavigate();
   const pathSegments = location.pathname.split('/');
   const page = pathSegments[2] || 'grades';
@@ -839,52 +802,13 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     } catch (err) { alert(err.message); }
   };
 
-  const handleUpdateRACModular = async (enabled) => {
-    try {
-      await post('config', { action: 'update_rac_modular', valor: String(enabled) });
-      showToast('Configuración de RAC Modular actualizada', 'success');
-      await loadData(selectedCourseId, selectedYearId);
-    } catch (err) { alert(err.message); }
-  };
-
   const onPrintAllCourses = () => handlePrintAllCourses(data);
   const onPrintSeguimientoGlobal = () => handlePrintSeguimientoGlobal(data, selectedYearId, user, setStatus);
   const onPrintPlanillasCurso = () => handlePrintPlanillasCurso(data, selectedCourseId);
   const onPrintRAC = (student) => handlePrintRAC(data, student);
 
-  const onPrintParteDiario = async () => {
-    if (!selectedCourseId) return;
-    const course = data.allCourses.find(c => c.id === selectedCourseId);
-    if (!course) return;
-
-    setLoading(true);
-    try {
-      const scheduleRes = await apiService.get('horarios', { courseId: selectedCourseId, userId: user.id });
-      handlePrintParteDiario(data, course, scheduleRes);
-    } catch (err) {
-      console.error('Error fetching schedule for parte:', err);
-      showToast('Error al obtener el horario del curso', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onPrintParteDiarioGlobal = async () => {
-    setLoading(true);
-    try {
-      const allSchedules = await apiService.get('horarios', { userId: user.id });
-      handlePrintParteDiarioGlobal(data, allSchedules);
-    } catch (err) {
-      console.error('Error fetching all schedules for global parte:', err);
-      showToast('Error al obtener los horarios institucionales', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   
   return {
-    tabs,
     location, navigate, data, setData, loading, setLoading, unseenPases, setUnseenPases, unseenHistorial, setUnseenHistorial,
     activeTecId, setActiveTecId, showNomenclaturaModal, setShowNomenclaturaModal, selectedYearId, setSelectedYearId,
     selectedCourseId, setSelectedCourseId, selectedPeriod, setSelectedPeriod, viewMode, setViewMode, pending, setPending,
@@ -903,9 +827,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     execTransfer, savePaseEdit, updateStudentField, saveObs, editStudent, handleSaveFicha, addCourse, addYear, editYear, deleteYear,
     createUser, editUser, startEditUser, deleteUser, handleResetPassword, setYearAsCurrent, copyYearInfo, handleSetPassword,
     startEndCycle, handleEndCycleConfirm, handleViewFicha, getHistorial, startCreateTec, startEditTec, addTec, editTec, removeTec,
-    handleUpdateLocks, handleUpdateSystemMode, handleUpdateMobileLogin, handleUpdatePreceptorMode, handleUpdateRACModular,
-    duplicateTec, savePrevia, deletePrevia,
-    page, setPage, handleUpdatePeriods,
-    onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC, onPrintParteDiario, onPrintParteDiarioGlobal
+    handleUpdateLocks, handleUpdateSystemMode, handleUpdateMobileLogin, handleUpdatePreceptorMode, duplicateTec, savePrevia, deletePrevia,
+    page, setPage, handleUpdatePeriods
   };
 }
