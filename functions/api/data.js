@@ -131,9 +131,10 @@ async function handleGrid(env, request, url) {
   if (currentUser.rol === 'admin' || currentUser.rol === 'secretaria_de_alumnos' || currentUser.rol === 'jefe_de_auxiliares' || currentUser.rol === 'director' || currentUser.rol === 'vicedirector') {
     idx.pases = statements.length;
     statements.push(env.DB.prepare(`
-      SELECT p.*, (c.ano || ' ' || c.division || ' · ' || c.turno) as course_label
+      SELECT p.*, (c.ano || ' ' || c.division || ' · ' || c.turno) as course_label, y.nombre as year_nombre
       FROM pases p
       LEFT JOIN cursos c ON c.id = p.course_id_origen
+      LEFT JOIN años_lectivos y ON y.id = c.year_id
       ORDER BY p.id DESC
     `));
     idx.users = statements.length;
@@ -143,11 +144,9 @@ async function handleGrid(env, request, url) {
       idx.allStudents = statements.length;
       statements.push(env.DB.prepare(`
         SELECT a.id, a.nombre, a.apellido, a.dni, a.course_id, a.observaciones, a.estado, a.genero, a.password,
-               (c.ano || ' ' || c.division || ' · ' || c.turno) as course_label
+               COALESCE(c.ano || ' ' || c.division || ' · ' || c.turno, 'Sin Curso') as course_label
         FROM alumnos a
-        JOIN cursos c ON a.course_id = c.id
-        WHERE a.course_id IS NOT NULL
-        AND a.estado = 1
+        LEFT JOIN cursos c ON a.course_id = c.id
         ORDER BY a.apellido, a.nombre
       `));
     }

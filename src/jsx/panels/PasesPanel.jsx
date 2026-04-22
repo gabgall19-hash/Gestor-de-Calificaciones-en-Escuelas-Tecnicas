@@ -68,7 +68,9 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
                 <tr key={p.id}>
                   <td><strong>{p.nombre_apellido}</strong></td>
                   <td>{formatDNI(p.dni)}</td>
-                  <td style={{ fontSize: '0.8rem' }}>{p.course_label} ({p.year_nombre})</td>
+                  <td style={{ fontSize: '0.8rem' }}>
+                    {p.course_label ? `${p.course_label} (${p.year_nombre || '---'})` : (p.course_id_origen === 0 ? 'Importado (Sin curso)' : '---')}
+                  </td>
                   <td>{p.institucion_destino}</td>
                   <td>{p.fecha_pase}</td>
                   <td><span className={`badge ${p.estado === 'De pase' ? 'badge-danger' : 'badge-warning'}`}>{p.estado || 'De pase'}</span></td>
@@ -79,8 +81,13 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
                         className="icon-btn" 
                         style={{ color: 'var(--primary)', background: 'rgba(99,102,241,0.1)' }} 
                         onClick={() => {
-                          const student = (data.allStudents || data.students || []).find(s => s.id === p.alumno_id || s.dni === p.dni);
-                          if (student) onViewFicha(student);
+                          const student = (data.allStudents || []).find(s => String(s.dni) === String(p.dni)) || 
+                                          (data.students || []).find(s => String(s.dni) === String(p.dni));
+                          if (student) {
+                            onViewFicha(student);
+                          } else {
+                            alert('No se encontró la ficha del alumno en el listado cargado.');
+                          }
                         }} 
                         title="Ver Ficha"
                       >
