@@ -1,3 +1,5 @@
+import { signJWT } from "./_utils.js";
+
 export async function onRequestPost({ request, env }) {
   try {
     const { username, password } = await request.json();
@@ -37,7 +39,10 @@ export async function onRequestPost({ request, env }) {
       preceptor_course_id: user.preceptor_course_id,
       professor_course_ids: user.professor_course_ids,
       professor_subject_ids: user.professor_subject_ids,
-      token: "auth-token-" + user.id // Simple token for verification
+      token: await signJWT(
+        { id: user.id, rol: user.rol, exp: Date.now() + 24 * 60 * 60 * 1000 },
+        env.JWT_SECRET || "default_secret_for_dev_only"
+      )
     }), {
       headers: { "Content-Type": "application/json" },
     });

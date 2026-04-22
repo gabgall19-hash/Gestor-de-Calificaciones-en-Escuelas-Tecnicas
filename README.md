@@ -6,7 +6,16 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### [2.8.6] - 2026-04-22 (Versión Actual)
+### 🛡️ [2.9.0] - 2026-04-22 (Versión Actual)
+**"Blindaje de Sesiones con JWT y Autenticación Robusta"**
+
+*   **🔐 Implementación de JWT (JSON Web Tokens)**: Migración de tokens predecibles en texto plano a un sistema de autenticación firmado digitalmente mediante HMAC-SHA256 (Web Crypto API).
+*   **⏳ Expiración de Sesión**: Los tokens ahora incluyen una fecha de vencimiento (24 horas), mitigando riesgos de sesiones persistentes en dispositivos compartidos.
+*   **🛡️ Verificación de Integridad en Backend**: Validación centralizada en Cloudflare Functions que impide la suplantación de identidad mediante la manipulación manual de IDs de usuario.
+*   **🔄 Auto-Logout Inteligente**: El sistema detecta automáticamente sesiones inválidas o expiradas, redirigiendo al usuario al inicio de forma transparente para una mejor UX.
+*   **🔑 API Hardening**: Refuerzo de todos los endpoints (`data`, `auth`, `student`) para garantizar que la identidad del usuario provenga exclusivamente del token firmado.
+
+### [2.8.6] - 2026-04-22
 **"Refactorización del Panel Administrativo"**
 
 *   **Panel Modularizado**: PreceptorPanel fue aligerado para funcionar principalmente como contenedor de vistas, filtros y navegación.

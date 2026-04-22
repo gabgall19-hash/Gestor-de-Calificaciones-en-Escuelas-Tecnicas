@@ -1,3 +1,5 @@
+import { verifyJWT } from "./_utils.js";
+
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
   const dni = url.searchParams.get("dni");
@@ -39,7 +41,9 @@ export async function onRequestGet({ env, request }) {
 
     const providedPassword = url.searchParams.get("password");
     const authHeader = request.headers.get("Authorization") || "";
-    const isStaffRequest = authHeader.startsWith("Bearer auth-token-");
+    const token = authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null;
+    const staffPayload = token ? await verifyJWT(token, env.JWT_SECRET || "default_secret_for_dev_only") : null;
+    const isStaffRequest = !!staffPayload;
 
     // Lógica de validación de contraseña (Bypass si es staff)
     if (!isStaffRequest) {

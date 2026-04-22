@@ -1,4 +1,4 @@
-﻿import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
+import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
 
 export const handlePrintSeguimientoGlobal = async (data, selectedYearId, user, setStatus) => {
   const activeCourses = data.courses.filter(c => c.activo === 1).sort((a, b) => a.ano - b.ano || a.division.localeCompare(b.division));
@@ -6,8 +6,12 @@ export const handlePrintSeguimientoGlobal = async (data, selectedYearId, user, s
 
   try {
     setStatus('Cargando datos de todos los alumnos...');
+    const token = user?.token;
+    const headers = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const res = await fetch(`/api/data?type=grid&yearId=${selectedYearId}&includeAllStudents=true&userId=${user.id}`, {
-      headers: { 'Authorization': `Bearer auth-token-${user.id}` }
+      headers
     });
     if (!res.ok) throw new Error(`Error servidor: ${res.status}`);
     const globalData = await res.json();

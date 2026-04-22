@@ -5,7 +5,23 @@
 
 const API_BASE = '/api/data';
 
-const getAuthToken = (userId) => `Bearer auth-token-${userId}`;
+const getAuthToken = () => {
+  const stored = localStorage.getItem('currentUser');
+  if (!stored) return '';
+  try {
+    const user = JSON.parse(stored);
+    return user.token ? `Bearer ${user.token}` : '';
+  } catch (e) {
+    return '';
+  }
+};
+
+const handleApiError = (error) => {
+  if (error && (error.includes('Sesión inválida') || error.includes('token'))) {
+    localStorage.removeItem('currentUser');
+    window.location.href = '/';
+  }
+};
 
 export const apiRequest = async (type, body = {}, userId = null, method = 'POST') => {
   if (!userId) {
@@ -21,7 +37,7 @@ export const apiRequest = async (type, body = {}, userId = null, method = 'POST'
     method,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': getAuthToken(userId)
+      'Authorization': getAuthToken()
     }
   };
 
@@ -34,6 +50,7 @@ export const apiRequest = async (type, body = {}, userId = null, method = 'POST'
     const data = await response.json();
 
     if (!response.ok) {
+      handleApiError(data.error);
       throw new Error(data.error || 'Ocurrió un error en la comunicación con el servidor.');
     }
 
@@ -55,7 +72,7 @@ export const apiLoadData = async (userId, selectedYearId, selectedCourseId, incl
   const options = {
     method: 'GET',
     headers: {
-      'Authorization': getAuthToken(userId)
+      'Authorization': getAuthToken()
     }
   };
 
@@ -64,6 +81,7 @@ export const apiLoadData = async (userId, selectedYearId, selectedCourseId, incl
     const data = await response.json();
 
     if (!response.ok) {
+      handleApiError(data.error);
       throw new Error(data.error || 'Error al cargar los datos.');
     }
 
@@ -87,13 +105,16 @@ const apiService = {
     const options = {
       method: 'GET',
       headers: {
-        'Authorization': getAuthToken(params.userId)
+        'Authorization': getAuthToken()
       }
     };
 
     const response = await fetch(url.toString(), options);
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'API GET Error');
+    if (!response.ok) {
+      handleApiError(data.error);
+      throw new Error(data.error || 'API GET Error');
+    }
     return data;
   }
 };

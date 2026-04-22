@@ -1,3 +1,5 @@
+import { verifyJWT } from "./_utils.js";
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function toNumber(value) {
@@ -5,7 +7,7 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-const SYSTEM_VERSION = '2.7.0';
+const SYSTEM_VERSION = '2.9.0';
 
 function toTitleCase(str) {
   if (!str) return '';
@@ -30,20 +32,28 @@ async function logHistory(env, userId, courseId, type, detail, alumnoId = null) 
 }
 
 async function validateUser(env, request, userId, ...requiredRoles) {
-  if (!userId) throw new Error('Usuario no identificado');
-
-  // Basic Token Verification (Hardening)
   const authHeader = request?.headers?.get('Authorization') || '';
-  const expectedToken = `Bearer auth-token-${userId}`;
+  if (!authHeader.startsWith('Bearer ')) {
+    throw new Error('No se proporcionó un token de autenticación.');
+  }
 
-  if (!authHeader || authHeader !== expectedToken) {
+  const token = authHeader.split(' ')[1];
+  const payload = await verifyJWT(token, env.JWT_SECRET || "default_secret_for_dev_only");
+
+  if (!payload) {
     throw new Error('Sesión inválida o expirada. Por favor, inicie sesión nuevamente.');
   }
 
-  const user = await env.DB.prepare('SELECT id, nombre, username, rol, preceptor_course_id, professor_course_ids, professor_subject_ids, is_professor_hybrid FROM usuarios WHERE id = ?').bind(userId).first();
+  // Si se pasó un userId, validamos que coincida con el del token (Consistencia)
+  if (userId && Number(userId) !== Number(payload.id)) {
+    throw new Error('Conflicto de identidad: El ID de usuario no coincide con la sesión.');
+  }
+
+  const finalUserId = payload.id;
+  const user = await env.DB.prepare('SELECT id, nombre, username, rol, preceptor_course_id, professor_course_ids, professor_subject_ids, is_professor_hybrid FROM usuarios WHERE id = ?').bind(finalUserId).first();
+  
   if (!user) throw new Error('Usuario no encontrado');
 
-  const validRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector', 'profesor', 'visualizador'];
   if (requiredRoles.length > 0 && !requiredRoles.includes(user.rol)) {
     throw new Error(`Permiso denegado: tu rol (${user.rol}) no tiene autorización.`);
   }
