@@ -28,58 +28,66 @@ const GradesPanel = ({
           <button 
             className="nomenclatura-link"
             onClick={() => setShowNomenclaturaModal(true)}
-            style={{ fontSize: '0.75rem', padding: '4px 10px', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '6px', color: '#818cf8', fontWeight: 'bold' }}
+            style={{ fontSize: isMobile ? '0.6rem' : '0.75rem', padding: '4px 10px', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '6px', color: '#818cf8', fontWeight: 'bold' }}
           >
             Nomenclatura Calificación
           </button>
         </div>
       </div>
       
-      <div className="section-toolbar-compact" style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.8rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: '250px' }}>
+      <div className="section-toolbar-compact" style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginBottom: '0.8rem', flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
+        
+        {/* Selector de Modo (Tabs) - Primero en movil */}
+        <div style={{ width: isMobile ? '100%' : 'auto', display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="view-selector">
+              {user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && (
+                <button className={`tab-btn ${viewMode === 'simple' ? 'active' : ''}`} onClick={() => setViewMode('simple')}>Todas las Materias</button>
+              )}
+              {user.rol !== 'preceptor_taller' && (
+                <button className={`tab-btn ${viewMode === 'bySubject' ? 'active' : ''}`} onClick={() => setViewMode('bySubject')}>Por Materia</button>
+              )}
+              {(
+                user.rol === 'admin' || 
+                user.rol === 'preceptor_taller' || 
+                (user.rol === 'preceptor' && (data.subjects || []).some(s => s.es_taller === 1 && (s.tipo || '').toLowerCase().includes('modular'))) || 
+                (user.rol === 'profesor' && (data.subjects || []).some(s => s.es_taller === 1)) ||
+                (['secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol))
+              ) && (data.subjects || []).some(s => s.es_taller === 1) && (
+                <button className={`tab-btn ${viewMode === 'taller' ? 'active' : ''}`} onClick={() => setViewMode('taller')}>Taller</button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* DNI + Guardar Cambios - Segundo en movil, en la misma linea */}
+        <div style={{ 
+          width: isMobile ? '100%' : 'auto', 
+          display: 'flex', 
+          gap: '8px', 
+          alignItems: 'center',
+          justifyContent: isMobile ? 'space-between' : 'flex-start',
+          flexWrap: isMobile ? 'nowrap' : 'wrap'
+        }}>
+          <div className="preview-inline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>DNI:</span>
+            <input type="text" value={previewDni} onChange={(e) => setPreviewDni(e.target.value)} className="input-field compact-inline-input" placeholder="..." style={{ padding: '0.5rem 0.6rem', width: isMobile ? '100px' : '110px' }} />
+          </div>
+          <button className="btn btn-primary" onClick={saveGrades} disabled={Object.keys(pending).length === 0 && !previewDni.trim()} style={{ whiteSpace: 'nowrap', flex: isMobile ? 1 : 'none', padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}>
+            <Save size={16} /> {isMobile ? 'Guardar' : 'Guardar Cambios'}
+          </button>
+        </div>
+
+        {/* Buscador - Ultimo en movil, justo encima del listado */}
+        <div style={{ width: '100%', marginTop: isMobile ? '0.2rem' : '0' }}>
           <input 
             type="text" 
             className="input-field" 
             placeholder="Buscar alumno por nombre o DNI..." 
             value={notesSearch} 
             onChange={(e) => setNotesSearch(e.target.value)} 
-            style={{ width: '100%' }}
+            style={{ width: '100%', padding: '0.6rem' }}
           />
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <div className="view-selector">
-            {/* Todas las Materias: Preceptores y Admin (inútil para Profesores y Preceptor de Taller) */}
-            {user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && (
-              <button className={`tab-btn ${viewMode === 'simple' ? 'active' : ''}`} onClick={() => setViewMode('simple')}>Todas las Materias</button>
-            )}
-            
-            {/* Por Materia: Preceptores y Profesores (inútil para Preceptor de Taller) */}
-            {user.rol !== 'preceptor_taller' && (
-              <button className={`tab-btn ${viewMode === 'bySubject' ? 'active' : ''}`} onClick={() => setViewMode('bySubject')}>Por Materia</button>
-            )}
-
-            {/* Taller: Preceptor de Taller, Preceptor (si hay modulares), Profesor (si tiene talleres) y Admin */}
-            {(
-              user.rol === 'admin' || 
-              user.rol === 'preceptor_taller' || 
-              (user.rol === 'preceptor' && (data.subjects || []).some(s => s.es_taller === 1 && (s.tipo || '').toLowerCase().includes('modular'))) || 
-              (user.rol === 'profesor' && (data.subjects || []).some(s => s.es_taller === 1)) ||
-              (['secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol))
-            ) && (data.subjects || []).some(s => s.es_taller === 1) && (
-              <button className={`tab-btn ${viewMode === 'taller' ? 'active' : ''}`} onClick={() => setViewMode('taller')}>Taller</button>
-            )}
-          </div>
-        </div>
-
-        <div className="panel-actions" style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <div className="preview-inline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>DNI Alumno:</span>
-            <input type="text" value={previewDni} onChange={(e) => setPreviewDni(e.target.value)} className="input-field compact-inline-input" placeholder="..." style={{ padding: '0.55rem 0.75rem', width: '110px' }} />
-          </div>
-          <button className="btn btn-primary" onClick={saveGrades} disabled={Object.keys(pending).length === 0 && !previewDni.trim()} style={{ whiteSpace: 'nowrap' }}>
-            <Save size={16} /> Guardar Cambios
-          </button>
         </div>
       </div>
       

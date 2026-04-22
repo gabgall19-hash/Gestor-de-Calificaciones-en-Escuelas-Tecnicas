@@ -55,10 +55,12 @@ function App() {
   }, []);
 
   React.useEffect(() => {
-    fetch('/api/settings')
+    fetch(`/api/settings?t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
-        setMobileLoginEnabled(data.mobile_login_enabled);
+        // Ensure boolean conversion if it comes as string
+        const isEnabled = data.mobile_login_enabled === true || data.mobile_login_enabled === 'true';
+        setMobileLoginEnabled(isEnabled);
         checkVersion(data.version);
       })
       .catch(err => console.error("Error fetching settings:", err));
@@ -224,17 +226,28 @@ function App() {
 
               {isMobile && (
                 <div style={{ 
-                  background: mobileLoginEnabled ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.25)', 
-                  border: `1px solid ${mobileLoginEnabled ? 'rgba(239, 68, 68, 0.3)' : 'rgba(239, 68, 68, 0.5)'}`, 
-                  padding: '0.6rem', 
-                  borderRadius: '8px', 
-                  marginBottom: '1rem',
-                  color: mobileLoginEnabled ? '#f87171' : '#ff4d4d',
-                  fontSize: '0.8rem',
+                  background: mobileLoginEnabled ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.2)', 
+                  border: `1px solid ${mobileLoginEnabled ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.5)'}`, 
+                  padding: '0.75rem', 
+                  borderRadius: '12px', 
+                  marginBottom: '1.2rem',
+                  color: mobileLoginEnabled ? '#10b981' : '#ff4d4d',
+                  fontSize: '0.85rem',
                   fontWeight: '600',
-                  textAlign: 'center'
+                  textAlign: 'center',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
                 }}>
-                  {mobileLoginEnabled ? "No compatible con celulares." : "Acceso deshabilitado en móviles."}
+                  {mobileLoginEnabled ? (
+                    <>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }}></div>
+                      Acceso móvil habilitado
+                    </>
+                  ) : (
+                    "Acceso deshabilitado en móviles."
+                  )}
                 </div>
               )}
 

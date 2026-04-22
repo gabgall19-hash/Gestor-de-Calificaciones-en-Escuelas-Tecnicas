@@ -8,9 +8,11 @@ import {
   FileText,
   History,
   Megaphone,
+  Menu,
   Save,
   UserCog,
-  Users
+  Users,
+  X
 } from 'lucide-react';
 import { emptyUser, simplifyTecName } from '../functions/PreceptorHelpers';
 import usePreceptorLogic from '../states/usePreceptorLogic';
@@ -28,6 +30,7 @@ import AnunciosPanel from './AnunciosPanel';
 import HorariosPanel from './HorariosPanel';
 
 export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showToast }) {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const tabs = useMemo(() => {
     const list = [{ id: 'grades', label: 'Notas', icon: <ClipboardList size={16} /> }];
     if (user.rol !== 'profesor') list.push({ id: 'materias', label: 'Materias', icon: <Book size={16} /> });
@@ -224,20 +227,75 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
   return (
     <div className="glass-card compact-panel" style={{ width: '100%', maxWidth: 'none' }}>
       <div className="panel-toolbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <div className="logo-section" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <img src="/logo.png" alt="Logo" style={{ height: '45px' }} />
           <div>
-            <h1 style={{ fontSize: '1.2rem', marginBottom: '0.1rem', fontWeight: '800' }}>INDUSTRIAL N°6 "X BRIGADA AEREA"</h1>
+            <h1 style={{ marginBottom: '0.1rem', fontWeight: '800' }}>INDUSTRIAL N°6 "X BRIGADA AEREA"</h1>
             <h2 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500' }}>Gestión de Calificaciones</h2>
           </div>
         </div>
-        <div style={{ textAlign: 'right', flex: 1, paddingRight: '1rem' }}>
+        <div className="welcome-section" style={{ textAlign: 'right', flex: 1, paddingRight: '1rem' }}>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Bienvenido, {user.rol === 'profesor' ? `Prof. ${user.nombre}` : user.nombre}</p>
           {currentCourse && <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Curso: {currentCourse.year_nombre} · {currentCourse.label}</p>}
           {status && <p className="panel-status" style={{ display: 'inline-block', marginTop: '0.25rem' }}>{status}</p>}
         </div>
         <div className="panel-actions">
-          <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={onLogout}>Cerrar Sesión</button>
+          {isMobile && (
+            <button 
+              className="btn btn-hamburger-mobile" 
+              style={{ padding: '0.6rem' }} 
+              onClick={() => setIsMenuOpen(true)}
+            >
+              <Menu size={20} />
+            </button>
+          )}
+          <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={onLogout}>
+            {isMobile ? 'Salir' : 'Cerrar Sesión'}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Navigation Drawer */}
+      <div className={`mobile-menu-overlay ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(false)}>
+        <div className="mobile-menu-drawer" onClick={(e) => e.stopPropagation()}>
+          <div className="menu-header">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <img src="/logo.png" alt="Logo" style={{ height: '30px' }} />
+              <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Menú</span>
+            </div>
+            <button className="btn" style={{ background: 'transparent', padding: '5px' }} onClick={() => setIsMenuOpen(false)}>
+              <X size={24} />
+            </button>
+          </div>
+
+          <div className="menu-nav">
+            {tabs.map((tab) => (
+              <div 
+                key={tab.id}
+                className={`menu-item ${page === tab.id ? 'active' : ''}`}
+                onClick={() => {
+                  setPage(tab.id);
+                  setIsMenuOpen(false);
+                }}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+                {((tab.id === 'pases' && unseenPases) || (tab.id === 'historial' && unseenHistorial)) && (
+                  <span style={{ width: '8px', height: '8px', background: '#ff4757', borderRadius: '50%', position: 'absolute', right: '15px' }} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="menu-footer">
+            <button 
+              className="btn" 
+              style={{ width: '100%', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }} 
+              onClick={onLogout}
+            >
+              Cerrar Sesión
+            </button>
+          </div>
         </div>
       </div>
 
@@ -260,36 +318,38 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       </div>
 
       <div className="panel-filters">
-        <label className="label">Año Lectivo:</label>
-        <select className="input-field compact-select" value={selectedYearId} onChange={async (e) => { await loadData(null, Number(e.target.value)); }}>
-          {data.academicYears.map((year) => <option key={year.id} value={year.id}>{year.nombre}</option>)}
-        </select>
+        <div className="filter-item">
+          <label className="label">Año:</label>
+          <select className="input-field compact-select" value={selectedYearId} onChange={async (e) => { await loadData(null, Number(e.target.value)); }}>
+            {data.academicYears.map((year) => <option key={year.id} value={year.id}>{year.nombre}</option>)}
+          </select>
+        </div>
 
         {data.courses.length > 0 && (
-          <>
+          <div className="filter-item">
             <label className="label">Curso:</label>
             <select className="input-field compact-select" value={selectedCourseId ?? ''} onChange={async (e) => { await loadData(Number(e.target.value), selectedYearId); }}>
               {data.courses.map((course) => <option key={course.id} value={course.id}>{course.label} · {simplifyTecName(course.tecnicatura_nombre)}</option>)}
             </select>
-          </>
+          </div>
         )}
 
         {page === 'grades' && (
           <>
             {(viewMode === 'bySubject' || viewMode === 'taller') ? (
-              <>
+              <div className="filter-item" style={{ gridColumn: isMobile ? '1' : 'auto' }}>
                 <label className="label">Materia:</label>
                 <select className="input-field compact-select" value={selectedSubjectId || ''} onChange={(e) => setSelectedSubjectId(Number(e.target.value))}>
                   {filteredSubjects.map((subject) => <option key={subject.id} value={subject.id}>{truncateSubject(subject.nombre, isMobile)}</option>)}
                 </select>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="filter-item">
                 <label className="label">Periodo:</label>
                 <select className="input-field compact-select" value={selectedPeriod} onChange={(e) => setSelectedPeriod(Number(e.target.value))}>
                   {data.periodos.map((periodo) => <option key={periodo.id} value={periodo.id}>{periodo.nombre}</option>)}
                 </select>
-              </>
+              </div>
             )}
           </>
         )}

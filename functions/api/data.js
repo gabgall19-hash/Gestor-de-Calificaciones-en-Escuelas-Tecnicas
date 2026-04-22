@@ -310,7 +310,7 @@ async function handleGrid(env, request, url) {
 // ─── POST /api/data?type=config ─────────────────────────────────────────────
 
 async function handleConfig(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin');
+  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'director', 'vicedirector');
   const { action, valor, periodos = [] } = body;
 
   if (action === 'update_mode') {
