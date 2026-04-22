@@ -387,7 +387,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
 
       {page === 'historial' && <AuditPanel data={data} user={user} onDelete={async (action, logId) => { await post('historial_delete', { action, logId, courseId: data.selectedCourseId }); loadData(); }} />}
       {page === 'materias' && <AcademicManager user={user} data={data} selectedCourseId={selectedCourseId} materiasSearch={materiasSearch} setMateriasSearch={setMateriasSearch} handleUpdateLocks={handleUpdateLocks} />}
-      {page === 'pases' && <PasesPanel user={user} data={data} pasesSearch={pasesSearch} setPasesSearch={setPasesSearch} setEditingPase={setEditingPase} undoPase={undoPase} onPreviewStudent={onPreviewStudent} />}
+      {page === 'pases' && <PasesPanel user={user} data={data} pasesSearch={pasesSearch} setPasesSearch={setPasesSearch} setEditingPase={setEditingPase} undoPase={undoPase} onPreviewStudent={onPreviewStudent} onViewFicha={handleViewFicha} />}
       {page === 'anuncios' && <AnunciosPanel data={data} post={post} loadData={loadData} />}
 
       {page === 'settings' && (

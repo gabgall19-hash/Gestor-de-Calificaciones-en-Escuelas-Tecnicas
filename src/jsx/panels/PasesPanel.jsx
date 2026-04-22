@@ -1,8 +1,8 @@
 import React from 'react';
-import { ArrowRightLeft, Search, Wrench, RotateCcw, Eye } from 'lucide-react';
+import { ArrowRightLeft, Search, Wrench, RotateCcw, Eye, FileText } from 'lucide-react';
 import { formatDNI } from '../functions/PreceptorHelpers';
 
-const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, undoPase, onPreviewStudent }) => {
+const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, undoPase, onPreviewStudent, onViewFicha }) => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 30;
 
@@ -75,6 +75,17 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
                   <td>
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                       {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol) && <button className="icon-btn" onClick={() => setEditingPase(p)} title="Editar Pase"><Wrench size={14} /></button>}
+                      <button 
+                        className="icon-btn" 
+                        style={{ color: 'var(--primary)', background: 'rgba(99,102,241,0.1)' }} 
+                        onClick={() => {
+                          const student = (data.allStudents || data.students || []).find(s => s.id === p.alumno_id || s.dni === p.dni);
+                          if (student) onViewFicha(student);
+                        }} 
+                        title="Ver Ficha"
+                      >
+                        <FileText size={14} />
+                      </button>
                       <button className="icon-btn" style={{ color: '#3498db' }} onClick={() => onPreviewStudent(p.dni)} title="Ver Boletín"><Eye size={14} /></button>
                       {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol) && <button className="icon-btn danger" onClick={() => undoPase(p)} title="Deshacer Pase"><RotateCcw size={14} /></button>}
                     </div>
