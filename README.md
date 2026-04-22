@@ -6,7 +6,17 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🛡️ [2.9.0] - 2026-04-22 (Versión Actual)
+### 🛡️ [2.9.5] - 2026-04-22 (Versión Actual)
+**"Automatización Docente y Optimización de Tabla de Notas"**
+
+*   **👨‍🏫 Automatización de Cuentas Profesores**: Generación masiva de credenciales para 104 docentes (`nom.ape` / `apellido2026`) con mapeo inteligente de materias y cursos.
+*   **🎓 Identidad Institucional (Prof.)**: Implementación automática del prefijo "Prof." en el panel de bienvenida, planillas A4 de calificaciones, partes diarios y horarios.
+*   **📊 Fix de Visualización de Notas**: Resolución del bug de columnas "aplastadas" en la vista global de calificaciones mediante la fijación de anchos de columna uniformes (50px).
+*   **📑 Gestión de Pases Refinada**: Normalización de etiquetas de origen y destino para alumnos de "SABANA 2026" y corrección de asignación de cursos de origen en el historial de pases.
+*   **🔒 Resolución de Conflictos de Usuario**: Lógica de desambiguación para nombres duplicados en la creación de cuentas docentes (ej: `mar.agu1`).
+*   **📋 Reporte de Credenciales**: Generación de un listado administrativo detallado con usuarios y contraseñas para la distribución institucional.
+
+### 🛡️ [2.9.0] - 2026-04-22
 **"Blindaje de Sesiones con JWT y Autenticación Robusta"**
 
 *   **🔐 Implementación de JWT (JSON Web Tokens)**: Migración de tokens predecibles en texto plano a un sistema de autenticación firmado digitalmente mediante HMAC-SHA256 (Web Crypto API).

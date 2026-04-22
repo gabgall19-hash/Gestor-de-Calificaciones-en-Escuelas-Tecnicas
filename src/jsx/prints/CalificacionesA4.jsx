@@ -1,4 +1,4 @@
-﻿import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
+import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
 
 export const handlePrintPlanillasCurso = (data, selectedCourseId) => {
   const activeCourse = data.courses.find(c => c.id === selectedCourseId);
@@ -12,7 +12,7 @@ export const handlePrintPlanillasCurso = (data, selectedCourseId) => {
         const assignments = String(u.professor_subject_ids || '').split(',').map(s => s.trim());
         return u.rol === 'profesor' && assignments.includes(subjectKey);
       })
-      .map(u => u.nombre)
+      .map(u => `Prof. ${u.nombre}`)
       .join(' / ') || '________________';
 
     const students = [...data.students].sort((a, b) => a.apellido.localeCompare(b.apellido));

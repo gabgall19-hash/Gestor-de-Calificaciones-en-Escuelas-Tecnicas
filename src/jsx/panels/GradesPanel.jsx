@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { ClipboardList, Search, Save, BookOpen, Users } from 'lucide-react';
 import { truncate, truncateSubject, formatDNI, numberToWords } from '../functions/PreceptorHelpers';
 import { TableSkeleton } from '../UI/Skeleton';
@@ -102,7 +102,7 @@ const GradesPanel = ({
             })() : (
               filteredSubjects.map((subject) => {
                 const units = getSubjectUnits(subject);
-                return Array(units).fill(null).map((_, i) => <col key={`${subject.id}-${i}`} style={{ width: 'auto' }} />);
+                return Array(units).fill(null).map((_, i) => <col key={`${subject.id}-${i}`} style={{ width: isMobile ? '40px' : '50px' }} />);
               })
             )}
           </colgroup>

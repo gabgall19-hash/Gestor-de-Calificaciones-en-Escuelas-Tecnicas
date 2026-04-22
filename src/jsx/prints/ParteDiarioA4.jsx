@@ -278,7 +278,7 @@ export const handlePrintParteDiario = (data, course, scheduleData) => {
                       ${['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].map(day => `
                         <td>
                           <span class="cell-subject">${row.days?.[day]?.subject || ''}</span>
-                          <span class="cell-teacher">${row.days?.[day]?.teacher || ''}</span>
+                          <span class="cell-teacher">${row.days?.[day]?.teacher ? (row.days[day].teacher.startsWith('Prof.') ? row.days[day].teacher : 'Prof. ' + row.days[day].teacher) : ''}</span>
                           <span class="signature-line"></span>
                         </td>
                       `).join('')}
@@ -404,7 +404,7 @@ export const handlePrintParteDiarioGlobal = (data, allSchedules) => {
                 if (row.type === 'break' || row.isRecreo) {
                   return `<tr class="row-break"><td style="vertical-align: middle !important; height: 14px !important;">${row.time || ''}</td><td colspan="5" style="vertical-align: middle !important;">RECREO</td></tr>`;
                 }
-                return `<tr><td style="font-weight: 900; vertical-align: middle;">${row.time || ''}</td>${['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].map(day => `<td><span class="cell-subject">${row.days?.[day]?.subject || ''}</span><span class="cell-teacher">${row.days?.[day]?.teacher || ''}</span><span class="signature-line"></span></td>`).join('')}</tr>`;
+                return `<tr><td style="font-weight: 900; vertical-align: middle;">${row.time || ''}</td>${['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].map(day => `<td><span class="cell-subject">${row.days?.[day]?.subject || ''}</span><span class="cell-teacher">${row.days?.[day]?.teacher ? (row.days[day].teacher.startsWith('Prof.') ? row.days[day].teacher : 'Prof. ' + row.days[day].teacher) : ''}</span><span class="signature-line"></span></td>`).join('')}</tr>`;
               }).join('')}
             </tbody>
           </table>

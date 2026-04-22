@@ -113,6 +113,7 @@
 .badge-secretaria_de_alumnos { background: rgba(6, 182, 212, 0.2); color: #cffafe; border: 1px solid #06b6d4; }
 .badge-danger { background: var(--danger); color: white; border: none; }
 .badge-warning { background: #f39c12; color: white; border: none; }
+.badge-never { background: #f1c40f; color: #000; border: none; font-weight: 700; }
 
 /* MultiSelect Styles (used in StudentManager/AcademicManager) */
 .multi-select {

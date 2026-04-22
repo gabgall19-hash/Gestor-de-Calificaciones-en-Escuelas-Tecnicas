@@ -815,22 +815,27 @@ async function handleStudents(env, request, userId, body) {
     const student = await env.DB.prepare('SELECT * FROM alumnos WHERE id = ?').bind(studentId).first();
     if (!student) throw new Error('Alumno no encontrado');
 
+    const noAsiste = !!body.noAsiste;
+    const finalInstitucion = noAsiste ? 'NUNCA ASISTIO' : body.institucion;
+    const finalEstado = noAsiste ? 'NUNCA ASISTIO' : 'En Proceso de Pase';
+
     // 1. Insert into pases with course_id_origen
     const finalMotivo = body.motivo?.trim() || '...';
     await env.DB.prepare(
       `INSERT INTO pases (alumno_id, nombre_apellido, dni, institucion_destino, fecha_pase, motivo, course_id_origen, estado)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(studentId, `${student.apellido}, ${student.nombre}`, student.dni, body.institucion, body.fecha, finalMotivo, student.course_id, 'De pase').run();
+    ).bind(studentId, `${student.apellido}, ${student.nombre}`, student.dni, finalInstitucion, body.fecha, finalMotivo, student.course_id, finalEstado).run();
 
     // 2. Update student: Set estado = 0, course_id = NULL, and add marker to observations
-    const marker = "**DADO DE PASE**";
-    const lines = (student.observaciones || "").split("\n").filter(l => !l.startsWith(marker));
-    lines.push(`${marker} en ${body.institucion} en la Fecha: ${body.fecha}. Motivo: ${finalMotivo}`);
+    const marker = noAsiste ? "**NUNCA ASISTIO**" : "**DADO DE PASE**";
+    // Eliminamos cualquier marcador previo de pase o nunca asistió para evitar duplicados
+    const lines = (student.observaciones || "").split("\n").filter(l => !l.startsWith("**DADO DE PASE**") && !l.startsWith("**NUNCA ASISTIO**"));
+    lines.push(`${marker} en ${finalInstitucion} en la Fecha: ${body.fecha}. Motivo: ${finalMotivo}`);
 
     await env.DB.prepare('UPDATE alumnos SET course_id = NULL, estado = 0, observaciones = ? WHERE id = ?').bind(lines.join("\n").trim(), studentId).run();
 
     // Audit Log for Pass
-    await logHistory(env, userId, student.course_id, 'pase_alumno', `${student.apellido}, ${student.nombre} ha sido dado de pase.`, studentId);
+    await logHistory(env, userId, student.course_id, 'pase_alumno', `${student.apellido}, ${student.nombre} ha sido dado de pase (${finalEstado}).`, studentId);
 
     return json({ success: true });
   }
@@ -897,8 +902,7 @@ async function handleStudents(env, request, userId, body) {
     if (pase) {
       const student = await env.DB.prepare('SELECT observaciones FROM alumnos WHERE id = ?').bind(pase.alumno_id).first();
       if (student) {
-        const marker = "**DADO DE PASE**";
-        const newObs = (student.observaciones || "").split("\n").filter(l => !l.startsWith(marker)).join("\n").trim();
+        const newObs = (student.observaciones || "").split("\n").filter(l => !l.startsWith("**DADO DE PASE**") && !l.startsWith("**NUNCA ASISTIO**")).join("\n").trim();
         // Restaurar curso y estado activo
         await env.DB.prepare('UPDATE alumnos SET course_id = ?, estado = 1, observaciones = ? WHERE id = ?').bind(pase.course_id_origen, newObs, pase.alumno_id).run();
         

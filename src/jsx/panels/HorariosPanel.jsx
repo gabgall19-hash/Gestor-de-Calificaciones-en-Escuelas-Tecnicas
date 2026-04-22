@@ -320,8 +320,8 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses }) =
                                 <input 
                                   type="text" 
                                   className="input-teacher" 
-                                  placeholder="Profesor"
-                                  value={row.days?.[day]?.teacher || ''} 
+                                  placeholder="Profesor..."
+                                  value={row.days?.[day]?.teacher ? (row.days[day].teacher.startsWith('Prof.') ? row.days[day].teacher : (isAdmin ? row.days[day].teacher : 'Prof. ' + row.days[day].teacher)) : ''} 
                                   readOnly={!isAdmin}
                                   onChange={(e) => updateCell(rowIndex, day, 'teacher', e.target.value)}
                                 />
@@ -408,6 +408,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses }) =
         .print-only { display: none; }
 
         @media print {
+          @page { size: landscape; }
           .no-print, .print-hide { display: none !important; }
           .print-only { display: block !important; }
           .horarios-panel { padding: 0; background: white; }

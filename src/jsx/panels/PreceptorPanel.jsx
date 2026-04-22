@@ -232,7 +232,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           </div>
         </div>
         <div style={{ textAlign: 'right', flex: 1, paddingRight: '1rem' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Bienvenido, {user.nombre}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Bienvenido, {user.rol === 'profesor' ? `Prof. ${user.nombre}` : user.nombre}</p>
           {currentCourse && <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Curso: {currentCourse.year_nombre} · {currentCourse.label}</p>}
           {status && <p className="panel-status" style={{ display: 'inline-block', marginTop: '0.25rem' }}>{status}</p>}
         </div>

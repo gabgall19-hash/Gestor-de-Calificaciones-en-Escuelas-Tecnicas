@@ -6,7 +6,7 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 30;
 
-  const [viewMode, setViewMode] = React.useState('global'); // 'global' or 'course'
+  const [viewMode, setViewMode] = React.useState('course'); // 'course' or 'global'
 
   const filteredPases = data.pases.filter(p => {
     const matchesSearch = `${p.nombre_apellido} ${p.dni} ${p.institucion_destino}`.toLowerCase().includes(pasesSearch.toLowerCase());
@@ -23,32 +23,22 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
 
   return (
     <section className="page-section">
-      <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <ArrowRightLeft size={16} />
-          <h2>Gestión de Pases de Alumnos</h2>
-        </div>
-        <div className="view-toggle" style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <button 
-            className={`toggle-btn ${viewMode === 'course' ? 'active' : ''}`} 
-            onClick={() => setViewMode('course')}
-            style={{ padding: '4px 12px', fontSize: '0.75rem', borderRadius: '6px', border: 'none', background: viewMode === 'course' ? 'var(--accent-primary)' : 'transparent', color: 'white', cursor: 'pointer' }}
-          >
-            Por Curso
-          </button>
-          <button 
-            className={`toggle-btn ${viewMode === 'global' ? 'active' : ''}`} 
-            onClick={() => setViewMode('global')}
-            style={{ padding: '4px 12px', fontSize: '0.75rem', borderRadius: '6px', border: 'none', background: viewMode === 'global' ? 'var(--accent-primary)' : 'transparent', color: 'white', cursor: 'pointer' }}
-          >
-            Global
-          </button>
-        </div>
-      </div>
+      <div className="section-title"><ArrowRightLeft size={16} /><h2>Gestión de Pases de Alumnos</h2></div>
       <div className="management-card" style={{ marginTop: '1rem' }}>
-        <div style={{ marginBottom: '1.5rem', position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
-          <input className="input-field" placeholder="Buscar en historial de pases..." value={pasesSearch} onChange={(e) => setPasesSearch(e.target.value)} style={{ paddingLeft: '45px' }} />
+        <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '8px' }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Search size={18} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+            <input className="input-field" placeholder={viewMode === 'global' ? "Buscar en historial global de pases..." : "Buscar pases en este curso..."} value={pasesSearch} onChange={(e) => setPasesSearch(e.target.value)} style={{ paddingLeft: '45px' }} />
+          </div>
+          <select 
+            className="input-field" 
+            style={{ width: 'auto', minWidth: '120px' }}
+            value={viewMode}
+            onChange={(e) => setViewMode(e.target.value)}
+          >
+            <option value="course">Por Curso</option>
+            <option value="global">Global</option>
+          </select>
         </div>
         <div className="table-container">
           <table className="grades-table">
@@ -71,9 +61,17 @@ const PasesPanel = ({ user, data, pasesSearch, setPasesSearch, setEditingPase, u
                   <td style={{ fontSize: '0.8rem' }}>
                     {p.course_label ? `${p.course_label} (${p.year_nombre || '---'})` : (p.course_id_origen === 0 ? 'Importado (Sin curso)' : '---')}
                   </td>
-                  <td>{p.institucion_destino}</td>
+                  <td>{p.institucion_destino === 'NUNCA ASISTIO' ? 'SABANA 2026' : p.institucion_destino}</td>
                   <td>{p.fecha_pase}</td>
-                  <td><span className={`badge ${p.estado === 'De pase' ? 'badge-danger' : 'badge-warning'}`}>{p.estado || 'De pase'}</span></td>
+                  <td>
+                    {p.institucion_destino === 'NUNCA ASISTIO' ? (
+                      <span className="badge badge-never">NUNCA ASISTIO</span>
+                    ) : (
+                      <span className={`badge ${p.estado === 'En Proceso de Pase' ? 'badge-warning' : 'badge-danger'}`}>
+                        {p.estado === 'En Proceso de Pase' ? 'Proceso de Pase' : (p.estado || 'De Pase')}
+                      </span>
+                    )}
+                  </td>
                   <td>
                     <div style={{ display: 'flex', gap: '0.4rem' }}>
                       {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol) && <button className="icon-btn" onClick={() => setEditingPase(p)} title="Editar Pase"><Wrench size={14} /></button>}

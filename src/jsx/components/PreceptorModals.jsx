@@ -260,6 +260,15 @@ export default function PreceptorModals(props) {
           <form className="stack-form" onSubmit={execPase}>
             <input className="input-field" placeholder="Institución Destino" value={paseForm.institucion} onChange={(e) => setPaseForm((prev) => ({ ...prev, institucion: e.target.value }))} required />
             <input className="input-field" placeholder="Fecha (dd/mm/aaaa)" value={paseForm.fecha} onChange={(e) => setPaseForm((prev) => ({ ...prev, fecha: e.target.value }))} required />
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={paseForm.noAsiste || false}
+                onChange={(e) => setPaseForm((prev) => ({ ...prev, noAsiste: e.target.checked }))}
+                style={{ width: '18px', height: '18px' }}
+              />
+              <span style={{ fontSize: '0.9rem' }}>El alumno <strong>NO registra asistencia</strong> (Nunca asistió)</span>
+            </label>
             <textarea className="input-field" placeholder="Motivo del pase (Opcional)" value={paseForm.motivo} onChange={(e) => setPaseForm((prev) => ({ ...prev, motivo: e.target.value }))} rows="3" />
             <button className="btn btn-primary" type="submit" style={{ background: 'var(--success)' }}><GraduationCap size={16} /> Confirmar Pase</button>
           </form>
