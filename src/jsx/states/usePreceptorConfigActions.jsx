@@ -68,6 +68,16 @@ export default function usePreceptorConfigActions(deps) {
     }
   };
 
+  const handleUpdatePasswordMsg = async (msg) => {
+    try {
+      await post('config', { action: 'update_password_msg', valor: msg });
+      showToast('Mensaje de contraseña actualizado', 'success');
+      await loadData(selectedCourseId, selectedYearId);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const savePrevia = async (previaData) => {
     try {
       await post('previas', ...[{ ...previaData, userId: user.id }]);
@@ -139,6 +149,7 @@ export default function usePreceptorConfigActions(deps) {
     handleUpdateMobileLogin,
     handleUpdateRACModular,
     handleUpdatePreceptorMode,
+    handleUpdatePasswordMsg,
     savePrevia,
     deletePrevia,
     handleUpdatePeriods,

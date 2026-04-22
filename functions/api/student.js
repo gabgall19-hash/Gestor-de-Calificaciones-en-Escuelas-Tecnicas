@@ -48,7 +48,11 @@ export async function onRequestGet({ env, request }) {
     // Lógica de validación de contraseña (Bypass si es staff)
     if (!isStaffRequest) {
       if (!alumno.password || alumno.password.trim() === "") {
-        return new Response(JSON.stringify({ error: "PASSWORD_NOT_SET" }), { status: 403 });
+        const customMsg = await env.DB.prepare("SELECT valor FROM ajustes WHERE clave = 'password_not_set_msg'").first();
+        return new Response(JSON.stringify({ 
+          error: "PASSWORD_NOT_SET",
+          custom_message: customMsg ? customMsg.valor : null
+        }), { status: 403 });
       }
 
       if (alumno.password !== providedPassword) {

@@ -351,6 +351,13 @@ async function handleConfig(env, request, userId, body) {
     return json({ success: true });
   }
 
+  if (action === 'update_password_msg') {
+    await env.DB.prepare('INSERT OR REPLACE INTO ajustes (clave, valor) VALUES (?, ?)')
+      .bind('password_not_set_msg', valor)
+      .run();
+    return json({ success: true });
+  }
+
   return json({ error: 'Accion no soportada' }, 400);
 }
 

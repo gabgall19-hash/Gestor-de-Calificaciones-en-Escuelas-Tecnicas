@@ -42,6 +42,7 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [customMsg, setCustomMsg] = useState(null);
 
   useEffect(() => {
     // Limpiar DNI de puntos o espacios antes de la consulta
@@ -59,8 +60,12 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
     fetch(`/api/student?dni=${cleanDNI}&password=${password || ''}`, { headers })
       .then(res => res.json())
       .then(json => {
-        if (json.error) setError(json.error);
-        else setData(json);
+        if (json.error) {
+          setError(json.error);
+          if (json.custom_message) setCustomMsg(json.custom_message);
+        } else {
+          setData(json);
+        }
         setLoading(false);
       })
       .catch(err => {
@@ -76,9 +81,10 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
         <div style={{ color: '#ef4444', padding: '1rem', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)' }}>
           <AlertCircle size={40} style={{ marginBottom: '1rem' }} />
           <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Contraseña no definida</h2>
-          <p style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>
-            Solicite la contraseña mediante atención directa en el horario de <b>8:00 a 13:00 de Lunes a Viernes</b>.
-          </p>
+          <p 
+            style={{ fontSize: '0.95rem', lineHeight: '1.5' }}
+            dangerouslySetInnerHTML={{ __html: customMsg || 'Solicite la contraseña mediante atención directa en el horario de <b>8:00 a 13:00 de Lunes a Viernes</b>.' }}
+          />
         </div>
       ) : (
         <p style={{ color: 'var(--danger)', marginBottom: '1.5rem', fontSize: '1.1rem' }}>{error}</p>

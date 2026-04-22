@@ -16,6 +16,7 @@ const SettingsPanel = ({
   prepareEditCourse, toggleCourseActive,
   handleUpdateMobileLogin, handleResetPassword,
   handleUpdateRACModular,
+  handleUpdatePasswordMsg,
   setYearAsCurrent, copyYearInfo, startEndCycle
 }) => {
   const [userSearch, setUserSearch] = React.useState('');
@@ -395,6 +396,34 @@ const SettingsPanel = ({
                 onClick={() => handleUpdateRACModular(data.config.rac_modular_enabled === 'true' ? 'false' : 'true')}
               >
                 {data.config.rac_modular_enabled === 'true' ? 'Activado' : 'Desactivado'}
+              </button>
+            </div>
+          </div>
+
+          {/* Mensaje de Contraseña no Definida */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '0.8rem', gridColumn: isMobile ? 'auto' : 'span 2' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Unlock size={16} style={{ color: 'var(--primary)' }} />
+              <h3 style={{ fontSize: '1rem', color: 'var(--primary)', margin: 0 }}>Mensaje de "Contraseña no definida"</h3>
+            </div>
+            <p style={{ fontSize: '0.75rem', opacity: 0.6, margin: 0 }}>Este texto aparecerá cuando un alumno intente entrar a su boletín sin haber configurado una clave previa.</p>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              <textarea 
+                className="input-field" 
+                style={{ flex: 1, minHeight: '80px', fontSize: '0.85rem', lineHeight: '1.4', padding: '12px' }}
+                placeholder="Ej: Solicite la contraseña mediante atención directa en el horario de 8:00 a 13:00 de Lunes a Viernes."
+                defaultValue={data.config.password_not_set_msg || ''}
+                id="password-msg-input"
+              />
+              <button 
+                className="btn btn-primary" 
+                style={{ alignSelf: 'stretch', padding: '0 1.5rem' }}
+                onClick={() => {
+                  const val = document.getElementById('password-msg-input').value;
+                  handleUpdatePasswordMsg(val);
+                }}
+              >
+                Guardar
               </button>
             </div>
           </div>
