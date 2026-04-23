@@ -186,9 +186,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
 
   const tabs = useMemo(() => {
     const list = [];
-    if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
-      list.push({ id: 'asistencia', label: 'Asistencia', icon: <Calendar size={16} /> });
-    }
+    list.push({ id: 'asistencia', label: 'Asistencia', icon: <Calendar size={16} /> });
     list.push({ id: 'grades', label: 'Notas', icon: <ClipboardList size={16} /> });
     if (user.rol !== 'profesor') list.push({ id: 'materias', label: 'Materias', icon: <Book size={16} /> });
     if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
@@ -453,6 +451,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       {page === 'asistencia' && (
         <AttendancePanel
           data={data}
+          user={user}
           selectedCourseId={selectedCourseId}
           apiService={{ get, post }}
           showToast={showToast}

@@ -11,7 +11,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
   const location = useLocation();
   const navigate = useNavigate();
   const pathSegments = location.pathname.split('/');
-  const page = pathSegments[2] || 'grades';
+  const page = pathSegments[2] || (user.rol === 'preceptor' ? 'asistencia' : 'grades');
   const setPage = (newPage) => navigate(`/dashboard/${newPage}`);
 
   const [data, setData] = useState(null);

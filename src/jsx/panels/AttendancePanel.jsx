@@ -3,13 +3,18 @@ import { Save, Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, Chevro
 import { TableSkeleton } from '../UI/Skeleton';
 import '../../css/AttendancePanel.css';
 
-const AttendancePanel = ({ data, selectedCourseId, apiService, showToast, isMobile, onPrintInformacion }) => {
+const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, isMobile, onPrintInformacion }) => {
   const [loading, setLoading] = useState(false);
   const [attendance, setAttendance] = useState({}); // { studentId|date: value }
   const [pending, setPending] = useState({}); // { studentId|date: value }
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileDayIndex, setMobileDayIndex] = useState(-1);
+  
+  const canEdit = useMemo(() => {
+    const editRoles = ['preceptor', 'admin', 'jefe_de_auxiliares', 'secretaria_de_alumnos', 'director', 'vicedirector'];
+    return editRoles.includes(user.rol);
+  }, [user.rol]);
 
   // Generate months for selector (March to December 2026)
   const monthOptions = useMemo(() => {
@@ -124,6 +129,7 @@ const AttendancePanel = ({ data, selectedCourseId, apiService, showToast, isMobi
   }, [selectedCourseId, selectedMonth]);
 
   const handleCellChange = (alumnoId, day, value) => {
+    if (!canEdit) return;
     const val = value.toUpperCase().trim();
     
     // Validation logic: Allow empty, "P", "A", or "AJ"
@@ -147,7 +153,7 @@ const AttendancePanel = ({ data, selectedCourseId, apiService, showToast, isMobi
   };
 
   const handleCellClick = (alumnoId, day) => {
-    if (!isMobile) return;
+    if (!isMobile || !canEdit) return;
     
     const currentVal = getCellValue(alumnoId, day);
     let nextVal = '';
@@ -287,7 +293,7 @@ const AttendancePanel = ({ data, selectedCourseId, apiService, showToast, isMobi
             <button 
               className={`btn btn-primary btn-save ${hasPendingChanges ? 'btn-shake' : ''}`} 
               onClick={saveChanges}
-              disabled={loading || !hasPendingChanges}
+              disabled={loading || !hasPendingChanges || !canEdit}
               style={{
                 transition: 'all 0.3s ease',
                 background: !hasPendingChanges ? 'rgba(16, 185, 129, 0.2)' : 'var(--primary)',
@@ -349,10 +355,10 @@ const AttendancePanel = ({ data, selectedCourseId, apiService, showToast, isMobi
                             className={getInputClass(val)}
                             value={val}
                             onChange={(e) => handleCellChange(student.id, d.day, e.target.value)}
-                            readOnly={isMobile}
+                            readOnly={isMobile || !canEdit}
                             maxLength={2}
                             autoComplete="off"
-                            style={isMobile ? { pointerEvents: 'none' } : {}}
+                            style={(isMobile || !canEdit) ? { pointerEvents: 'none' } : {}}
                           />
                         </td>
                       );
