@@ -1,7 +1,7 @@
 ﻿import React, { useState } from 'react';
-import { Megaphone, Plus, Trash2, Edit2, CheckCircle, XCircle, Video, Type } from 'lucide-react';
+import { Megaphone, Plus, Trash2, Edit2, CheckCircle, XCircle } from 'lucide-react';
 
-const AnunciosPanel = ({ data, post, loadData }) => {
+const AnunciosPanel = ({ data, post, loadData, isMobile }) => {
   const [editingAnuncio, setEditingAnuncio] = useState(null);
   const [anuncioForm, setAnuncioForm] = useState({ titulo: '', contenido: '', activo: 1 });
 
@@ -34,7 +34,7 @@ const AnunciosPanel = ({ data, post, loadData }) => {
     <section className="page-section">
       <div className="section-title"><Megaphone size={16} /><h2>Tablón de Anuncios Institucionales</h2></div>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '2rem', marginTop: '1rem' }}>
         {/* Formulario */}
         <div className="management-card">
           <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>

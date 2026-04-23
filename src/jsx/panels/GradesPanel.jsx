@@ -8,19 +8,38 @@ const GradesPanel = ({
   data, user, pending, loading, viewMode, setViewMode, 
   notesSearch, setNotesSearch, 
   previewDni, setPreviewDni,
-  selectedSubjectId, setSelectedSubjectId,
+  selectedSubjectId,
   selectedPeriod, setSelectedPeriod,
   isMobile, updateCell, gradeValue, saveGrades,
   filteredSubjects, getSubjectUnits, rotationFilteredStudents,
   setShowNomenclaturaModal, setEditingObsStudent
 }) => {
+  const isGroupedSubjectView = viewMode === 'bySubject' || viewMode === 'taller';
+  const selectedSubject = filteredSubjects.find((subject) => subject.id === selectedSubjectId) || filteredSubjects[0];
+  const isSelectedModular = (selectedSubject?.tipo || '').toLowerCase().includes('modular');
+  const isMobileGroupedSubjectView = isMobile && isGroupedSubjectView;
+  const isMobileFinalPeriod = [7, 8, 9, 10, 11].includes(selectedPeriod);
+  const selectedTrimesterPeriod = [2, 4, 6].includes(selectedPeriod) ? selectedPeriod : 2;
+  const selectedTrimesterNumber = selectedTrimesterPeriod / 2;
+  const isDesktopSimpleSparseView = !isMobile && !isGroupedSubjectView && filteredSubjects.length > 0 && filteredSubjects.length <= 8;
+  const mobilePeriodOptions = [
+    { value: 2, label: '1° Trimestre' },
+    { value: 4, label: '2° Trimestre' },
+    { value: 6, label: '3° Trimestre' },
+    { value: 10, label: 'Calificación Final' }
+  ];
+  const mobileGroupedColumnCount = isMobileFinalPeriod ? 5 : (isSelectedModular ? 3 : 2);
+  const saveDisabled = isMobileGroupedSubjectView
+    ? Object.keys(pending).length === 0
+    : (Object.keys(pending).length === 0 && !previewDni.trim());
+
   return (
     <section className="page-section">
       <div className="section-title">
         <ClipboardList size={16} />
         <h2>
           {viewMode === 'taller' ? 'Calificaciones de Taller' : 'Calificaciones del curso'}
-          {(viewMode === 'bySubject' || viewMode === 'taller') && (
+          {!isMobile && isGroupedSubjectView && (
             <> · {(filteredSubjects.find(s => s.id === selectedSubjectId) || filteredSubjects[0])?.nombre || ''}</>
           )}
         </h2>
@@ -38,7 +57,7 @@ const GradesPanel = ({
       <div className="section-toolbar-compact" style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginBottom: '0.8rem', flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
         
         {/* Selector de Modo (Tabs) - Primero en movil */}
-        <div style={{ width: isMobile ? '100%' : 'auto', display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start' }}>
+        <div style={{ width: isMobile ? '100%' : 'auto', display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', flex: isMobile ? 'none' : 1 }}>
           <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="view-selector">
               {user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && (
@@ -66,20 +85,35 @@ const GradesPanel = ({
           display: 'flex', 
           gap: '8px', 
           alignItems: 'center',
-          justifyContent: isMobile ? 'space-between' : 'flex-start',
+          justifyContent: isMobile ? 'space-between' : 'flex-end',
           flexWrap: isMobile ? 'nowrap' : 'wrap'
         }}>
-          <div className="preview-inline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>DNI:</span>
-            <input type="text" value={previewDni} onChange={(e) => setPreviewDni(e.target.value)} className="input-field compact-inline-input" placeholder="..." style={{ padding: '0.5rem 0.6rem', width: isMobile ? '100px' : '110px' }} />
+          <div className="preview-inline" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '10px', flex: isMobileGroupedSubjectView ? 1 : 'none', minWidth: 0 }}>
+            {isMobileGroupedSubjectView ? (
+              <select
+                className="input-field compact-inline-input"
+                value={isMobileFinalPeriod ? 10 : selectedTrimesterPeriod}
+                onChange={(e) => setSelectedPeriod(Number(e.target.value))}
+                style={{ padding: '0.5rem 0.6rem', width: '100%' }}
+              >
+                {mobilePeriodOptions.map((period) => (
+                  <option key={period.value} value={period.value}>{period.label}</option>
+                ))}
+              </select>
+            ) : (
+              <>
+                <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>DNI:</span>
+                <input type="text" value={previewDni} onChange={(e) => setPreviewDni(e.target.value)} className="input-field compact-inline-input" placeholder="..." style={{ padding: '0.5rem 0.6rem', width: isMobile ? '100px' : '96px' }} />
+              </>
+            )}
           </div>
-          <button className="btn btn-primary" onClick={saveGrades} disabled={Object.keys(pending).length === 0 && !previewDni.trim()} style={{ whiteSpace: 'nowrap', flex: isMobile ? 1 : 'none', padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}>
+          <button className="btn btn-primary" onClick={saveGrades} disabled={saveDisabled} style={{ whiteSpace: 'nowrap', flex: isMobile ? 1 : 'none', padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}>
             <Save size={16} /> {isMobile ? 'Guardar' : 'Guardar Cambios'}
           </button>
         </div>
 
         {/* Buscador - Ultimo en movil, justo encima del listado */}
-        <div style={{ width: '100%', marginTop: isMobile ? '0.2rem' : '0' }}>
+        <div style={{ width: '100%', marginTop: isMobile ? '0.2rem' : '0.15rem' }}>
           <input 
             type="text" 
             className="input-field" 
@@ -92,13 +126,16 @@ const GradesPanel = ({
       </div>
       
       <div className="table-container compact-table-container">
-        <table className="grades-table">
+        <table
+          className={`grades-table${isMobileGroupedSubjectView ? ' grades-table-mobile-grouped' : ''}${isMobileGroupedSubjectView && isSelectedModular && !isMobileFinalPeriod ? ' grades-table-mobile-grouped-modular' : ''}${isDesktopSimpleSparseView ? ' grades-table-simple-sparse' : ''}`}
+        >
           <colgroup>
-            <col style={{ width: '120px' }} />
-            {(viewMode === 'bySubject' || viewMode === 'taller') ? (() => {
-              const currentSub = filteredSubjects.find(s => s.id === selectedSubjectId) || filteredSubjects[0];
-              const sid = currentSub?.id;
-              const sub = currentSub;
+            <col style={{ width: isDesktopSimpleSparseView ? '180px' : '120px' }} />
+            {isGroupedSubjectView ? (() => {
+              if (isMobileGroupedSubjectView) {
+                return Array(mobileGroupedColumnCount).fill(null).map((_, i) => <col key={i} style={{ width: isMobileFinalPeriod ? '20%' : (isSelectedModular ? (i === 2 ? '34%' : '33%') : '50%') }} />);
+              }
+              const sub = selectedSubject;
               const isModular = (sub?.tipo || '').toLowerCase().includes('modular');
               const mode = data.config?.period_view_mode || 'completo';
               let colCount = 1; // Student name
@@ -106,19 +143,51 @@ const GradesPanel = ({
               else if (mode === 'orientadores') colCount += isModular ? 6 : 3;
               else if (mode === 'trimestrales') colCount += isModular ? 12 : 6;
               else if (mode === 'finales') colCount += 5;
-              return Array(colCount - 1).fill(null).map((_, i) => <col key={i} style={{ width: isModular ? (isMobile ? '35px' : '40px') : (isMobile ? '40px' : '55px') }} />);
+              return Array(colCount - 1).fill(null).map((_, i) => <col key={i} style={{ width: isModular ? (isMobile ? '35px' : '46px') : (isMobile ? '40px' : '55px') }} />);
             })() : (
               filteredSubjects.map((subject) => {
                 const units = getSubjectUnits(subject);
-                return Array(units).fill(null).map((_, i) => <col key={`${subject.id}-${i}`} style={{ width: isMobile ? '40px' : '50px' }} />);
+                return Array(units).fill(null).map((_, i) => <col key={`${subject.id}-${i}`} style={{ width: isMobile ? '40px' : (isDesktopSimpleSparseView ? `${Math.max(10, Math.floor(82 / filteredSubjects.length))}%` : '50px') }} />);
               })
             )}
           </colgroup>
           <thead>
-            {(viewMode === 'bySubject' || viewMode === 'taller') ? (() => {
-              const currentSub = filteredSubjects.find(s => s.id === selectedSubjectId) || filteredSubjects[0];
-              const sid = currentSub?.id;
-              const sub = currentSub;
+            {isGroupedSubjectView ? (() => {
+              if (isMobileGroupedSubjectView) {
+                return (
+                  <>
+                    <tr>
+                      <th rowSpan="2" className="student-column student-column-header">Apellido(s) y Nombre(s):</th>
+                      <th colSpan={mobileGroupedColumnCount} className="subject-header" style={{ borderBottom: `2px solid ${isMobileFinalPeriod ? '#e74c3c' : 'var(--primary)'}`, background: isMobileFinalPeriod ? 'rgba(231, 76, 60, 0.1)' : 'rgba(99, 102, 241, 0.08)' }}>
+                        {isMobileFinalPeriod ? 'Calificación Final' : `${selectedTrimesterNumber}° Trimestre`}
+                      </th>
+                    </tr>
+                    <tr>
+                      {isMobileFinalPeriod ? (
+                        <>
+                          <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Dic.</th>
+                          <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Feb.</th>
+                          <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Mar.</th>
+                          <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', fontSize: '0.6rem', borderBottom: '2px solid #e74c3c' }}>Otras Inst.</th>
+                          <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Def.</th>
+                        </>
+                      ) : isSelectedModular ? (
+                        <>
+                          <th className="cell-t">T</th>
+                          <th className="cell-p">P</th>
+                          <th className="cell-pond">Pond</th>
+                        </>
+                      ) : (
+                        <>
+                          <th className="cell-grade-header">{selectedTrimesterNumber}° Inf.</th>
+                          <th className="cell-grade-header">Nota</th>
+                        </>
+                      )}
+                    </tr>
+                  </>
+                );
+              }
+              const sub = selectedSubject;
               const isModular = (sub?.tipo || '').toLowerCase().includes('modular');
 
               if (isModular) {
@@ -136,13 +205,13 @@ const GradesPanel = ({
                       {(mode === 'completo' || mode === 'orientadores') && <th colSpan="2" className="cell-grade-header">1° {isMobile ? 'I' : 'Inf.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th colSpan="2" className="cell-grade-header">Nota</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header">{isMobile ? 'Pn' : 'Pond.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header" style={{ borderRight: '2px solid rgba(255,255,255,0.2)' }}>{isMobile ? 'Lt' : 'Letras'}</th>}
                       {(mode === 'completo' || mode === 'orientadores') && <th colSpan="2" className="cell-grade-header">2° {isMobile ? 'I' : 'Inf.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th colSpan="2" className="cell-grade-header">Nota</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header">{isMobile ? 'Pn' : 'Pond.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header" style={{ borderRight: '2px solid rgba(255,255,255,0.2)' }}>{isMobile ? 'Lt' : 'Letras'}</th>}
                       {(mode === 'completo' || mode === 'orientadores') && <th colSpan="2" className="cell-grade-header">3° {isMobile ? 'I' : 'Inf.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th colSpan="2" className="cell-grade-header">Nota</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header">{isMobile ? 'Pn' : 'Pond.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header" style={{ borderRight: '2px solid rgba(255,255,255,0.2)' }}>{isMobile ? 'Lt' : 'Letras'}</th>}
-                      {(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header">Dic.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header">Feb.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header">Mar.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.05)', fontSize: '0.6rem' }}>Otras Inst.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header">Def.</th>}
+                      {(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Dic.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Feb.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Mar.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', fontSize: '0.6rem', borderBottom: '2px solid #e74c3c' }}>Otras Inst.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', minWidth: '52px', borderBottom: '2px solid #e74c3c' }}>Def.</th>}
                     </tr>
                     <tr>
                       {(mode === 'completo' || mode === 'orientadores') && <><th className="cell-t">T</th><th className="cell-p">P</th></>}{(mode === 'completo' || mode === 'trimestrales') && <><th className="cell-t">T</th><th className="cell-p">P</th><th className="cell-pond"></th><th className="cell-letras" style={{ borderRight: '2px solid rgba(255,255,255,0.2)' }}></th></>}
                       {(mode === 'completo' || mode === 'orientadores') && <><th className="cell-t">T</th><th className="cell-p">P</th></>}{(mode === 'completo' || mode === 'trimestrales') && <><th className="cell-t">T</th><th className="cell-p">P</th><th className="cell-pond"></th><th className="cell-letras" style={{ borderRight: '2px solid rgba(255,255,255,0.2)' }}></th></>}
                       {(mode === 'completo' || mode === 'orientadores') && <><th className="cell-t">T</th><th className="cell-p">P</th></>}{(mode === 'completo' || mode === 'trimestrales') && <><th className="cell-t">T</th><th className="cell-p">P</th><th className="cell-pond"></th><th className="cell-letras" style={{ borderRight: '2px solid rgba(255,255,255,0.2)' }}></th></>}
-                      {(mode === 'completo' || mode === 'finales') && <><th></th><th></th><th></th><th></th><th></th></>}
+                      {(mode === 'completo' || mode === 'finales') && <><th className="cell-final-spacer"></th><th className="cell-final-spacer"></th><th className="cell-final-spacer"></th><th className="cell-final-spacer"></th><th className="cell-final-spacer"></th></>}
                     </tr>
                   </>
                 );
@@ -162,7 +231,7 @@ const GradesPanel = ({
                     {(mode === 'completo' || mode === 'orientadores') && <th className="cell-grade-header">1° {isMobile ? 'I' : 'Inf.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header">Nota</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header" style={{ color: 'var(--primary)', borderRight: '2px solid rgba(255,255,255,0.2)' }}>{isMobile ? 'Lt' : 'Letras'}</th>}
                     {(mode === 'completo' || mode === 'orientadores') && <th className="cell-grade-header">2° {isMobile ? 'I' : 'Inf.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header">Nota</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header" style={{ color: 'var(--primary)', borderRight: '2px solid rgba(255,255,255,0.2)' }}>{isMobile ? 'Lt' : 'Letras'}</th>}
                     {(mode === 'completo' || mode === 'orientadores') && <th className="cell-grade-header">3° {isMobile ? 'I' : 'Inf.'}</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header">Nota</th>}{(mode === 'completo' || mode === 'trimestrales') && <th className="cell-grade-header" style={{ color: 'var(--primary)', borderRight: '2px solid rgba(255,255,255,0.2)' }}>{isMobile ? 'Lt' : 'Letras'}</th>}
-                    {(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header">Dic.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header">Feb.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header">Mar.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.05)', fontSize: '0.6rem' }}>Otras Inst.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ fontWeight: 'bold' }}>Def.</th>}
+                    {(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Dic.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Feb.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', borderBottom: '2px solid #e74c3c' }}>Mar.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', fontSize: '0.6rem', borderBottom: '2px solid #e74c3c' }}>Otras Inst.</th>}{(mode === 'completo' || mode === 'finales') && <th className="cell-grade-header" style={{ background: 'rgba(231, 76, 60, 0.12)', minWidth: '52px', fontWeight: 'bold', borderBottom: '2px solid #e74c3c' }}>Def.</th>}
                   </tr>
                 </>
               );
@@ -171,7 +240,7 @@ const GradesPanel = ({
                 <tr>
                   <th rowSpan="2" className="student-column student-column-header">Apellido(s) y Nombre(s):</th>
                   {filteredSubjects.map((subject) => (
-                    <th key={subject.id} colSpan={getSubjectUnits(subject)} className="subject-header" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.15)', borderBottom: '2px solid #3498db' } : {}}>
+                    <th key={subject.id} colSpan={getSubjectUnits(subject)} className="subject-header" style={subject.es_taller === 1 ? { background: 'rgba(52, 152, 219, 0.15)', borderBottom: '2px solid #3498db' } : { borderBottom: '2px solid var(--primary)', background: 'rgba(99, 102, 241, 0.1)' }}>
                       {subject.es_taller === 1 && <div style={{ fontSize: '0.6rem', color: '#3498db', marginBottom: '4px', fontWeight: '900', letterSpacing: '0.05em' }}>TALLER</div>}
                       {truncateSubject(subject.nombre, isMobile)}
                     </th>
@@ -206,7 +275,7 @@ const GradesPanel = ({
                   No se encontraron alumnos para el criterio seleccionado.
                 </td>
               </tr>
-            ) : rotationFilteredStudents.map((student, idx) => {
+            ) : rotationFilteredStudents.map((student) => {
               const isTransfer = student.observaciones?.toLowerCase().includes('transferido de');
               
               return (
@@ -238,9 +307,9 @@ const GradesPanel = ({
                     </div>
                   </td>
 
-                  {(viewMode === 'bySubject' || viewMode === 'taller') ? (
+                  {isGroupedSubjectView ? (
                     (() => {
-                      const currentSub = filteredSubjects.find(s => s.id === selectedSubjectId) || filteredSubjects[0];
+                      const currentSub = selectedSubject;
                       const sid = currentSub?.id;
                       if (!sid) return <td colSpan="13">No hay materias vinculadas</td>;
                       const isModular = (currentSub?.tipo || '').toLowerCase().includes('modular');
@@ -257,6 +326,61 @@ const GradesPanel = ({
                         const val = gradeValue(student.id, sid, f, pId);
                         return val && Number(String(val).replace(',','.')) >= 7;
                       };
+
+                      if (isMobileGroupedSubjectView) {
+                        const trimesterInfoPeriod = selectedTrimesterNumber * 2 - 1;
+                        const trimesterGradePeriod = selectedTrimesterNumber * 2;
+                        const isPeriodLocked = (periodId) => isLocked || (data.locks || []).some((lock) => lock.materia_id === sid && lock.periodo_id === periodId);
+
+                        if (isMobileFinalPeriod) {
+                          return (
+                            <>
+                              <td className="cell-t">
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_t', 7) || ''} disabled={isPeriodLocked(7) || isPassed(6) || isPassed(8) || isPassed(9) || isPassed(11)} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, 7, 'valor_t', v); }} />
+                              </td>
+                              <td className="cell-t">
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_t', 8) || ''} disabled={isPeriodLocked(8) || isPassed(6) || isPassed(7) || isPassed(9) || isPassed(11)} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, 8, 'valor_t', v); }} />
+                              </td>
+                              <td className="cell-t">
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_t', 9) || ''} disabled={isPeriodLocked(9) || isPassed(6) || isPassed(7) || isPassed(8) || isPassed(11)} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, 9, 'valor_t', v); }} />
+                              </td>
+                              <td className="cell-t">
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_t', 11) || ''} disabled={isPeriodLocked(11) || isPassed(6) || isPassed(7) || isPassed(8) || isPassed(9)} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, 11, 'valor_t', v); }} />
+                              </td>
+                              <td className="cell-t">
+                                <input type="text" className="cell-input" inputMode="decimal" style={{ fontWeight: 'bold' }} value={gradeValue(student.id, sid, 'valor_t', 10) || ''} disabled={isPeriodLocked(10) || !isTallerSimple} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, 10, 'valor_t', v); }} />
+                              </td>
+                            </>
+                          );
+                        }
+
+                        if (isModular) {
+                          return (
+                            <>
+                              <td className="cell-t">
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_t', trimesterGradePeriod) || ''} disabled={isPeriodLocked(trimesterGradePeriod) || (trimesterGradePeriod === 6 && (isPassed(7) || isPassed(8) || isPassed(9) || isPassed(11)))} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, trimesterGradePeriod, 'valor_t', v); }} />
+                              </td>
+                              <td className="cell-p">
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_p', trimesterGradePeriod) || ''} disabled={isPeriodLocked(trimesterGradePeriod) || (trimesterGradePeriod === 6 && (isPassed(7) || isPassed(8) || isPassed(9) || isPassed(11)))} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, trimesterGradePeriod, 'valor_p', v); }} />
+                              </td>
+                              <td className="cell-pond">
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_pond', trimesterGradePeriod) || ''} disabled={isPeriodLocked(trimesterGradePeriod) || (trimesterGradePeriod === 6 && (isPassed(7) || isPassed(8) || isPassed(9) || isPassed(11)))} onChange={(e) => { const v = e.target.value; if (v !== '' && isNaN(v)) return; updateCell(student.id, sid, trimesterGradePeriod, 'valor_pond', v); }} />
+                              </td>
+                            </>
+                          );
+                        }
+
+                        return (
+                          <>
+                            <td className="cell-t">
+                              <input type="text" className="cell-input" value={gradeValue(student.id, sid, 'valor_t', trimesterInfoPeriod) || ''} disabled={isPeriodLocked(trimesterInfoPeriod)} onChange={(e) => { const v = e.target.value; if (v !== '' && !/^[A-Za-z]+$/.test(v)) return; updateCell(student.id, sid, trimesterInfoPeriod, 'valor_t', v.toUpperCase()); }} />
+                            </td>
+                            <td className="cell-t">
+                              <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_t', trimesterGradePeriod) || ''} disabled={isPeriodLocked(trimesterGradePeriod) || (trimesterGradePeriod === 6 && (isPassed(7) || isPassed(8) || isPassed(9) || isPassed(11)))} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, trimesterGradePeriod, 'valor_t', v); }} />
+                            </td>
+                          </>
+                        );
+                      }
 
                       if (isModular) {
                         return (

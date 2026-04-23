@@ -186,10 +186,21 @@ th {
   flex-wrap: wrap;
 }
 
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
 .compact-select {
   width: auto;
   min-width: 220px;
   padding: 0.55rem 0.75rem;
+}
+
+.panel-filters .label {
+  font-size: 0.76rem;
+  white-space: nowrap;
 }
 
 .panel-stats {
@@ -228,7 +239,7 @@ th {
 }
 
 .preview-inline {
-  min-width: 220px;
+  min-width: 0;
 }
 
 .compact-inline-input {

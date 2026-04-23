@@ -1,23 +1,22 @@
 import React from 'react';
 import { Users, Settings, Plus, Eye, Wrench, Trash2, Smartphone, Unlock, Lock, Copy, BookOpen, Check, ArrowUpCircle, AlertTriangle } from 'lucide-react';
-import { simplifyTecName } from '../functions/PreceptorHelpers';
 
 const SettingsPanel = ({ 
   user, data, isMobile,
-  editingUserId, setEditingUserId,
-  userForm, setUserForm, emptyUser,
+  setEditingUserId,
+  setUserForm, emptyUser,
   yearForm, setYearForm,
   activeTecId, setActiveTecId,
   startEditUser, deleteUser, setViewingProf,
   handleUpdateSystemMode, handleUpdatePeriods,
   handleUpdatePreceptorMode,
-  addYear, editYear, deleteYear,
+  addYear, editYear,
   startCreateTec, startEditTec, duplicateTec, removeTec,
   prepareEditCourse, toggleCourseActive,
-  handleUpdateMobileLogin, handleResetPassword,
+  handleUpdateMobileLogin,
   handleUpdateRACModular,
   handleUpdatePasswordMsg,
-  setYearAsCurrent, copyYearInfo, startEndCycle
+  setYearAsCurrent, copyYearInfo
 }) => {
   const [userSearch, setUserSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -231,7 +230,7 @@ const SettingsPanel = ({
         </div>
       </section>
 
-      <section className="management-card" style={{ gridColumn: 'span 2' }}>
+      <section className="management-card" style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
         <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <BookOpen size={16} />
@@ -324,7 +323,7 @@ const SettingsPanel = ({
         </div>
       </section>
 
-      <section className="management-card" style={{ gridColumn: 'span 2' }}>
+      <section className="management-card" style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
         <div className="section-title">
           <Smartphone size={16} />
           <h2>Otras Opciones</h2>

@@ -22,6 +22,8 @@
   position: sticky;
   top: 0;
   z-index: 1;
+  background: #0f172a;
+  background-clip: padding-box;
 }
 
 .student-column,
@@ -44,6 +46,8 @@
   word-break: break-word;
   line-height: 1.2;
   font-size: 0.74rem;
+  background: #0f172a !important;
+  z-index: 12 !important;
 }
 
 .student-name {
@@ -70,15 +74,38 @@
   line-height: 1.2;
   white-space: normal;
   word-break: break-word;
+  background: #0f172a;
 }
 
-.cell-t,
-.cell-p,
-.cell-grade,
-.cell-grade-header {
+.grades-table thead .cell-t,
+.grades-table thead .cell-p,
+.grades-table thead .cell-pond,
+.grades-table thead .cell-letras,
+.grades-table thead .cell-grade,
+.grades-table thead .cell-grade-header {
   width: 48px;
   min-width: 48px;
   text-align: center;
+  background: rgba(99, 102, 241, 0.1);
+  border-bottom: 2px solid var(--primary);
+}
+
+.grades-table thead .cell-final-spacer {
+  background: rgba(231, 76, 60, 0.12);
+  border-bottom: 2px solid #e74c3c;
+}
+
+.grades-table tbody td {
+  background: transparent;
+}
+
+.grades-table tbody td:not(:first-child) {
+  text-align: center;
+}
+
+.grades-table tbody td:not(:first-child) .cell-input {
+  display: block;
+  margin: 0 auto;
 }
 
 .cell-input {
@@ -246,28 +273,35 @@
 }
 
 @media (max-width: 600px) {
+  .grades-table-mobile-grouped {
+    width: 100%;
+    min-width: 100%;
+    table-layout: fixed;
+  }
+
   .cell-input {
-    width: 42px;
-    height: 38px;
-    font-size: 1rem;
-    padding: 0.25rem;
+    width: 36px;
+    height: 34px;
+    font-size: 0.92rem;
+    padding: 0.15rem;
   }
 
   .grades-table th, .grades-table td {
-    padding: 0.5rem 0.4rem;
+    padding: 0.42rem 0.3rem;
     white-space: nowrap;
-    min-width: 80px;
+    min-width: 0;
   }
 
   .grades-table th:first-child, .grades-table td:first-child {
     position: sticky;
     left: 0;
-    z-index: 10;
+    z-index: 14;
     min-width: 110px;
   }
 
   .subject-header {
-    min-width: 120px !important;
+    min-width: 0 !important;
+    background: #0f172a !important;
   }
 
   .grades-table td:first-child {
@@ -280,6 +314,75 @@
   }
 
   .grades-table td, .grades-table th {
-    min-width: 100px;
+    min-width: 0;
+  }
+
+  .grades-table thead th {
+    background: #0f172a !important;
+    z-index: 11;
+  }
+
+  .grades-table thead .student-column,
+  .grades-table thead .student-column-header {
+    z-index: 16 !important;
+    background: #0f172a !important;
+    box-shadow: 1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .grades-table .cell-t,
+  .grades-table .cell-p,
+  .grades-table .cell-pond,
+  .grades-table .cell-grade,
+  .grades-table .cell-grade-header {
+    width: 34px;
+    min-width: 34px;
+    padding-left: 0.08rem;
+    padding-right: 0.08rem;
+  }
+
+  .grades-table .cell-pond {
+    width: 38px;
+    min-width: 38px;
+  }
+
+  .grades-table-mobile-grouped.grades-table-mobile-grouped-modular .cell-t,
+  .grades-table-mobile-grouped.grades-table-mobile-grouped-modular .cell-p,
+  .grades-table-mobile-grouped.grades-table-mobile-grouped-modular .cell-pond,
+  .grades-table-mobile-grouped.grades-table-mobile-grouped-modular .cell-grade-header {
+    width: auto;
+    min-width: 0;
+    padding-left: 0.12rem;
+    padding-right: 0.12rem;
+    text-align: center;
+  }
+
+  .grades-table-mobile-grouped.grades-table-mobile-grouped-modular .cell-pond {
+    width: auto;
+    min-width: 0;
+  }
+
+  .grades-table-mobile-grouped.grades-table-mobile-grouped-modular .cell-input {
+    width: 30px;
+    height: 30px;
+    padding: 0.12rem;
+    font-size: 0.82rem;
+  }
+
+  .grades-table-mobile-grouped:not(.grades-table-mobile-grouped-modular) .cell-grade-header,
+  .grades-table-mobile-grouped:not(.grades-table-mobile-grouped-modular) .cell-t,
+  .grades-table-mobile-grouped:not(.grades-table-mobile-grouped-modular) .cell-p,
+  .grades-table-mobile-grouped:not(.grades-table-mobile-grouped-modular) .cell-pond {
+    width: auto;
+    min-width: 0;
+    padding-left: 0.16rem;
+    padding-right: 0.16rem;
+    text-align: center;
+  }
+
+  .grades-table-mobile-grouped:not(.grades-table-mobile-grouped-modular) .cell-input {
+    width: 32px;
+    height: 32px;
+    padding: 0.14rem;
+    font-size: 0.84rem;
   }
 }

@@ -7,7 +7,7 @@ function toNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-const SYSTEM_VERSION = '2.9.0';
+const SYSTEM_VERSION = '2.9.8';
 
 function toTitleCase(str) {
   if (!str) return '';
@@ -23,11 +23,24 @@ function json(body, status = 200) {
 
 async function logHistory(env, userId, courseId, type, detail, alumnoId = null) {
   try {
+    // Minimal insert without 'fecha' to rely on DB default
     await env.DB.prepare(
       'INSERT INTO historial (usuario_id, course_id, tipo_evento, detalle, alumno_id) VALUES (?, ?, ?, ?, ?)'
-    ).bind(userId, courseId, type, detail, alumnoId).run();
+    ).bind(
+      userId ? Number(userId) : null, 
+      courseId ? Number(courseId) : null, 
+      type || 'info', 
+      detail || '', 
+      alumnoId ? Number(alumnoId) : null
+    ).run();
   } catch (err) {
-    console.error('History logging failed:', err);
+    // If it fails, try to at least log the error message itself into the history
+    try {
+      await env.DB.prepare('INSERT INTO historial (detalle, tipo_evento) VALUES (?, ?)')
+        .bind('ERROR_LOG: ' + err.message, 'error').run();
+    } catch (e) {
+      console.error('Total failure in logging:', e.message);
+    }
   }
 }
 
@@ -185,7 +198,7 @@ async function handleGrid(env, request, url) {
       FROM historial h
       LEFT JOIN usuarios u ON u.id = h.usuario_id
       LEFT JOIN alumnos a ON a.id = h.alumno_id
-      WHERE h.course_id = ?
+      WHERE h.course_id = ? OR h.course_id IS NULL
       ORDER BY h.fecha DESC
       LIMIT 100
     `).bind(courseId));
@@ -263,7 +276,7 @@ async function handleGrid(env, request, url) {
         FROM historial h
         LEFT JOIN usuarios u ON u.id = h.usuario_id
         LEFT JOIN alumnos a ON a.id = h.alumno_id
-        WHERE h.course_id = ?
+        WHERE h.course_id = ? OR h.course_id IS NULL
         ORDER BY h.fecha DESC
         LIMIT 100
       `).bind(finalCourseId)
@@ -617,11 +630,70 @@ async function handleGradeUpdates(env, request, userId, body) {
   }).join(' | ');
 
   const detailString = `[DETALLE] ${actionLabel} de ${updates.length} notas en ${firstMateria.nombre}. Desglose: ${list}`;
-  await logHistory(env, userId, firstStudent.course_id, eventType, detailString);
+  const courseIdToLog = auditoriaStudent?.course_id || firstStudent?.course_id;
 
   await env.DB.batch(statements);
+
+  // Auditoría: siempre loguear, incluso sin courseId
+  await logHistory(env, userId, courseIdToLog || null, eventType, detailString);
+
   return json({ success: true });
 }
+
+// ─── ASISTENCIA ─────────────────────────────────────────────────────────────
+
+async function handleAttendanceLoad(env, request, url) {
+  const courseId = toNumber(url.searchParams.get('courseId'));
+  const month = url.searchParams.get('month');
+  if (!courseId || !month) return json({ error: 'Faltan parámetros' }, 400);
+
+  const { results } = await env.DB.prepare(`
+    SELECT * FROM asistencia 
+    WHERE alumno_id IN (SELECT id FROM alumnos WHERE course_id = ?) 
+    AND fecha LIKE ?
+  `).bind(courseId, `${month}-%`).all();
+  return json(results);
+}
+
+async function handleAttendanceSave(env, request, userId, body) {
+  const user = await validateUser(env, request, userId);
+  const { updates = [] } = body;
+  if (!updates.length) return json({ success: true });
+
+  const allowedRoles = ['admin', 'preceptor', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  if (!allowedRoles.includes(user.rol)) {
+    throw new Error('No tienes permiso para guardar asistencias.');
+  }
+
+  const statements = updates.map(u => {
+    if (!u.valor || u.valor.trim() === '') {
+      return env.DB.prepare('DELETE FROM asistencia WHERE alumno_id = ? AND fecha = ?').bind(u.alumno_id, u.fecha);
+    }
+    return env.DB.prepare(`
+      INSERT INTO asistencia (alumno_id, fecha, valor) 
+      VALUES (?, ?, ?) 
+      ON CONFLICT(alumno_id, fecha) 
+      DO UPDATE SET valor = excluded.valor
+    `).bind(u.alumno_id, u.fecha, u.valor.toUpperCase());
+  });
+
+  await env.DB.batch(statements);
+
+  // Auditoría de Asistencia
+  try {
+    const firstUpdate = updates[0];
+    const student = await env.DB.prepare('SELECT id, course_id, apellido, nombre FROM alumnos WHERE id = ?').bind(firstUpdate.alumno_id).first();
+    if (student) {
+      const detail = `[DETALLE] Registro de asistencia: ${updates.length} cambios aplicados en la grilla mensual.`;
+      await logHistory(env, userId, student.course_id, 'asistencia_edit', detail);
+    }
+  } catch (logErr) {
+    console.error('Error logging attendance history:', logErr);
+  }
+
+  return json({ success: true });
+}
+
 
 
 // ─── POST /api/data?type=students ────────────────────────────────────────────
@@ -1393,6 +1465,7 @@ export async function onRequestGet({ env, request }) {
       const { results } = await env.DB.prepare('SELECT * FROM course_schedules').all();
       return json(results);
     }
+    if (type === 'asistencia') return await handleAttendanceLoad(env, request, url);
     return json({ error: 'Tipo no especificado' }, 400);
   } catch (err) {
     return json({ error: err.message }, 500);
@@ -1419,6 +1492,7 @@ export async function onRequestPost({ env, request }) {
     if (type === 'anuncios') return await handleAnuncios(env, request, userId, body);
     if (type === 'end_cycle') return await handleEndCycle(env, request, userId, body);
     if (type === 'horarios') return await handleSchedules(env, request, userId, body);
+    if (type === 'asistencia') return await handleAttendanceSave(env, request, userId, body);
     return json({ error: 'Tipo no soportado' }, 400);
   } catch (err) {
     return json({ error: err.message }, 500);

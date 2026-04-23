@@ -6,7 +6,22 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🛡️ [2.9.5] - 2026-04-22 (Versión Actual)
+### 🛡️ [2.9.8] - 2026-04-23 (Versión Actual)
+**"Auditoría Reparada y Panel de Asistencia"**
+
+*   **🐛 Fix Crítico del Sistema de Historial**: Resolución de un bug de larga data donde **ninguna acción administrativa se registraba** en el historial. La causa raíz era un Foreign Key roto apuntando a una tabla inexistente (`usuarios_old`), lo que causaba que D1 rechazara silenciosamente cada INSERT en la tabla `historial`.
+*   **🗄️ Migración de Base de Datos**: Recreación de la tabla `historial` en producción con el FK corregido apuntando a `usuarios`, preservando los registros existentes y el índice de búsqueda.
+*   **🔍 Consulta de Historial Mejorada**: La consulta ahora incluye acciones globales (`course_id IS NULL`) como gestión de usuarios, horarios e importaciones que antes eran invisibles al filtrar por curso.
+*   **📊 Filtros de Auditoría Ampliados**: Nuevas categorías de filtro en el AuditPanel: **Alumnos**, **Asistencia** y **Sistema**, además de Cargas, Ediciones y Eliminaciones. Filtrado basado en `tipo_evento` del backend en vez de búsqueda de texto.
+*   **🧹 Limpieza de Debug**: Eliminación de datos de depuración (`historial_debug`, `debug_call`, entrada `id:-999`) que se filtraban al frontend de producción.
+*   **⚡ Orden de Auditoría Corregido**: El log de notas ahora se ejecuta **después** de confirmar la escritura en la base de datos, evitando registros fantasma de operaciones fallidas.
+*   **📅 Panel de Asistencia Mensual**: Nuevo módulo completo para el registro de asistencia diaria con grilla interactiva mensual, filtrado de fines de semana (solo LU-VIE) y validación estricta de valores (**P**, **A**, **AJ**).
+*   **📱 Vista Móvil Optimizada**: Interfaz de 3 días con navegación por flechas, selección por tap (ciclo P→A→AJ→vacío) y detección robusta de dispositivos móviles vía User-Agent + pointer coarse.
+*   **🟢 Highlight de Día Actual**: Resaltado verde del día de hoy en ambas versiones (PC y móvil) para orientación inmediata.
+*   **🔎 Buscador de Alumnos**: Campo de búsqueda por nombre integrado en la grilla de asistencia.
+*   **🖨️ Impresión de Partes Semanales**: Botón "Imprimir Parte" que genera reportes A4 semanales pre-cargados con datos reales de asistencia, horarios y etiquetas de mes dinámicas.
+
+### 🛡️ [2.9.5] - 2026-04-22
 **"Automatización Docente y Optimización de Tabla de Notas"**
 
 *   **👨‍🏫 Automatización de Cuentas Profesores**: Generación masiva de credenciales para 104 docentes (`nom.ape` / `apellido2026`) con mapeo inteligente de materias y cursos.

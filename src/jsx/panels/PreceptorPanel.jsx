@@ -8,6 +8,7 @@ import {
   FileText,
   History,
   Megaphone,
+  LogOut,
   Menu,
   Save,
   UserCog,
@@ -28,31 +29,10 @@ import PlanillasPanel from './PlanillasPanel';
 import PasesPanel from './PasesPanel';
 import AnunciosPanel from './AnunciosPanel';
 import HorariosPanel from './HorariosPanel';
+import AttendancePanel from './AttendancePanel';
 
 export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showToast }) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const tabs = useMemo(() => {
-    const list = [{ id: 'grades', label: 'Notas', icon: <ClipboardList size={16} /> }];
-    if (user.rol !== 'profesor') list.push({ id: 'materias', label: 'Materias', icon: <Book size={16} /> });
-    if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
-      list.push({ id: 'students', label: 'Alumnos', icon: <Users size={16} /> });
-    }
-    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol)) {
-      list.push({ id: 'pases', label: 'Pases', icon: <ArrowRightLeft size={16} /> });
-    }
-    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector'].includes(user.rol)) {
-      if (user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') list.push({ id: 'rac', label: 'RAC', icon: <FileText size={16} /> });
-      list.push({ id: 'historial', label: 'Historial', icon: <History size={16} /> });
-    }
-    if (['admin', 'secretaria_de_alumnos', 'director', 'vicedirector'].includes(user.rol)) {
-      list.push({ id: 'anuncios', label: 'Anuncios', icon: <Megaphone size={16} /> });
-      list.push({ id: 'settings', label: 'Ajustes', icon: <UserCog size={16} /> });
-    }
-    if (user.rol !== 'profesor') list.push({ id: 'horarios', label: 'Horarios', icon: <Calendar size={16} /> });
-    list.push({ id: 'planillas', label: 'Generar Planillas', icon: <Save size={16} /> });
-    return list;
-  }, [user.rol]);
-
   const logic = usePreceptorLogic({ user, onPreviewStudent, showToast });
   const {
     data,
@@ -60,7 +40,6 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     page,
     setPage,
     status,
-    currentCourse,
     isMobile,
     unseenPases,
     unseenHistorial,
@@ -120,6 +99,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     setEditingPase,
     undoPase,
     post,
+    get,
     userForm,
     setUserForm,
     yearForm,
@@ -153,6 +133,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     onPrintSeguimientoGlobal,
     onPrintParteDiario,
     onPrintParteDiarioGlobal,
+    onPrintParteConInformacion,
     viewingFichaStudent,
     setViewingFichaStudent,
     handleSaveFicha,
@@ -203,6 +184,38 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     getHistorial
   } = logic;
 
+  const tabs = useMemo(() => {
+    const list = [];
+    if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
+      list.push({ id: 'asistencia', label: 'Asistencia', icon: <Calendar size={16} /> });
+    }
+    list.push({ id: 'grades', label: 'Notas', icon: <ClipboardList size={16} /> });
+    if (user.rol !== 'profesor') list.push({ id: 'materias', label: 'Materias', icon: <Book size={16} /> });
+    if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
+      list.push({ id: 'students', label: 'Alumnos', icon: <Users size={16} /> });
+    }
+    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol)) {
+      list.push({ id: 'pases', label: 'Pases', icon: <ArrowRightLeft size={16} /> });
+    }
+    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector'].includes(user.rol)) {
+      if (user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') list.push({ id: 'rac', label: 'RAC', icon: <FileText size={16} /> });
+      list.push({ id: 'historial', label: 'Historial', icon: <History size={16} /> });
+    }
+    if (['admin', 'secretaria_de_alumnos', 'director', 'vicedirector'].includes(user.rol)) {
+      list.push({ id: 'anuncios', label: 'Anuncios', icon: <Megaphone size={16} /> });
+      list.push({ id: 'settings', label: 'Ajustes', icon: <UserCog size={16} /> });
+    }
+    if (!isMobile && user.rol !== 'profesor') list.push({ id: 'horarios', label: 'Horarios', icon: <Calendar size={16} /> });
+    list.push({ id: 'planillas', label: 'Generar Planillas', icon: <Save size={16} /> });
+    return isMobile ? list.filter((tab) => tab.id !== 'rac') : list;
+  }, [isMobile, user.rol]);
+
+  React.useEffect(() => {
+    if (isMobile && (page === 'rac' || page === 'horarios')) {
+      setPage('grades');
+    }
+  }, [isMobile, page, setPage]);
+
   if (!data) return <p>Cargando datos...</p>;
 
   if (viewingFichaStudent) {
@@ -230,30 +243,79 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         <div className="logo-section" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <img src="/logo.png" alt="Logo" style={{ height: '45px' }} />
           <div>
-            <h1 style={{ marginBottom: '0.1rem', fontWeight: '800' }}>INDUSTRIAL N°6 "X BRIGADA AEREA"</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1 style={{ marginBottom: '0.1rem', fontWeight: '800' }}>INDUSTRIAL N°6 "X BRIGADA AEREA"</h1>
+              {isMobile && <button 
+                className="btn-logout-icon" 
+                onClick={onLogout}
+                title="Cerrar Sesión"
+                style={{ 
+                  width: '45px',
+                  height: '45px',
+                  background: 'rgba(239, 68, 68, 0.16)', 
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#f87171',
+                  cursor: 'pointer',
+                  flexShrink: 0
+                }}
+              >
+                <LogOut size={20} />
+              </button>}
+            </div>
             <h2 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: '500' }}>Gestión de Calificaciones</h2>
           </div>
         </div>
-        <div className="welcome-section" style={{ textAlign: 'right', flex: 1, paddingRight: '1rem' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Bienvenido, {user.rol === 'profesor' ? `Prof. ${user.nombre}` : user.nombre}</p>
-          {currentCourse && <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Curso: {currentCourse.year_nombre} · {currentCourse.label}</p>}
+        {!isMobile && <div className="welcome-section" style={{ textAlign: 'right', flex: 1, paddingRight: '1rem', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Bienvenido, {user.rol === 'profesor' ? `Prof. ${user.nombre}` : user.nombre}</p>
           {status && <p className="panel-status" style={{ display: 'inline-block', marginTop: '0.25rem' }}>{status}</p>}
-        </div>
+          </div>
+          
+            <button
+              className="btn-logout-icon"
+              onClick={onLogout}
+              title="Cerrar SesiÃ³n"
+              style={{
+                width: '45px',
+                height: '45px',
+                background: 'rgba(239, 68, 68, 0.14)',
+                border: '1px solid rgba(239, 68, 68, 0.32)',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#f87171',
+                cursor: 'pointer',
+                flexShrink: 0
+              }}
+            >
+              <LogOut size={18} />
+            </button>
+          
+        </div>}
         <div className="panel-actions">
           {isMobile && (
             <button 
               className="btn btn-hamburger-mobile" 
-              style={{ padding: '0.6rem' }} 
+              style={{ width: '45px', height: '45px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} 
               onClick={() => setIsMenuOpen(true)}
             >
               <Menu size={20} />
             </button>
           )}
-          <button className="btn" style={{ background: 'rgba(255,255,255,0.1)' }} onClick={onLogout}>
-            {isMobile ? 'Salir' : 'Cerrar Sesión'}
-          </button>
         </div>
       </div>
+      {isMobile && (
+        <div style={{ marginTop: '-0.1rem', marginBottom: '0.55rem', textAlign: 'left', paddingLeft: '0.1rem' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem', margin: 0, lineHeight: 1.25 }}>
+            Bienvenido, {user.rol === 'profesor' ? `Prof. ${user.nombre}` : user.nombre}
+          </p>
+        </div>
+      )}
 
       {/* Mobile Navigation Drawer */}
       <div className={`mobile-menu-overlay ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(false)}>
@@ -327,7 +389,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
 
         {data.courses.length > 0 && (
           <div className="filter-item">
-            <label className="label">Curso:</label>
+            <label className="label" style={{ fontSize: isMobile ? '0.7rem' : '0.76rem', whiteSpace: 'nowrap' }}>Curso:</label>
             <select className="input-field compact-select" value={selectedCourseId ?? ''} onChange={async (e) => { await loadData(Number(e.target.value), selectedYearId); }}>
               {data.courses.map((course) => <option key={course.id} value={course.id}>{course.label} · {simplifyTecName(course.tecnicatura_nombre)}</option>)}
             </select>
@@ -338,14 +400,14 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           <>
             {(viewMode === 'bySubject' || viewMode === 'taller') ? (
               <div className="filter-item" style={{ gridColumn: isMobile ? '1' : 'auto' }}>
-                <label className="label">Materia:</label>
+                <label className="label" style={{ fontSize: isMobile ? '0.7rem' : '0.76rem', whiteSpace: 'nowrap' }}>Materia:</label>
                 <select className="input-field compact-select" value={selectedSubjectId || ''} onChange={(e) => setSelectedSubjectId(Number(e.target.value))}>
                   {filteredSubjects.map((subject) => <option key={subject.id} value={subject.id}>{truncateSubject(subject.nombre, isMobile)}</option>)}
                 </select>
               </div>
             ) : (
               <div className="filter-item">
-                <label className="label">Periodo:</label>
+                <label className="label" style={{ fontSize: isMobile ? '0.7rem' : '0.76rem', whiteSpace: 'nowrap' }}>Periodo:</label>
                 <select className="input-field compact-select" value={selectedPeriod} onChange={(e) => setSelectedPeriod(Number(e.target.value))}>
                   {data.periodos.map((periodo) => <option key={periodo.id} value={periodo.id}>{periodo.nombre}</option>)}
                 </select>
@@ -388,6 +450,17 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         />
       )}
 
+      {page === 'asistencia' && (
+        <AttendancePanel
+          data={data}
+          selectedCourseId={selectedCourseId}
+          apiService={{ get, post }}
+          showToast={showToast}
+          isMobile={isMobile}
+          onPrintInformacion={onPrintParteConInformacion}
+        />
+      )}
+
       {page === 'planillas' && (
         <PlanillasPanel
           user={user}
@@ -399,7 +472,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         />
       )}
 
-      {page === 'horarios' && <HorariosPanel user={user} selectedYearId={selectedYearId} selectedCourseId={selectedCourseId} allCourses={data.allCourses} />}
+      {page === 'horarios' && !isMobile && <HorariosPanel user={user} selectedYearId={selectedYearId} selectedCourseId={selectedCourseId} allCourses={data.allCourses} />}
 
       {page === 'students' && (
         <StudentManager
@@ -426,7 +499,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         />
       )}
 
-      {page === 'rac' && (
+      {page === 'rac' && !isMobile && (
         <RACPanel
           data={data}
           selectedYearId={selectedYearId}
@@ -446,9 +519,9 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       )}
 
       {page === 'historial' && <AuditPanel data={data} user={user} onDelete={async (action, logId) => { await post('historial_delete', { action, logId, courseId: data.selectedCourseId }); loadData(); }} />}
-      {page === 'materias' && <AcademicManager user={user} data={data} selectedCourseId={selectedCourseId} materiasSearch={materiasSearch} setMateriasSearch={setMateriasSearch} handleUpdateLocks={handleUpdateLocks} />}
-      {page === 'pases' && <PasesPanel user={user} data={data} pasesSearch={pasesSearch} setPasesSearch={setPasesSearch} setEditingPase={setEditingPase} undoPase={undoPase} onPreviewStudent={onPreviewStudent} onViewFicha={handleViewFicha} />}
-      {page === 'anuncios' && <AnunciosPanel data={data} post={post} loadData={loadData} />}
+      {page === 'materias' && <AcademicManager isMobile={isMobile} user={user} data={data} selectedCourseId={selectedCourseId} materiasSearch={materiasSearch} setMateriasSearch={setMateriasSearch} handleUpdateLocks={handleUpdateLocks} />}
+      {page === 'pases' && <PasesPanel isMobile={isMobile} user={user} data={data} pasesSearch={pasesSearch} setPasesSearch={setPasesSearch} setEditingPase={setEditingPase} undoPase={undoPase} onPreviewStudent={onPreviewStudent} onViewFicha={handleViewFicha} />}
+      {page === 'anuncios' && <AnunciosPanel isMobile={isMobile} data={data} post={post} loadData={loadData} />}
 
       {page === 'settings' && (
         <SettingsPanel

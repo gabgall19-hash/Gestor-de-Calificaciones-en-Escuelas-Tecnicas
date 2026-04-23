@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { emptyStudent, emptyCourse, emptyYear, emptyUser, emptyTec, draftTec } from '../functions/PreceptorHelpers';
-import { apiLoadData, apiRequest } from '../functions/apiService';
+import { apiLoadData, apiRequest, default as apiService } from '../functions/apiService';
 import usePreceptorStudentActions from './usePreceptorStudentActions';
 import usePreceptorAdminActions from './usePreceptorAdminActions';
 import usePreceptorConfigActions from './usePreceptorConfigActions';
@@ -47,15 +47,15 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
 
   useEffect(() => {
     if (page === 'historial') {
-      const count = (data?.auditLogs || []).length;
+      const count = (data?.historial || []).length;
       localStorage.setItem('lastSeenHistorialCount', String(count));
       setUnseenHistorial(false);
     } else {
-      const count = (data?.auditLogs || []).length;
+      const count = (data?.historial || []).length;
       const last = Number(localStorage.getItem('lastSeenHistorialCount') || 0);
       setUnseenHistorial(count > last);
     }
-  }, [page, data?.auditLogs]);
+  }, [page, data?.historial]);
 
   const [pending, setPending] = useState({});
   const [studentForm, setStudentForm] = useState(emptyStudent);
@@ -91,7 +91,14 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
   const [materiasSearch, setMateriasSearch] = useState('');
   const [viewingFichaStudent, setViewingFichaStudent] = useState(null);
   const [isEditingFicha, setIsEditingFicha] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const checkIsMobile = () => {
+    const ua = navigator.userAgent;
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
+    return isMobileUA || isTouch || (window.innerWidth <= 1024);
+  };
+
+  const [isMobile, setIsMobile] = useState(checkIsMobile());
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [showEndCycleModal, setShowEndCycleModal] = useState(false);
@@ -104,7 +111,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
   };
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => setIsMobile(checkIsMobile());
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -255,6 +262,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
   const canTransfer = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol);
 
   const post = async (type, body) => apiRequest(type, body, user.id);
+  const get = async (type, params) => apiService.get(type, { ...params, userId: user.id });
 
   const saveFicha = async () => {
     try {
@@ -400,7 +408,8 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     onPrintPlanillasCurso,
     onPrintRAC,
     onPrintParteDiario,
-    onPrintParteDiarioGlobal
+    onPrintParteDiarioGlobal,
+    onPrintParteConInformacion
   } = usePreceptorConfigActions({
     data,
     user,
@@ -429,7 +438,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     viewingFichaStudent, setViewingFichaStudent, isEditingFicha, setIsEditingFicha, isMobile, setIsMobile, isSelectionMode, setIsSelectionMode,
     selectedStudentIds, setSelectedStudentIds, showEndCycleModal, setShowEndCycleModal, endCycleForm, setEndCycleForm,
     truncateSubject, filteredSubjects, rotationFilteredStudents, roleText, loadData, handleDragStart, handleDragEnter, handleDragEnd,
-    currentCourse, getSubjectUnits, gradeUnits, gradeWidth, canManageStudents, canTransfer, gradeValue, post, saveGrades, saveFicha,
+    currentCourse, getSubjectUnits, gradeUnits, gradeWidth, canManageStudents, canTransfer, gradeValue, post, get, saveGrades, saveFicha,
     updateCell, addStudent, deleteStudent, transferStudent, prepareEditCourse, editCourse, toggleCourseActive, execPase, undoPase,
     execTransfer, savePaseEdit, updateStudentField, saveObs, editStudent, handleSaveFicha, addCourse, addYear, editYear, deleteYear,
     createUser, editUser, startEditUser, deleteUser, handleResetPassword, setYearAsCurrent, copyYearInfo, handleSetPassword,
@@ -437,6 +446,6 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     handleUpdateLocks, handleUpdateSystemMode, handleUpdateMobileLogin, handleUpdateRACModular, handleUpdatePreceptorMode,
     handleUpdatePasswordMsg,
     duplicateTec, savePrevia, deletePrevia, page, setPage, handleUpdatePeriods,
-    onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC, onPrintParteDiario, onPrintParteDiarioGlobal
+    onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC, onPrintParteDiario, onPrintParteDiarioGlobal, onPrintParteConInformacion
   };
 }

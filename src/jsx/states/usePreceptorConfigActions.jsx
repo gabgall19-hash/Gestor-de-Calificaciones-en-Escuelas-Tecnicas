@@ -3,7 +3,7 @@ import { handlePrintAllCourses } from '../prints/SeguimientoA4';
 import { handlePrintSeguimientoGlobal } from '../prints/SeguimientoAllA4';
 import { handlePrintPlanillasCurso } from '../prints/CalificacionesA4';
 import { handlePrintRAC } from '../prints/RACA4';
-import { handlePrintParteDiario, handlePrintParteDiarioGlobal } from '../prints/ParteDiarioA4';
+import { handlePrintParteDiario, handlePrintParteDiarioGlobal, handlePrintParteConInformacion } from '../prints/ParteDiarioA4';
 
 export default function usePreceptorConfigActions(deps) {
   const {
@@ -143,6 +143,22 @@ export default function usePreceptorConfigActions(deps) {
     }
   };
 
+  const onPrintParteConInformacion = async (month, attendanceMap) => {
+    if (!selectedCourseId) return;
+    const course = data.allCourses.find((item) => item.id === selectedCourseId);
+    if (!course) return;
+    setLoading(true);
+    try {
+      const scheduleRes = await apiService.get('horarios', { courseId: selectedCourseId, userId: user.id });
+      handlePrintParteConInformacion(data, course, scheduleRes, month, attendanceMap);
+    } catch (err) {
+      console.error('Error fetching schedule for parte info:', err);
+      showToast('Error al obtener el horario del curso', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     handleUpdateLocks,
     handleUpdateSystemMode,
@@ -158,6 +174,7 @@ export default function usePreceptorConfigActions(deps) {
     onPrintPlanillasCurso,
     onPrintRAC,
     onPrintParteDiario,
-    onPrintParteDiarioGlobal
+    onPrintParteDiarioGlobal,
+    onPrintParteConInformacion
   };
 }
