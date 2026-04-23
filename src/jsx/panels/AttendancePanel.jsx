@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Save, Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Save, Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
 import { TableSkeleton } from '../UI/Skeleton';
 import '../../css/AttendancePanel.css';
 
@@ -285,12 +285,18 @@ const AttendancePanel = ({ data, selectedCourseId, apiService, showToast, isMobi
               </div>
             )}
             <button 
-              className="btn btn-primary btn-save" 
+              className={`btn btn-primary btn-save ${hasPendingChanges ? 'btn-shake' : ''}`} 
               onClick={saveChanges}
               disabled={loading || !hasPendingChanges}
+              style={{
+                transition: 'all 0.3s ease',
+                background: !hasPendingChanges ? 'rgba(16, 185, 129, 0.2)' : 'var(--primary)',
+                color: !hasPendingChanges ? '#10b981' : 'white',
+                opacity: 1 // Override default disabled opacity to keep it readable
+              }}
             >
-              <Save size={18} />
-              <span>Guardar Cambios</span>
+              {loading ? <Save size={18} className="animate-spin" /> : <Save size={18} />}
+              <span>{hasPendingChanges ? 'Guardar Cambios' : 'Guardado'}</span>
             </button>
 
             <button 
@@ -299,7 +305,7 @@ const AttendancePanel = ({ data, selectedCourseId, apiService, showToast, isMobi
               disabled={loading}
               title="Imprimir Parte Mensual con Asistencias"
             >
-              <span>Imprimir Parte</span>
+              {isMobile ? <Printer size={18} /> : <span>Imprimir Parte</span>}
             </button>
           </div>
         </div>

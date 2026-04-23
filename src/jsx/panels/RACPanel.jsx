@@ -1,4 +1,4 @@
-﻿import { FileText, Printer, Search, Users, Wrench, RotateCcw, Eye, ClipboardList, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { FileText, Printer, Search, Users, Wrench, RotateCcw, Eye, ClipboardList, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { formatDNI } from '../functions/PreceptorHelpers';
 import '../../css/ReportViews.css';
 
@@ -56,8 +56,8 @@ const RACPanel = ({
               <tr>
                 {isSelectionMode && <th style={{ width: '40px' }}>SEL</th>}
                 <th style={{ width: '50px' }}>N°</th>
-                <th>ALUMNO</th>
-                <th style={{ width: '120px' }}>DNI</th>
+                <th style={{ textAlign: 'left' }}>ALUMNO</th>
+                <th style={{ width: '120px', textAlign: 'left' }}>DNI</th>
                 <th style={{ width: '100px' }}>MATRICULA</th>
                 <th style={{ width: '60px' }}>L°</th>
                 <th style={{ width: '60px' }}>F°</th>
@@ -82,8 +82,8 @@ const RACPanel = ({
                       </td>
                     )}
                     <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                    <td><strong>{student.apellido}, {student.nombre}</strong></td>
-                    <td>{formatDNI(student.dni)}</td>
+                    <td style={{ textAlign: 'left' }}><strong>{student.apellido}, {student.nombre}</strong></td>
+                    <td style={{ textAlign: 'left' }}>{formatDNI(student.dni)}</td>
                     <td>
                       <input 
                         type="text" 

@@ -23,6 +23,18 @@
 .toast-in { animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .toast-out { animation: toastOut 0.4s cubic-bezier(0.7, 0, 0.84, 0) forwards; }
 
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+.btn-shake {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
 * {
   margin: 0;
   padding: 0;

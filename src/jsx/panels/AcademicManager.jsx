@@ -117,8 +117,8 @@ const AcademicManager = ({
         <table className="grades-table academic-locks-table" style={{ fontSize: '0.8rem' }}>
           <thead>
             <tr>
-              <th className="academic-locks-header academic-locks-header-main" style={{ width: isMobile ? '180px' : '250px' }}>
-                ESTRUCTURA CURRICULAR / DOCENTES
+              <th className="academic-locks-header academic-locks-header-main" style={{ width: isMobile ? '140px' : '250px' }}>
+                {isMobile ? 'MATERIA / DOCENTE' : 'ESTRUCTURA CURRICULAR / DOCENTES'}
               </th>
               {visibleGroups.map((group) => {
                 const isPeriodLockedFull =
@@ -130,7 +130,7 @@ const AcademicManager = ({
                   );
 
                 return (
-                  <th key={group.label} className="academic-locks-header" style={{ textAlign: 'center', fontSize: '0.65rem', minWidth: isMobile ? '120px' : '80px', paddingBottom: '10px' }}>
+                  <th key={group.label} className="academic-locks-header" style={{ textAlign: 'center', fontSize: '0.65rem', minWidth: isMobile ? '70px' : '80px', paddingBottom: '10px' }}>
                     <button
                       className={`icon-btn ${isPeriodLockedFull ? 'danger' : 'success'}`}
                       style={{ display: 'block', margin: '0 auto 6px auto', width: '24px', height: '24px', padding: 0, opacity: 0.8 }}

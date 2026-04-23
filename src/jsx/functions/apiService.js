@@ -3,7 +3,23 @@
  * Centralized service for handling all API requests.
  */
 
-const API_BASE = '/api/data';
+const PRODUCTION_URL = 'https://industrialn6.pages.dev';
+const API_BASE_PATH = '/api/data';
+
+const getBaseUrl = () => {
+  // If we are in capacitor (android/ios) or not on the production domain, use the absolute production URL
+  if (window.location.origin.includes('localhost') || 
+      window.location.origin.includes('capacitor://') || 
+      window.location.origin.includes('http://localhost')) {
+    return PRODUCTION_URL;
+  }
+  return window.location.origin;
+};
+
+const getApiUrl = () => {
+  return new URL(API_BASE_PATH, getBaseUrl());
+};
+
 
 const getAuthToken = () => {
   const stored = localStorage.getItem('currentUser');
@@ -29,7 +45,7 @@ export const apiRequest = async (type, body = {}, userId = null, method = 'POST'
     if (stored) userId = JSON.parse(stored).id;
   }
 
-  const url = new URL(API_BASE, window.location.origin);
+  const url = getApiUrl();
   url.searchParams.set('type', type);
   if (userId) url.searchParams.set('userId', userId);
 
@@ -62,7 +78,7 @@ export const apiRequest = async (type, body = {}, userId = null, method = 'POST'
 };
 
 export const apiLoadData = async (userId, selectedYearId, selectedCourseId, includeAllStudents = false) => {
-  const url = new URL(API_BASE, window.location.origin);
+  const url = getApiUrl();
   url.searchParams.set('type', 'grid');
   url.searchParams.set('userId', userId);
   if (selectedYearId) url.searchParams.set('yearId', selectedYearId);
@@ -98,7 +114,7 @@ const apiService = {
   getGrid: apiLoadData,
   post: (type, userId, body) => apiRequest(type, body, userId, 'POST'),
   get: async (type, params = {}) => {
-    const url = new URL(API_BASE, window.location.origin);
+    const url = getApiUrl();
     url.searchParams.set('type', type);
     Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
 

@@ -6,7 +6,19 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🛡️ [2.9.8] - 2026-04-23 (Versión Actual)
+### 🛡️ [2.9.9] - 2026-04-23 (Versión Actual)
+**"Refinamiento UI/UX y Preparación para App Móvil"**
+
+*   **💾 Botón de Guardado Dinámico**: Rediseño del botón de guardado en los paneles de **Notas** y **Asistencia**. Ahora alterna entre **"Guardado"** (verde/deshabilitado) y **"Guardar Cambios"** (azul/animado).
+*   **🫨 Feedback Visual (Shake)**: Implementación de una animación de sacudida (`btn-shake`) que se activa cuando hay cambios pendientes, mejorando la detección de acciones requeridas.
+*   **📱 Optimización Móvil Crítica**: 
+    *   Reemplazo de texto por iconos de `Printer` en botones de impresión para maximizar el espacio en pantallas pequeñas.
+    *   Ajuste de anchos de columna y textos de cabecera en el panel de **Estructura Curricular** para evitar el scroll horizontal.
+*   **🤖 Integración con Capacitor**: Preparación del proyecto para su compilación como App Nativa (Android/APK).
+*   **🌐 API Multi-Entorno**: El sistema ahora detecta automáticamente si corre desde un entorno nativo (`capacitor://`) o local, forzando la conexión a la API de producción en Cloudflare para garantizar conectividad total desde la App.
+*   **📊 Alineación de Datos RAC**: Mejora de legibilidad en el panel **RAC**, alineando a la izquierda las columnas de Alumno y DNI.
+
+### 🛡️ [2.9.8] - 2026-04-23
 **"Auditoría Reparada y Panel de Asistencia"**
 
 *   **🐛 Fix Crítico del Sistema de Historial**: Resolución de un bug de larga data donde **ninguna acción administrativa se registraba** en el historial. La causa raíz era un Foreign Key roto apuntando a una tabla inexistente (`usuarios_old`), lo que causaba que D1 rechazara silenciosamente cada INSERT en la tabla `historial`.

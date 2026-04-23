@@ -107,8 +107,23 @@ const GradesPanel = ({
               </>
             )}
           </div>
-          <button className="btn btn-primary" onClick={saveGrades} disabled={saveDisabled} style={{ whiteSpace: 'nowrap', flex: isMobile ? 1 : 'none', padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}>
-            <Save size={16} /> {isMobile ? 'Guardar' : 'Guardar Cambios'}
+          <button 
+            className={`btn btn-primary ${!saveDisabled ? 'btn-shake' : ''}`} 
+            onClick={saveGrades} 
+            disabled={saveDisabled} 
+            style={{ 
+              whiteSpace: 'nowrap', 
+              flex: isMobile ? 1 : 'none', 
+              padding: '0.5rem 0.8rem', 
+              fontSize: '0.85rem',
+              transition: 'all 0.3s ease',
+              background: saveDisabled ? 'rgba(16, 185, 129, 0.2)' : 'var(--primary)',
+              color: saveDisabled ? '#10b981' : 'white',
+              opacity: 1
+            }}
+          >
+            {loading ? <Save size={16} className="animate-spin" /> : <Save size={16} />} 
+            {saveDisabled ? 'Guardado' : (isMobile ? 'Guardar' : 'Guardar Cambios')}
           </button>
         </div>
 
