@@ -231,7 +231,7 @@ async function logHistory(env, userId, courseId, type, detail, alumnoId = null) 
 async function validateUser(env, request, userId, ...requiredRoles) {
   const authHeader = request?.headers?.get('Authorization') || '';
   if (!authHeader.startsWith('Bearer ')) {
-    throw new Error('No se proporcionó un token de autenticación.');
+    throw new Error('No se ha proporcionado un token de seguridad.');
   }
 
   const token = authHeader.split(' ')[1];
@@ -1487,7 +1487,7 @@ async function handleTecnicaturas(env, request, userId, body) {
     const originalTec = await env.DB.prepare('SELECT nombre FROM tecnicaturas WHERE id = ?').bind(tecnicaturaId).first();
     if (!originalTec) throw new Error('Tecnicatura original no encontrada');
 
-    const newName = `${originalTec.nombre} (Copia)`;
+    const newName = `${String(originalTec.nombre || '').trim()} (Copia)`;
     const tec = await env.DB.prepare('INSERT INTO tecnicaturas (nombre) VALUES (?) RETURNING *').bind(newName).first();
 
     const subjects = await env.DB.prepare('SELECT * FROM materias WHERE tecnicatura_id = ? ORDER BY orden, id').bind(tecnicaturaId).all();

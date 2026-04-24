@@ -6,7 +6,16 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🚀 [3.0.0] - 2026-04-23 (Versión Actual)
+### 🚀 [3.0.5] - 2026-04-24 (Actualización de Seguridad)
+**"Blindaje de Sesión y Refinamiento de Pases"**
+
+*   **🔐 Fix de Redirección Infinita**: Resolución del bug que causaba recargas infinitas cuando el token de sesión expiraba. Ahora el sistema detecta proactivamente el error 401/403, limpia el almacenamiento local y utiliza `window.location.replace` para forzar el re-login.
+*   **🛡️ Hardening de Seguridad API**: Estandarización de mensajes de error de seguridad en Cloudflare Functions y mejora en la captura de excepciones de autenticación en el frontend.
+*   **📋 Acceso Directo a Ficha (Pases)**: Nueva funcionalidad en el panel de **Pases** que permite abrir la **Ficha del Alumno** directamente desde el listado, facilitando la consulta de antecedentes sin cambiar de módulo.
+*   **🏗️ Mejora en Copia de Tecnicaturas**: Optimización de la lógica de duplicación de estructuras curriculares, asegurando una limpieza de nombres (`trim`) y evitando corrupciones en la base de datos.
+*   **🧹 Limpieza de Especificaciones**: Depuración de archivos de especificación de testing (`TESTSPRITE_SPEC.md`) para mantener el repositorio enfocado en código de producción.
+
+### 🚀 [3.0.0] - 2026-04-23
 **"Gestión Dinámica de Horarios y Excelencia Operativa"**
 
 *   **📅 Sistema de Horarios Inteligente**:
@@ -15,7 +24,6 @@
     *   **Drag-and-Drop Controlado**: Restricción de reordenamiento exclusivo para bloques de recreo, evitando desplazamientos accidentales de materias académicas.
     *   **🖨️ Impresión de Horarios**: Nueva vista de impresión optimizada para PDF/A4 que permite a los alumnos y preceptores tener el cronograma físico siempre a mano.
 *   **🛡️ Integridad de Base de Datos**: Refactorización de las consultas `UPSERT` en Cloudflare D1 para la gestión de horarios, eliminando errores de colisión y garantizando persistencia atómica.
-*   **🧪 QA Autónomo con TestSprite**: Integración de especificaciones de testing automatizado para validar de forma continua los flujos de login, carga de notas y gestión de asistencia.
 *   **🎨 Micro-interacciones Premium**: Pulido de transiciones y estados de carga en el panel de horarios para una sensación de aplicación nativa.
 
 ### 🛡️ [2.9.9] - 2026-04-23

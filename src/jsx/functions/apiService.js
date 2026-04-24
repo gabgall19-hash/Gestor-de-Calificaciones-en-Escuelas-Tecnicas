@@ -32,10 +32,22 @@ const getAuthToken = () => {
   }
 };
 
-const handleApiError = (error) => {
-  if (error && (error.includes('Sesión inválida') || error.includes('token'))) {
+const handleApiError = (error, status) => {
+  const isAuthError = 
+    status === 401 || 
+    status === 403 || 
+    (error && (
+      error.includes('Sesión inválida') || 
+      error.includes('token') || 
+      error.includes('seguridad') ||
+      error.includes('autenticación')
+    ));
+
+  if (isAuthError) {
+    console.warn("Autenticación fallida o sesión expirada. Redirigiendo al login...");
     localStorage.removeItem('currentUser');
-    window.location.href = '/';
+    // Usamos replace para evitar que el usuario vuelva atrás a una página protegida
+    window.location.replace(window.location.origin + window.location.pathname);
   }
 };
 
@@ -66,7 +78,7 @@ export const apiRequest = async (type, body = {}, userId = null, method = 'POST'
     const data = await response.json();
 
     if (!response.ok) {
-      handleApiError(data.error);
+      handleApiError(data.error, response.status);
       throw new Error(data.error || 'Ocurrió un error en la comunicación con el servidor.');
     }
 
@@ -97,7 +109,7 @@ export const apiLoadData = async (userId, selectedYearId, selectedCourseId, incl
     const data = await response.json();
 
     if (!response.ok) {
-      handleApiError(data.error);
+      handleApiError(data.error, response.status);
       throw new Error(data.error || 'Error al cargar los datos.');
     }
 
@@ -128,7 +140,7 @@ const apiService = {
     const response = await fetch(url.toString(), options);
     const data = await response.json();
     if (!response.ok) {
-      handleApiError(data.error);
+      handleApiError(data.error, response.status);
       throw new Error(data.error || 'API GET Error');
     }
     return data;
