@@ -20,6 +20,28 @@ export const emptyTec = { nombre: '', detalle: '', materias: [{ id: 'draft-1', n
 
 export const truncate = (value, max = 20) => (!value ? '' : value.length > max ? `${value.slice(0, max).trim()}...` : value);
 
+export const normalizeCurricularName = (value) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+
+export const findDuplicateSubjectNames = (materias = []) => {
+  const seen = new Map();
+  const duplicates = new Set();
+
+  materias.forEach((materia) => {
+    const name = normalizeCurricularName(materia?.nombre);
+    if (!name) return;
+    if (seen.has(name)) duplicates.add(name);
+    else seen.set(name, materia?.nombre?.trim() || '');
+  });
+
+  return Array.from(duplicates).map((key) => seen.get(key) || key);
+};
+
 export const truncateSubject = (name, isMobile) => {
   if (!name) return '';
   const max = isMobile ? 12 : 30;

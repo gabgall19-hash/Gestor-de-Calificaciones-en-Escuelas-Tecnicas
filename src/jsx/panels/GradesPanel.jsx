@@ -2,6 +2,7 @@ import React from 'react';
 import { ClipboardList, Search, Save, BookOpen, Users } from 'lucide-react';
 import { truncate, truncateSubject, formatDNI, numberToWords } from '../functions/PreceptorHelpers';
 import { TableSkeleton } from '../UI/Skeleton';
+import SaveStatusButton from '../UI/SaveStatusButton';
 import '../../css/GradesPanel.css';
 
 const GradesPanel = ({ 
@@ -107,24 +108,19 @@ const GradesPanel = ({
               </>
             )}
           </div>
-          <button 
-            className={`btn btn-primary ${!saveDisabled ? 'btn-shake' : ''}`} 
-            onClick={saveGrades} 
-            disabled={saveDisabled} 
-            style={{ 
-              whiteSpace: 'nowrap', 
-              flex: isMobile ? 1 : 'none', 
-              padding: '0.5rem 0.8rem', 
-              fontSize: '0.85rem',
-              transition: 'all 0.3s ease',
-              background: saveDisabled ? 'rgba(16, 185, 129, 0.2)' : 'var(--primary)',
-              color: saveDisabled ? '#10b981' : 'white',
-              opacity: 1
+          <SaveStatusButton
+            onClick={saveGrades}
+            loading={loading}
+            hasChanges={!saveDisabled}
+            isMobile={isMobile}
+            iconSize={16}
+            style={{
+              whiteSpace: 'nowrap',
+              flex: isMobile ? 1 : 'none',
+              padding: '0.5rem 0.8rem',
+              fontSize: '0.85rem'
             }}
-          >
-            {loading ? <Save size={16} className="animate-spin" /> : <Save size={16} />} 
-            {saveDisabled ? 'Guardado' : (isMobile ? 'Guardar' : 'Guardar Cambios')}
-          </button>
+          />
         </div>
 
         {/* Buscador - Ultimo en movil, justo encima del listado */}

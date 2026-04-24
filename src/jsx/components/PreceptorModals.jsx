@@ -3,7 +3,9 @@ import { ArrowRightLeft, GraduationCap, GripVertical, Plus, Save, Trash2, AlertT
 import {
   divisionOptions,
   emptyUser,
+  findDuplicateSubjectNames,
   formatDNI,
+  normalizeCurricularName,
   shiftOptions,
   simplifyTecName,
   yearOptions
@@ -83,6 +85,9 @@ export default function PreceptorModals(props) {
     handleSaveFicha,
     getHistorial
   } = props;
+
+  const duplicateSubjectNames = tecMode !== 'list' ? findDuplicateSubjectNames(tecForm.materias) : [];
+  const duplicateSubjectKeys = new Set(duplicateSubjectNames.map((name) => normalizeCurricularName(name)));
 
   return (
     <>
@@ -186,7 +191,13 @@ export default function PreceptorModals(props) {
                   onDragOver={(e) => e.preventDefault()}
                 >
                   <div className="drag-handle"><GripVertical size={16} /></div>
-                  <input className="input-field" placeholder="Nombre de la Materia" value={materia.nombre} onChange={(e) => setTecForm((prev) => ({ ...prev, materias: prev.materias.map((item, idx) => idx === index ? { ...item, nombre: e.target.value } : item) }))} />
+                  <input
+                    className="input-field"
+                    style={duplicateSubjectKeys.has(normalizeCurricularName(materia.nombre)) ? { borderColor: 'rgba(255, 102, 102, 0.75)', boxShadow: '0 0 0 1px rgba(255, 102, 102, 0.25)' } : undefined}
+                    placeholder="Nombre de la Materia"
+                    value={materia.nombre}
+                    onChange={(e) => setTecForm((prev) => ({ ...prev, materias: prev.materias.map((item, idx) => idx === index ? { ...item, nombre: e.target.value } : item) }))}
+                  />
                   <select className="input-field" style={{ width: '160px' }} value={materia.tipo} onChange={(e) => setTecForm((prev) => ({ ...prev, materias: prev.materias.map((item, idx) => idx === index ? { ...item, tipo: e.target.value } : item) }))}>
                     <option value="comun">Materias Comunes</option>
                     <option value="modular">Modular (Teoría/Prác.)</option>
@@ -198,6 +209,14 @@ export default function PreceptorModals(props) {
                   </button>
                 </div>
               ))}
+            </div>
+            {duplicateSubjectNames.length > 0 && (
+              <div style={{ marginTop: '0.85rem', padding: '0.85rem 1rem', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ffd4d4', fontSize: '0.88rem', lineHeight: '1.45' }}>
+                Hay materias duplicadas o casi iguales: <strong>{duplicateSubjectNames.join(', ')}</strong>. CorrÃ­gelas antes de guardar para evitar desincronizaciones.
+              </div>
+            )}
+            <div style={{ marginTop: '0.85rem', padding: '0.85rem 1rem', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.45' }}>
+              Los <strong>Taller (Modular)</strong> se usan luego con <strong>2 docentes titulares</strong> y <strong>2 suplentes</strong> en Horarios. Los <strong>Taller (Simple)</strong> y las materias teÃ³ricas usan una sola asignaciÃ³n.
             </div>
             <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
               <button className="btn" type="button" onClick={() => setTecForm((prev) => ({ ...prev, materias: [...prev.materias, { id: `draft-${Date.now()}`, nombre: '', tipo: 'comun' }] }))} style={{ flex: 1 }}><Plus size={16} /> Agregar Materia</button>

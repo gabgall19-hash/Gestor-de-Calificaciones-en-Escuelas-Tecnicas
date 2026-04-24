@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Save, Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
 import { TableSkeleton } from '../UI/Skeleton';
+import SaveStatusButton from '../UI/SaveStatusButton';
 import '../../css/AttendancePanel.css';
 
 const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, isMobile, onPrintInformacion }) => {
@@ -290,20 +291,13 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
                 </button>
               </div>
             )}
-            <button 
-              className={`btn btn-primary btn-save ${hasPendingChanges ? 'btn-shake' : ''}`} 
+            <SaveStatusButton
+              className="btn-save"
               onClick={saveChanges}
-              disabled={loading || !hasPendingChanges || !canEdit}
-              style={{
-                transition: 'all 0.3s ease',
-                background: !hasPendingChanges ? 'rgba(16, 185, 129, 0.2)' : 'var(--primary)',
-                color: !hasPendingChanges ? '#10b981' : 'white',
-                opacity: 1 // Override default disabled opacity to keep it readable
-              }}
-            >
-              {loading ? <Save size={18} className="animate-spin" /> : <Save size={18} />}
-              <span>{hasPendingChanges ? 'Guardar Cambios' : 'Guardado'}</span>
-            </button>
+              loading={loading}
+              hasChanges={hasPendingChanges}
+              canEdit={canEdit}
+            />
 
             <button 
               className="btn btn-secondary" 

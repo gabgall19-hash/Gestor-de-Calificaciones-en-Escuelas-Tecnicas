@@ -6,7 +6,19 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🛡️ [2.9.9] - 2026-04-23 (Versión Actual)
+### 🚀 [3.0.0] - 2026-04-23 (Versión Actual)
+**"Gestión Dinámica de Horarios y Excelencia Operativa"**
+
+*   **📅 Sistema de Horarios Inteligente**:
+    *   **Autocompletado Pro**: Implementación de `SearchableSelect` con búsqueda difusa e insensible a acentos para la asignación ultra-rápida de materias y profesores.
+    *   **Visualización "Horario Libre"**: Diseño específico para horas libres con alineación centrada y estilo minimalista, mejorando la claridad del cronograma.
+    *   **Drag-and-Drop Controlado**: Restricción de reordenamiento exclusivo para bloques de recreo, evitando desplazamientos accidentales de materias académicas.
+    *   **🖨️ Impresión de Horarios**: Nueva vista de impresión optimizada para PDF/A4 que permite a los alumnos y preceptores tener el cronograma físico siempre a mano.
+*   **🛡️ Integridad de Base de Datos**: Refactorización de las consultas `UPSERT` en Cloudflare D1 para la gestión de horarios, eliminando errores de colisión y garantizando persistencia atómica.
+*   **🧪 QA Autónomo con TestSprite**: Integración de especificaciones de testing automatizado para validar de forma continua los flujos de login, carga de notas y gestión de asistencia.
+*   **🎨 Micro-interacciones Premium**: Pulido de transiciones y estados de carga en el panel de horarios para una sensación de aplicación nativa.
+
+### 🛡️ [2.9.9] - 2026-04-23
 **"Refinamiento UI/UX y Preparación para App Móvil"**
 
 *   **💾 Botón de Guardado Dinámico**: Rediseño del botón de guardado en los paneles de **Notas** y **Asistencia**. Ahora alterna entre **"Guardado"** (verde/deshabilitado) y **"Guardar Cambios"** (azul/animado).

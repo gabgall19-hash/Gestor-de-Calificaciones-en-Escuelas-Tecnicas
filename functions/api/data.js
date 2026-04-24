@@ -14,6 +14,190 @@ function toTitleCase(str) {
   return str.trim().toLowerCase().split(/\s+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
+function normalizeCurricularName(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function sanitizeTecMaterias(materias = []) {
+  return materias
+    .filter((materia) => String(materia?.nombre || '').trim())
+    .map((materia) => ({
+      ...materia,
+      nombre: String(materia.nombre || '').trim(),
+      tipo: materia?.tipo ?? 'comun',
+      es_taller: materia?.es_taller ? 1 : 0
+    }));
+}
+
+function getDuplicateCurricularNames(materias = []) {
+  const seen = new Map();
+  const duplicates = new Set();
+
+  materias.forEach((materia) => {
+    const normalized = normalizeCurricularName(materia?.nombre);
+    if (!normalized) return;
+    if (seen.has(normalized)) duplicates.add(normalized);
+    else seen.set(normalized, materia.nombre);
+  });
+
+  return Array.from(duplicates).map((key) => seen.get(key) || key);
+}
+
+function removeSubjectPairsFromAssignments(currentValue, deletedIdsSet) {
+  return String(currentValue || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((pair) => {
+      const [, subjectId] = pair.split('-');
+      return !deletedIdsSet.has(Number(subjectId));
+    })
+    .join(',');
+}
+
+function sanitizeSchedulePayload(gridData, deletedIdsSet, deletedNamesSet) {
+  let parsed;
+  try {
+    parsed = JSON.parse(gridData || '[]');
+  } catch {
+    return { changed: false, serialized: gridData || '[]' };
+  }
+
+  const payload = Array.isArray(parsed)
+    ? { meta: {}, grid: parsed }
+    : { meta: parsed?.meta || {}, grid: Array.isArray(parsed?.grid) ? parsed.grid : [] };
+
+  let changed = false;
+  const nextGrid = payload.grid.map((row) => {
+    if (row?.type === 'break' || !row?.days) return row;
+
+    let rowChanged = false;
+    const nextDays = { ...row.days };
+
+    Object.keys(nextDays).forEach((day) => {
+      const cell = nextDays[day];
+      const subjectId = Number(cell?.subject_id);
+      const subjectName = normalizeCurricularName(cell?.subject);
+      const shouldClear = deletedIdsSet.has(subjectId) || (!!subjectName && deletedNamesSet.has(subjectName));
+
+      if (!shouldClear) return;
+
+      rowChanged = true;
+      changed = true;
+      nextDays[day] = {
+        ...cell,
+        subject: '',
+        teacher: '',
+        subject_id: null,
+        teacher_id: null
+      };
+    });
+
+    return rowChanged ? { ...row, days: nextDays } : row;
+  });
+
+  const nextAssignments = {};
+  const currentAssignments = payload.meta?.subjectAssignments && typeof payload.meta.subjectAssignments === 'object'
+    ? payload.meta.subjectAssignments
+    : {};
+
+  Object.entries(currentAssignments).forEach(([key, value]) => {
+    const matchesDeletedId = /^subject-(\d+)$/.test(key) && deletedIdsSet.has(Number(key.replace('subject-', '')));
+    const matchesDeletedName = key.startsWith('subject-name-') && deletedNamesSet.has(key.replace('subject-name-', ''));
+    if (matchesDeletedId || matchesDeletedName) {
+      changed = true;
+      return;
+    }
+    nextAssignments[key] = value;
+  });
+
+  const nextMeta = Object.keys(nextAssignments).length > 0
+    ? { ...payload.meta, subjectAssignments: nextAssignments }
+    : Object.prototype.hasOwnProperty.call(payload.meta || {}, 'subjectAssignments')
+      ? (() => {
+          changed = true;
+          const { subjectAssignments, ...restMeta } = payload.meta || {};
+          return restMeta;
+        })()
+      : payload.meta;
+
+  return {
+    changed,
+    serialized: JSON.stringify({ meta: nextMeta || {}, grid: nextGrid })
+  };
+}
+
+async function syncProfessorAssignmentsForCourse(env, courseId, gridData) {
+  const parsed = JSON.parse(gridData || '[]');
+  const grid = Array.isArray(parsed) ? parsed : (parsed.grid || []);
+  const newAssignmentsByTeacher = {};
+
+  grid.forEach((row) => {
+    if (row?.type === 'break' || !row?.days) return;
+    Object.values(row.days).forEach((cell) => {
+      if (cell?.teacher_id && cell?.subject_id) {
+        const teacherId = Number(cell.teacher_id);
+        const subjectId = Number(cell.subject_id);
+        if (!newAssignmentsByTeacher[teacherId]) newAssignmentsByTeacher[teacherId] = new Set();
+        newAssignmentsByTeacher[teacherId].add(subjectId);
+      }
+    });
+  });
+
+  const [validSubjects, validProfs] = await Promise.all([
+    env.DB.prepare('SELECT id FROM materias WHERE tecnicatura_id = (SELECT tecnicatura_id FROM cursos WHERE id = ?)').bind(courseId).all(),
+    env.DB.prepare("SELECT id FROM usuarios WHERE (rol = 'profesor' OR rol = 'preceptor' OR rol = 'preceptor_taller' OR rol = 'preceptor_ef' OR is_professor_hybrid = 1)").all()
+  ]);
+
+  const validSubjectIds = new Set(validSubjects.results.map((subject) => subject.id));
+  const validProfIds = new Set(validProfs.results.map((professor) => professor.id));
+  const verifiedAssignmentsByTeacher = {};
+
+  Object.keys(newAssignmentsByTeacher).forEach((teacherIdValue) => {
+    const teacherId = Number(teacherIdValue);
+    if (!validProfIds.has(teacherId)) return;
+
+    newAssignmentsByTeacher[teacherIdValue].forEach((subjectId) => {
+      if (!validSubjectIds.has(subjectId)) return;
+      if (!verifiedAssignmentsByTeacher[teacherId]) verifiedAssignmentsByTeacher[teacherId] = new Set();
+      verifiedAssignmentsByTeacher[teacherId].add(subjectId);
+    });
+  });
+
+  const professors = await env.DB.prepare("SELECT id, rol, professor_subject_ids, is_professor_hybrid FROM usuarios WHERE (rol = 'profesor' OR rol = 'preceptor' OR rol = 'preceptor_taller' OR rol = 'preceptor_ef' OR is_professor_hybrid = 1)").all();
+  const updateStatements = [];
+
+  for (const professor of professors.results) {
+    const currentIds = String(professor.professor_subject_ids || '').split(',').filter(Boolean);
+    const filteredIds = currentIds.filter((pair) => !pair.startsWith(`${courseId}-`));
+    const newForThisCourse = verifiedAssignmentsByTeacher[professor.id];
+
+    if (newForThisCourse) {
+      newForThisCourse.forEach((subjectId) => {
+        filteredIds.push(`${courseId}-${subjectId}`);
+      });
+    }
+
+    const finalIds = [...new Set(filteredIds)].join(',');
+    const shouldActivateHybrid = !!newForThisCourse && ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(professor.rol) && !professor.is_professor_hybrid;
+    if (finalIds !== (professor.professor_subject_ids || '') || shouldActivateHybrid) {
+      updateStatements.push(
+        env.DB.prepare('UPDATE usuarios SET professor_subject_ids = ?, is_professor_hybrid = ? WHERE id = ?')
+          .bind(finalIds, shouldActivateHybrid ? 1 : (professor.is_professor_hybrid ? 1 : 0), professor.id)
+      );
+    }
+  }
+
+  if (updateStatements.length > 0) {
+    await env.DB.batch(updateStatements);
+  }
+}
+
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -1193,32 +1377,89 @@ async function handleEndCycle(env, request, userId, body) {
 async function handleTecnicaturas(env, request, userId, body) {
   await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector');
   const { action, nombre, materias = [], tecnicaturaId } = body;
+  const sanitizedNombre = String(nombre || '').trim();
+  const sanitizedMaterias = sanitizeTecMaterias(materias);
+  const duplicateNames = getDuplicateCurricularNames(sanitizedMaterias);
+
+  if ((action === 'create' || action === 'update') && !sanitizedNombre) {
+    return json({ error: 'La tecnicatura debe tener un nombre.' }, 400);
+  }
+
+  if ((action === 'create' || action === 'update') && sanitizedMaterias.length === 0) {
+    return json({ error: 'La tecnicatura debe tener al menos una materia.' }, 400);
+  }
+
+  if ((action === 'create' || action === 'update') && duplicateNames.length > 0) {
+    return json({ error: `Hay materias duplicadas o casi iguales: ${duplicateNames.join(', ')}` }, 400);
+  }
 
   if (action === 'create') {
     const tec = await env.DB.prepare(
       'INSERT INTO tecnicaturas (nombre, detalle) VALUES (?, ?) RETURNING *'
-    ).bind(nombre, body.detalle || '').first();
+    ).bind(sanitizedNombre, body.detalle || '').first();
 
     const statements = [];
-    for (let i = 0; i < materias.length; i++) {
-      const m = materias[i];
-      if (!m.nombre?.trim()) continue;
+    for (let i = 0; i < sanitizedMaterias.length; i++) {
+      const m = sanitizedMaterias[i];
       statements.push(env.DB.prepare(
         'INSERT INTO materias (nombre, tipo, es_taller, tecnicatura_id, num_rotacion, orden) VALUES (?, ?, ?, ?, ?, ?)'
-      ).bind(m.nombre.trim(), m.tipo ?? 'comun', m.es_taller ? 1 : 0, tec.id, m.num_rotacion ?? null, i));
+      ).bind(m.nombre, m.tipo ?? 'comun', m.es_taller ? 1 : 0, tec.id, m.num_rotacion ?? null, i));
     }
     if (statements.length) await env.DB.batch(statements);
     return json({ success: true, tecnicatura: tec });
   }
 
   if (action === 'update') {
-    await env.DB.prepare('UPDATE tecnicaturas SET nombre = ?, detalle = ? WHERE id = ?').bind(nombre, body.detalle || '', tecnicaturaId).run();
+    await env.DB.prepare('UPDATE tecnicaturas SET nombre = ?, detalle = ? WHERE id = ?').bind(sanitizedNombre, body.detalle || '', tecnicaturaId).run();
 
-    // Get current subject IDs to delete those removed from form
-    const currentSubjects = await env.DB.prepare('SELECT id FROM materias WHERE tecnicatura_id = ?').bind(tecnicaturaId).all();
-    const currentIds = currentSubjects.results.map(s => s.id);
-    const incomingIds = materias.filter(m => typeof m.id !== 'string' || !m.id.startsWith('draft-')).map(m => Number(m.id));
+    const currentSubjects = await env.DB.prepare('SELECT id, nombre FROM materias WHERE tecnicatura_id = ?').bind(tecnicaturaId).all();
+    const currentIds = currentSubjects.results.map((subject) => subject.id);
+    const incomingIds = sanitizedMaterias
+      .filter((materia) => typeof materia.id !== 'string' || !materia.id.startsWith('draft-'))
+      .map((materia) => Number(materia.id));
     const idsToDelete = currentIds.filter(id => !incomingIds.includes(id));
+    const deletedIdsSet = new Set(idsToDelete.map((id) => Number(id)));
+    const deletedNamesSet = new Set(
+      currentSubjects.results
+        .filter((subject) => deletedIdsSet.has(Number(subject.id)))
+        .map((subject) => normalizeCurricularName(subject.nombre))
+        .filter(Boolean)
+    );
+
+    if (idsToDelete.length) {
+      const userRows = await env.DB.prepare("SELECT id, professor_subject_ids FROM usuarios WHERE professor_subject_ids IS NOT NULL AND professor_subject_ids != ''").all();
+      const userStatements = [];
+
+      userRows.results.forEach((userRow) => {
+        const nextAssignments = removeSubjectPairsFromAssignments(userRow.professor_subject_ids, deletedIdsSet);
+        if (nextAssignments !== (userRow.professor_subject_ids || '')) {
+          userStatements.push(env.DB.prepare('UPDATE usuarios SET professor_subject_ids = ? WHERE id = ?').bind(nextAssignments, userRow.id));
+        }
+      });
+
+      if (userStatements.length) await env.DB.batch(userStatements);
+
+      const placeholders = idsToDelete.map(() => '?').join(',');
+      await env.DB.batch([
+        env.DB.prepare(`DELETE FROM bloqueos_materias WHERE materia_id IN (${placeholders})`).bind(...idsToDelete),
+        env.DB.prepare(`DELETE FROM calificaciones WHERE materia_id IN (${placeholders})`).bind(...idsToDelete),
+        env.DB.prepare(`DELETE FROM previas WHERE materia_id IN (${placeholders})`).bind(...idsToDelete)
+      ]);
+
+      const scheduleRows = await env.DB.prepare(`
+        SELECT cs.course_id, cs.grid_data
+        FROM course_schedules cs
+        JOIN cursos c ON c.id = cs.course_id
+        WHERE c.tecnicatura_id = ?
+      `).bind(tecnicaturaId).all();
+
+      for (const scheduleRow of scheduleRows.results) {
+        const sanitizedSchedule = sanitizeSchedulePayload(scheduleRow.grid_data, deletedIdsSet, deletedNamesSet);
+        if (!sanitizedSchedule.changed) continue;
+        await env.DB.prepare('UPDATE course_schedules SET grid_data = ? WHERE course_id = ?').bind(sanitizedSchedule.serialized, scheduleRow.course_id).run();
+        await syncProfessorAssignmentsForCourse(env, scheduleRow.course_id, sanitizedSchedule.serialized);
+      }
+    }
 
     const statements = [];
     if (idsToDelete.length) {
@@ -1226,17 +1467,16 @@ async function handleTecnicaturas(env, request, userId, body) {
       statements.push(env.DB.prepare(`DELETE FROM materias WHERE id IN (${placeholders})`).bind(...idsToDelete));
     }
 
-    for (let i = 0; i < materias.length; i++) {
-      const m = materias[i];
-      if (!m.nombre?.trim()) continue;
+    for (let i = 0; i < sanitizedMaterias.length; i++) {
+      const m = sanitizedMaterias[i];
       if (typeof m.id === 'string' && m.id.startsWith('draft-')) {
         statements.push(env.DB.prepare(
           'INSERT INTO materias (nombre, tipo, es_taller, tecnicatura_id, num_rotacion, orden) VALUES (?, ?, ?, ?, ?, ?)'
-        ).bind(m.nombre.trim(), m.tipo ?? 'comun', m.es_taller ? 1 : 0, tecnicaturaId, m.num_rotacion ?? null, i));
+        ).bind(m.nombre, m.tipo ?? 'comun', m.es_taller ? 1 : 0, tecnicaturaId, m.num_rotacion ?? null, i));
       } else {
         statements.push(env.DB.prepare(
           'UPDATE materias SET nombre = ?, tipo = ?, es_taller = ?, num_rotacion = ?, orden = ? WHERE id = ?'
-        ).bind(m.nombre.trim(), m.tipo ?? 'comun', m.es_taller ? 1 : 0, m.num_rotacion ?? null, i, m.id));
+        ).bind(m.nombre, m.tipo ?? 'comun', m.es_taller ? 1 : 0, m.num_rotacion ?? null, i, m.id));
       }
     }
     if (statements.length) await env.DB.batch(statements);
@@ -1410,9 +1650,18 @@ async function handleSchedules(env, request, userId, body) {
     if (!course_id) throw new Error('ID de curso requerido');
     await env.DB.prepare(`
       INSERT INTO course_schedules (course_id, grid_data) VALUES (?, ?)
-      ON CONFLICT(course_id) DO UPDATE SET grid_data = excluded.grid_data, last_updated = CURRENT_TIMESTAMP
+      ON CONFLICT(course_id) DO UPDATE SET grid_data = excluded.grid_data
     `).bind(course_id, grid_data).run();
-    await logHistory(env, userId, course_id, 'horarios_save', `Se actualizó el horario del curso.`);
+
+    // --- Dynamic Permission Sync Logic ---
+    try {
+      await syncProfessorAssignmentsForCourse(env, course_id, grid_data);
+    } catch (syncErr) {
+      console.error('Permission sync error:', syncErr);
+    }
+    // -------------------------------------
+
+    await logHistory(env, userId, course_id, 'horarios_save', `Se actualizó el horario del curso y se sincronizaron los accesos de profesores.`);
     return json({ success: true });
   }
 

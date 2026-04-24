@@ -471,7 +471,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         />
       )}
 
-      {page === 'horarios' && !isMobile && <HorariosPanel user={user} selectedYearId={selectedYearId} selectedCourseId={selectedCourseId} allCourses={data.allCourses} />}
+      {page === 'horarios' && !isMobile && <HorariosPanel user={user} selectedYearId={selectedYearId} selectedCourseId={selectedCourseId} allCourses={data.allCourses} subjects={data.subjects} allSubjects={data.allSubjects} users={data.users} />}
 
       {page === 'students' && (
         <StudentManager

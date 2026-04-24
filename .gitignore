@@ -31,3 +31,24 @@ dist-ssr
 
 # Institucional
 REPORTE_PROFESORES_2026.txt
+lint_output.txt
+xls/
+
+# InsForge & AI agent skills
+.insforge
+.agent
+.agents
+.augment
+.claude
+.cline
+.github/copilot*
+.kilocode
+.qoder
+.qwen
+.roo
+.trae
+.windsurf
+
+# Data & Scratch
+db/
+scratch/

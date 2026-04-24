@@ -1,4 +1,4 @@
-import { draftTec, emptyUser } from '../functions/PreceptorHelpers';
+import { draftTec, emptyUser, findDuplicateSubjectNames } from '../functions/PreceptorHelpers';
 
 function normalizeTecMaterias(materias) {
   return materias.filter((materia) => materia.nombre.trim()).map((materia) => {
@@ -16,6 +16,29 @@ function normalizeTecMaterias(materias) {
     }
     return { ...materia, tipo, es_taller };
   });
+}
+
+function validateTecPayload(tecForm, showToast) {
+  const nombre = String(tecForm?.nombre || '').trim();
+  const materias = normalizeTecMaterias(Array.isArray(tecForm?.materias) ? tecForm.materias : []);
+
+  if (!nombre) {
+    showToast('La tecnicatura debe tener un nombre.', 'error');
+    return null;
+  }
+
+  if (!materias.length) {
+    showToast('Agrega al menos una materia antes de guardar la tecnicatura.', 'error');
+    return null;
+  }
+
+  const duplicates = findDuplicateSubjectNames(materias);
+  if (duplicates.length) {
+    showToast(`Hay materias duplicadas o casi idénticas: ${duplicates.join(', ')}`, 'error');
+    return null;
+  }
+
+  return materias;
 }
 
 export default function usePreceptorAdminActions(deps) {
@@ -200,7 +223,9 @@ export default function usePreceptorAdminActions(deps) {
 
   const addTec = async (e) => {
     e.preventDefault();
-    await post('tecnicaturas', { action: 'create', nombre: tecForm.nombre, detalle: tecForm.detalle, materias: normalizeTecMaterias(tecForm.materias) });
+    const materias = validateTecPayload(tecForm, showToast);
+    if (!materias) return;
+    await post('tecnicaturas', { action: 'create', nombre: tecForm.nombre.trim(), detalle: tecForm.detalle, materias });
     setTecMode('list');
     setStatus('Tecnicatura creada');
     await loadData(selectedCourseId, selectedYearId);
@@ -208,12 +233,14 @@ export default function usePreceptorAdminActions(deps) {
 
   const editTec = async (e) => {
     e.preventDefault();
+    const materias = validateTecPayload(tecForm, showToast);
+    if (!materias) return;
     await post('tecnicaturas', {
       action: 'update',
       tecnicaturaId: Number(editingTecId),
-      nombre: tecForm.nombre,
+      nombre: tecForm.nombre.trim(),
       detalle: tecForm.detalle,
-      materias: normalizeTecMaterias(tecForm.materias)
+      materias
     });
     setTecMode('list');
     setStatus('Tecnicatura actualizada');

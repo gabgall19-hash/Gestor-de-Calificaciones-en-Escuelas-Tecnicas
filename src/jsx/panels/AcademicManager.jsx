@@ -91,9 +91,9 @@ const AcademicManager = ({
         </div>
       </div>
 
-      <div className="glass-card table-container" style={{ marginTop: '1rem', overflowX: 'auto' }}>
+      <div className="glass-card table-container" style={{ marginTop: '0.4rem', overflowX: 'auto' }}>
         {isMobile && (
-          <div style={{ padding: '1rem 1rem 0', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+          <div style={{ padding: '0.85rem 1rem 0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             <label style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: '600' }}>Periodo</label>
             <select className="input-field" value={mobilePeriodLabel} onChange={(e) => setMobilePeriodLabel(e.target.value)} style={{ width: '100%' }}>
               {PERIOD_GROUPS.map((group) => (
@@ -103,7 +103,7 @@ const AcademicManager = ({
           </div>
         )}
 
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--glass-border)', position: 'relative' }}>
+        <div style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--glass-border)', position: 'relative' }}>
           <Search size={18} style={{ position: 'absolute', left: '25px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
           <input
             className="input-field"
