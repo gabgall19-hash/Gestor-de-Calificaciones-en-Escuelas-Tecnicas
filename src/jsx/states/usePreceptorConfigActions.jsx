@@ -111,7 +111,20 @@ export default function usePreceptorConfigActions(deps) {
 
   const onPrintAllCourses = () => handlePrintAllCourses(data);
   const onPrintSeguimientoGlobal = () => handlePrintSeguimientoGlobal(data, selectedYearId, user, setStatus);
-  const onPrintPlanillasCurso = () => handlePrintPlanillasCurso(data, selectedCourseId);
+  const onPrintPlanillasCurso = async () => {
+    if (!selectedCourseId) return;
+    setLoading(true);
+    try {
+      const scheduleRes = await apiService.get('horarios', { courseId: selectedCourseId, userId: user.id });
+      handlePrintPlanillasCurso(data, selectedCourseId, scheduleRes);
+    } catch (err) {
+      console.error('Error fetching schedule for planillas:', err);
+      // Fallback to existing data if schedule fails
+      handlePrintPlanillasCurso(data, selectedCourseId);
+    } finally {
+      setLoading(false);
+    }
+  };
   const onPrintRAC = (student) => handlePrintRAC(data, student);
 
   const onPrintParteDiario = async () => {

@@ -6,6 +6,13 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.0.6] - 2026-04-24 (Corrección de Impresión)
+**"Sincronización de Docentes en Planillas"**
+
+*   **🖨️ Fix de Profesores en Planillas**: Resolución del bug que dejaba vacío el campo "Docentes a cargo" en las planillas de calificaciones A4. Ahora el sistema realiza una búsqueda exhaustiva que prioriza las asignaciones dinámicas del **Panel de Horarios** y escanea directamente las celdas del cronograma para garantizar la aparición del profesor.
+*   **👨‍🏫 Soporte Multi-Rol**: Se amplió la lógica de detección de docentes para incluir preceptores y cargos híbridos que cumplen funciones de enseñanza, asegurando que su nombre figure correctamente en los reportes oficiales.
+*   **🔍 Normalización de Materias**: Implementación de un motor de búsqueda por nombres normalizados (insensible a tildes y mayúsculas) para vincular profesores incluso cuando los nombres de las materias tienen ligeras variaciones.
+
 ### 🚀 [3.0.5] - 2026-04-24 (Actualización de Seguridad)
 **"Blindaje de Sesión y Refinamiento de Pases"**
 

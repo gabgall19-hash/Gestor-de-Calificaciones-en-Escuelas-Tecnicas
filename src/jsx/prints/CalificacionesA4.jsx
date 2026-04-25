@@ -1,19 +1,97 @@
 import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
 
-export const handlePrintPlanillasCurso = (data, selectedCourseId) => {
+export const handlePrintPlanillasCurso = (data, selectedCourseId, scheduleRes = null) => {
   const activeCourse = data.courses.find(c => c.id === selectedCourseId);
   if (!activeCourse) return;
+
+  // Helper for name normalization
+  const normalize = (str) => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  
+  // Extract schedule assignments if available
+  let scheduleAssignments = {};
+  if (scheduleRes && scheduleRes.grid_data) {
+    try {
+      const parsed = JSON.parse(scheduleRes.grid_data);
+      scheduleAssignments = parsed.meta?.subjectAssignments || {};
+    } catch (e) {
+      console.error("Error parsing schedule grid_data", e);
+    }
+  }
 
   const win = window.open('', '_blank');
   const subjectsHTML = data.subjects.map(subject => {
     const subjectKey = `${activeCourse.id}-${subject.id}`;
-    const professors = (data.users || [])
-      .filter(u => {
-        const assignments = String(u.professor_subject_ids || '').split(',').map(s => s.trim());
-        return u.rol === 'profesor' && assignments.includes(subjectKey);
+    
+    // 1. Try to get professors from schedule assignments (meta or grid)
+    let assignedProfessors = [];
+    const normName = normalize(subject.nombre);
+    
+    if (scheduleRes && scheduleRes.grid_data) {
+      try {
+        const parsed = typeof scheduleRes.grid_data === 'string' ? JSON.parse(scheduleRes.grid_data) : scheduleRes.grid_data;
+        const scheduleAssignments = parsed.meta?.subjectAssignments || {};
+        
+        // A. Match by ID key (standard)
+        const idKey = `subject-${subject.id}`;
+        if (scheduleAssignments[idKey]) {
+          const ass = scheduleAssignments[idKey];
+          const actual = Array.isArray(ass.actualTeachers) ? ass.actualTeachers : [ass.actualTeacherName];
+          const substitute = Array.isArray(ass.substituteTeachers) ? ass.substituteTeachers : [ass.substituteTeacherName];
+          assignedProfessors.push(...actual, ...substitute);
+        }
+        
+        // B. Match by canonical/name keys
+        if (assignedProfessors.length === 0) {
+          const nameKey = `subject-name-${normName}`;
+          const canonicalKey = `subject-canonical-${normName.replace('ingles tecnico', 'ingles').replace('ingl tecnico', 'ingles')}`;
+          const ass = scheduleAssignments[nameKey] || scheduleAssignments[canonicalKey];
+          if (ass) {
+            const actual = Array.isArray(ass.actualTeachers) ? ass.actualTeachers : [ass.actualTeacherName];
+            const substitute = Array.isArray(ass.substituteTeachers) ? ass.substituteTeachers : [ass.substituteTeacherName];
+            assignedProfessors.push(...actual, ...substitute);
+          }
+        }
+
+        // C. Match by searching the grid cells directly (ultimate fallback)
+        if (assignedProfessors.length === 0 && Array.isArray(parsed.grid)) {
+          parsed.grid.forEach(row => {
+            if (row.days) {
+              Object.values(row.days).forEach(cell => {
+                const cellSubName = normalize(cell.subject);
+                if (Number(cell.subject_id) === Number(subject.id) || cellSubName === normName || (cellSubName.includes('lengua extranjera') && normName.includes('lengua extranjera'))) {
+                  if (cell.teacher) assignedProfessors.push(cell.teacher);
+                }
+              });
+            }
+          });
+        }
+      } catch (e) {
+        console.error("Error matching teachers from schedule", e);
+      }
+    }
+
+    // Clean up and format assigned professors
+    assignedProfessors = assignedProfessors
+      .filter(Boolean)
+      .map(name => {
+        const clean = name.replace('Prof. ', '').trim();
+        return clean ? `Prof. ${clean}` : null;
       })
-      .map(u => `Prof. ${u.nombre}`)
-      .join(' / ') || '________________';
+      .filter(Boolean);
+
+    // 2. Fallback to data.users (broadened role check)
+    if (assignedProfessors.length === 0) {
+      assignedProfessors = (data.users || [])
+        .filter(u => {
+          const assignments = String(u.professor_subject_ids || '').split(',').map(s => s.trim());
+          const isAssigned = assignments.includes(subjectKey);
+          const hasTeachingRole = ['profesor', 'preceptor', 'preceptor_taller', 'preceptor_ef'].includes(u.rol) || u.is_professor_hybrid === 1;
+          return isAssigned && hasTeachingRole;
+        })
+        .map(u => `Prof. ${u.nombre}`);
+    }
+
+    const professors = [...new Set(assignedProfessors)].join(' / ') || '________________';
 
     const students = [...data.students].sort((a, b) => a.apellido.localeCompare(b.apellido));
 
