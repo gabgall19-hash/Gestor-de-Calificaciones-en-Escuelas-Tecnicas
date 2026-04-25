@@ -76,6 +76,8 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   const [isSaving, setIsSaving] = useState(false);
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState('');
+  const [allSchedules, setAllSchedules] = useState(null);
+  const [isPrintingAll, setIsPrintingAll] = useState(false);
 
   const isAdmin = user.rol === 'admin';
   const professors = users.filter((userRow) =>
@@ -252,7 +254,26 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   };
 
   const handlePrint = () => {
-    window.print();
+    setAllSchedules(null); // Ensure single print
+    setTimeout(() => window.print(), 100);
+  };
+
+  const handlePrintAll = async () => {
+    setIsPrintingAll(true);
+    try {
+      const res = await apiService.get('horarios', { userId: user.id });
+      setAllSchedules(res);
+      // Wait for React to render the batch print view
+      setTimeout(() => {
+        window.print();
+        setAllSchedules(null);
+      }, 500);
+    } catch (err) {
+      console.error('Error fetching all schedules:', err);
+      showMsg('error', 'Error al cargar todos los horarios');
+    } finally {
+      setIsPrintingAll(false);
+    }
   };
 
   const findSubjectByLogicalId = (logicalId) => {
@@ -560,8 +581,9 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
       }));
   }, [curriculumSubjects, grid, professors, subjectAssignments, subjectOrderMap, subjects]);
 
-  const getHeaderColor = () => {
-    const tec = selectedCourse?.tecnicatura_nombre?.toUpperCase() || '';
+  const getHeaderColor = (courseArg) => {
+    const course = courseArg || selectedCourse;
+    const tec = course?.tecnicatura_nombre?.toUpperCase() || '';
     if (tec.includes('CICLO BASICO')) return '#ff9900'; 
     if (tec.includes('AERONAUTICA')) return '#2563eb'; 
     if (tec.includes('ELECTRONICA')) return '#16a34a'; 
@@ -569,8 +591,9 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
     return '#ffff00';
   };
 
-  const getCiclo = () => {
-    const ano = Number(selectedCourse?.ano);
+  const getCiclo = (courseArg) => {
+    const course = courseArg || selectedCourse;
+    const ano = Number(course?.ano);
     if (ano <= 2) return 'Básico';
     return 'Superior';
   };
@@ -624,6 +647,15 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                 <button className="btn btn-icon" onClick={handlePrint} title="Imprimir">
                   <Printer size={20} />
                 </button>
+                <button 
+                  className={`btn btn-outline btn-sm ${isPrintingAll ? 'loading' : ''}`} 
+                  onClick={handlePrintAll} 
+                  disabled={isPrintingAll}
+                  title="Imprimir todos los horarios del año"
+                >
+                  <Printer size={16} />
+                  <span>{isPrintingAll ? 'Cargando...' : 'Imprimir todos'}</span>
+                </button>
                 {isAdmin && (
                   <button className="btn btn-icon text-danger" onClick={handleDelete} title="Eliminar horario">
                     <Trash2 size={20} />
@@ -637,6 +669,8 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
               grid={grid}
               getHeaderColor={getHeaderColor}
               getCiclo={getCiclo}
+              allSchedules={allSchedules}
+              allCourses={allCourses}
             />
 
             <div className="schedule-table-container print-hide">
@@ -864,17 +898,54 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
 
       <style jsx>{`
         .horarios-panel { padding: 10px; animation: fadeIn 0.3s ease; }
-        .main-editor { padding: 25px; min-height: 600px; display: flex; flex-direction: column; background: rgba(255,255,255,0.03); }
+        .main-editor { 
+          padding: 25px; 
+          min-height: 600px; 
+          display: flex; 
+          flex-direction: column; 
+          background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255,255,255,0.08);
+          box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
         .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
         .course-info h2 { margin: 0; font-size: 1.6rem; font-weight: 800; color: white; }
         .badge { background: var(--primary-color); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; margin-top: 8px; display: inline-block; font-weight: 700; text-transform: uppercase; }
         
         .editor-actions { display: flex; gap: 12px; align-items: center; }
         
-        .schedule-table-container { overflow-x: auto; flex: 1; }
+        .schedule-table-container { 
+          overflow-x: auto; 
+          flex: 1; 
+          border-radius: 12px; 
+          border: 1px solid rgba(255,255,255,0.12); 
+          background:
+            linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)),
+            radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent 40%),
+            rgba(119, 125, 132, 0.15);
+          backdrop-filter: blur(15px);
+          -webkit-backdrop-filter: blur(15px);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
         .schedule-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .schedule-table th { padding: 15px 10px; text-align: center; background: rgba(119,125,132,0.42); color: #f3f4f6; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .schedule-table td { padding: 10px; border: 1px solid rgba(148,163,184,0.22); vertical-align: middle; background: rgba(119,125,132,0.2); }
+        .schedule-table th { 
+          padding: 15px 10px; 
+          text-align: center; 
+          background: rgba(255,255,255,0.15); 
+          color: #f8fafc; 
+          font-size: 0.85rem; 
+          font-weight: 900; 
+          text-transform: uppercase; 
+          letter-spacing: 0.05em;
+          border: 1px solid rgba(255,255,255,0.1);
+        }
+        .schedule-table td { 
+          padding: 10px; 
+          border: 1px solid rgba(255,255,255,0.08); 
+          vertical-align: middle; 
+          background: rgba(255,255,255,0.04); 
+        }
 
         .bulk-editor-section {
           margin-top: 28px;
@@ -984,29 +1055,29 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
         tr:hover .cell-drag.no-drag { opacity: 0 !important; }
         .dragging { opacity: 0.4; background: rgba(var(--primary-rgb), 0.1) !important; }
 
-        .cell-time { background: rgba(119,125,132,0.3); text-align: center; }
+        .cell-time { background: rgba(255,255,255,0.08); text-align: center; }
         .input-time { 
           background: transparent; border: none; color: #fff; width: 100%; text-align: center; 
-          font-weight: 700; font-size: 0.95rem; outline: none;
+          font-weight: 900; font-size: 0.95rem; outline: none;
         }
         
         .slot-editor { display: flex; flex-direction: column; gap: 4px; }
         .input-subject-search, .input-teacher-search { 
-          background: rgba(119,125,132,0.28); border: 1px solid rgba(255,255,255,0.14); 
-          color: white; font-size: 0.75rem; padding: 4px; border-radius: 4px; outline: none;
+          background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); 
+          color: white; font-size: 0.75rem; padding: 6px; border-radius: 6px; outline: none;
           width: 100%; transition: all 0.2s;
         }
         .input-subject-search:focus, .input-teacher-search:focus {
-          background: rgba(119,125,132,0.4); border-color: #cbd5e1;
+          background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4);
         }
         .input-subject-search.centered-free { text-align: center; color: rgba(255,255,255,0.3); font-style: italic; }
-        .input-teacher-search { color: #d1d5db; opacity: 0.95; }
+        .input-teacher-search { color: #f1f5f9; opacity: 1; }
         .view-subject { font-weight: 700; font-size: 0.85rem; color: white; text-align: center; }
         .view-subject.is-free { color: rgba(255,255,255,0.2); font-style: italic; font-weight: 400; font-size: 0.75rem; min-height: 32px; display: flex; align-items: center; justify-content: center; }
         .view-subject.centered-free { text-align: center; }
         .view-teacher { font-size: 0.75rem; color: var(--primary-color); text-align: center; opacity: 0.8; }
         
-        .row-break { background: rgba(119,125,132,0.24); }
+        .row-break { background: rgba(255,255,255,0.08); }
         .input-break { 
           width: 100%; background: transparent; border: none; color: #ffcc00; 
           text-align: center; font-style: italic; letter-spacing: 4px; font-weight: 700; outline: none;

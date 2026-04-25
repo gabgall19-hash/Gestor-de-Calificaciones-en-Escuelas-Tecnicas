@@ -149,30 +149,37 @@ async function syncProfessorAssignmentsForCourse(env, courseId, gridData) {
     });
   });
 
-  const [validSubjects, validProfs] = await Promise.all([
+  const teacherIds = Object.keys(newAssignmentsByTeacher).map(Number);
+
+  // Load valid subjects for the course and only relevant professors
+  // We need professors who are either in the new schedule OR have existing assignments for this course (to clear them)
+  const [validSubjects, professorsRes] = await Promise.all([
     env.DB.prepare('SELECT id FROM materias WHERE tecnicatura_id = (SELECT tecnicatura_id FROM cursos WHERE id = ?)').bind(courseId).all(),
-    env.DB.prepare("SELECT id FROM usuarios WHERE (rol = 'profesor' OR rol = 'preceptor' OR rol = 'preceptor_taller' OR rol = 'preceptor_ef' OR is_professor_hybrid = 1)").all()
+    env.DB.prepare(`
+      SELECT id, rol, professor_subject_ids, is_professor_hybrid 
+      FROM usuarios 
+      WHERE (rol = 'profesor' OR rol = 'preceptor' OR rol = 'preceptor_taller' OR rol = 'preceptor_ef' OR is_professor_hybrid = 1)
+      AND (
+        id IN (${teacherIds.length ? teacherIds.map(() => '?').join(',') : 'NULL'})
+        OR professor_subject_ids LIKE ?
+      )
+    `).bind(...(teacherIds.length ? teacherIds : []), `%${courseId}-%`).all()
   ]);
 
   const validSubjectIds = new Set(validSubjects.results.map((subject) => subject.id));
-  const validProfIds = new Set(validProfs.results.map((professor) => professor.id));
   const verifiedAssignmentsByTeacher = {};
 
-  Object.keys(newAssignmentsByTeacher).forEach((teacherIdValue) => {
-    const teacherId = Number(teacherIdValue);
-    if (!validProfIds.has(teacherId)) return;
-
-    newAssignmentsByTeacher[teacherIdValue].forEach((subjectId) => {
+  teacherIds.forEach((teacherId) => {
+    newAssignmentsByTeacher[teacherId].forEach((subjectId) => {
       if (!validSubjectIds.has(subjectId)) return;
       if (!verifiedAssignmentsByTeacher[teacherId]) verifiedAssignmentsByTeacher[teacherId] = new Set();
       verifiedAssignmentsByTeacher[teacherId].add(subjectId);
     });
   });
 
-  const professors = await env.DB.prepare("SELECT id, rol, professor_subject_ids, is_professor_hybrid FROM usuarios WHERE (rol = 'profesor' OR rol = 'preceptor' OR rol = 'preceptor_taller' OR rol = 'preceptor_ef' OR is_professor_hybrid = 1)").all();
   const updateStatements = [];
 
-  for (const professor of professors.results) {
+  for (const professor of professorsRes.results) {
     const currentIds = String(professor.professor_subject_ids || '').split(',').filter(Boolean);
     const filteredIds = currentIds.filter((pair) => !pair.startsWith(`${courseId}-`));
     const newForThisCourse = verifiedAssignmentsByTeacher[professor.id];
@@ -185,6 +192,7 @@ async function syncProfessorAssignmentsForCourse(env, courseId, gridData) {
 
     const finalIds = [...new Set(filteredIds)].join(',');
     const shouldActivateHybrid = !!newForThisCourse && ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(professor.rol) && !professor.is_professor_hybrid;
+    
     if (finalIds !== (professor.professor_subject_ids || '') || shouldActivateHybrid) {
       updateStatements.push(
         env.DB.prepare('UPDATE usuarios SET professor_subject_ids = ?, is_professor_hybrid = ? WHERE id = ?')
@@ -681,6 +689,14 @@ async function handleGradeUpdates(env, request, userId, body) {
 
   const p_subjects = (user.professor_subject_ids ?? '').split(',');
 
+  // Pre-load edit mode if user is a preceptor to avoid queries in loop
+  let canEditRoleMode = false;
+  if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
+    const ajustes = await env.DB.prepare('SELECT valor FROM ajustes WHERE clave = ?').bind(`${user.rol}_mode`).first();
+    canEditRoleMode = ajustes ? ajustes.valor === 'edit' : false;
+  }
+
+
   // 1.5 Restriction: Check if year is current
   const firstStudent = studentsRes.results[0];
   if (firstStudent) {
@@ -709,9 +725,8 @@ async function handleGradeUpdates(env, request, userId, body) {
 
       if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
         if (!isAssignedAsProfessor) {
-          // Check for configurable edit mode
-          const ajustes = await env.DB.prepare('SELECT valor FROM ajustes WHERE clave = ?').bind(`${user.rol}_mode`).first();
-          const canEdit = ajustes ? ajustes.valor === 'edit' : false;
+          // Check for configurable edit mode (Pre-loaded before loop)
+          const canEdit = canEditRoleMode;
 
           if (!canEdit) {
             throw new Error(`Permiso denegado: el modo de edición para tu rol está deshabilitado.`);
@@ -1312,32 +1327,44 @@ async function handleEndCycle(env, request, userId, body) {
   const user = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares');
   const { students = [], isRepeater, targetCourseId, cycleName } = body;
 
-  const statements = [];
-  for (const s of students) {
-    // 1. Get current data for history
-    const data = await env.DB.prepare(`
+  const sIds = students.map(s => s.id);
+  if (sIds.length === 0) return json({ success: true });
+
+  // Load all required data in batch to avoid N+1 queries
+  const [allDataRes, allGradesRes] = await Promise.all([
+    env.DB.prepare(`
       SELECT a.*, c.ano, c.division, c.turno, t.nombre as tec_nombre
       FROM alumnos a
       JOIN cursos c ON c.id = a.course_id
       JOIN tecnicaturas t ON t.id = c.tecnicatura_id
-      WHERE a.id = ?
-    `).bind(s.id).first();
-
-    if (!data) continue;
-
-    // 2. Get grades for the bulletin snapshot
-    const grades = await env.DB.prepare(`
-      SELECT m.id as materia_id, m.nombre as materia, g.valor_t as definitiva
+      WHERE a.id IN (${sIds.map(() => '?').join(',')})
+    `).bind(...sIds).all(),
+    env.DB.prepare(`
+      SELECT g.alumno_id, m.id as materia_id, m.nombre as materia, g.valor_t as definitiva
       FROM calificaciones g
       JOIN materias m ON m.id = g.materia_id
-      WHERE g.alumno_id = ? AND g.periodo_id = 10
-    `).bind(s.id).all();
+      WHERE g.alumno_id IN (${sIds.map(() => '?').join(',')}) AND g.periodo_id = 10
+    `).bind(...sIds).all()
+  ]);
 
+  const dataMap = allDataRes.results.reduce((acc, d) => ({ ...acc, [d.id]: d }), {});
+  const gradesByStudent = allGradesRes.results.reduce((acc, g) => {
+    if (!acc[g.alumno_id]) acc[g.alumno_id] = [];
+    acc[g.alumno_id].push(g);
+    return acc;
+  }, {});
+
+  const statements = [];
+  for (const s of students) {
+    const data = dataMap[s.id];
+    if (!data) continue;
+
+    const grades = gradesByStudent[s.id] || [];
     const historyData = {
       curso: `${data.ano} ${data.division}`,
       tecnicatura: data.tec_nombre,
       ciclo: cycleName,
-      boletin: grades.results
+      boletin: grades
     };
 
     statements.push(env.DB.prepare(`
@@ -1346,7 +1373,7 @@ async function handleEndCycle(env, request, userId, body) {
     `).bind(s.id, historyData.curso, historyData.tecnicatura, historyData.ciclo, JSON.stringify(historyData.boletin)));
 
     // 3. Detect failures and move to 'previas' table before deleting
-    for (const g of grades.results) {
+    for (const g of grades) {
       const val = g.definitiva ? Number(String(g.definitiva).replace(',', '.')) : 0;
       if (val < 7) {
         statements.push(env.DB.prepare(`

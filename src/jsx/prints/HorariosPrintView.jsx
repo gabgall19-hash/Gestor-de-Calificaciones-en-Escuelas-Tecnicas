@@ -2,81 +2,114 @@ import React from 'react';
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
-export default function HorariosPrintView({ selectedCourse, grid = [], getHeaderColor, getCiclo }) {
-  const printRowCount = Math.max(grid.length || 0, 1);
-  const printRowHeight = printRowCount <= 8 ? '18mm' : printRowCount <= 10 ? '15mm' : printRowCount <= 12 ? '13mm' : '11mm';
+export default function HorariosPrintView({ selectedCourse, grid = [], getHeaderColor, getCiclo, allSchedules = null, allCourses = [] }) {
+  const isBatch = Array.isArray(allSchedules);
+  const schedulesToPrint = isBatch ? allSchedules : [{ course: selectedCourse, grid }];
 
   return (
     <>
-      <div className="print-only horarios-print-view" style={{ '--print-row-height': printRowHeight }}>
-        <div
-          className="yellow-banner"
-          style={{ background: getHeaderColor(), color: getHeaderColor() === '#ff9900' ? 'black' : 'white' }}
-        >
-          HORARIO 2026 - INDUSTRIAL N°6 "X BRIGADA AÉREA"
-        </div>
+      <div className="print-only">
+        {schedulesToPrint.map((item, idx) => {
+          const course = isBatch ? allCourses.find(c => c.id === item.course_id) : item.course;
+          if (!course) return null;
 
-        <table className="meta-print-table">
-          <thead>
-            <tr>
-              <th>Auxiliar Docente</th>
-              <th>Año / Curso</th>
-              <th>Ciclo</th>
-              <th>División</th>
-              <th>Turno</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{selectedCourse?.preceptor_nombre || '---'}</td>
-              <td>{selectedCourse?.ano}°</td>
-              <td>{getCiclo()}</td>
-              <td>{selectedCourse?.division || '---'}</td>
-              <td>{selectedCourse?.turno || '---'}</td>
-            </tr>
-          </tbody>
-        </table>
+          let gridData = item.grid || [];
+          if (typeof item.grid_data === 'string') {
+            try {
+              const parsed = JSON.parse(item.grid_data);
+              gridData = Array.isArray(parsed) ? parsed : (parsed.grid || []);
+            } catch (e) {
+              gridData = [];
+            }
+          }
 
-        <table className="schedule-print-table">
-          <thead>
-            <tr>
-              <th className="col-time">Hora</th>
-              {DAYS.map((day) => (
-                <th key={day}>{day}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {grid.map((row, rowIndex) => (
-              <tr key={rowIndex} className={row.type === 'break' ? 'print-break-row' : ''}>
-                <td className="print-time-cell">{row.time || ''}</td>
-                {row.type === 'break' ? (
-                  <td colSpan={5} className="print-break-cell">{row.label || 'RECREO'}</td>
-                ) : (
-                  DAYS.map((day) => {
-                    const cell = row.days?.[day] || {};
-                    const subject = cell.subject || 'Horario Libre';
-                    const teacher = subject.toUpperCase() === 'HORARIO LIBRE' ? '' : (cell.teacher || '');
+          const rowCount = Math.max(gridData.length || 0, 1);
+          const rowHeight = rowCount <= 8 ? '17mm' : rowCount <= 10 ? '14mm' : rowCount <= 12 ? '12mm' : '10.5mm';
+          const isLast = idx === schedulesToPrint.length - 1;
 
-                    return (
-                      <td key={day} className="print-slot-cell">
-                        <div className={`print-subject ${subject.toUpperCase() === 'HORARIO LIBRE' ? 'is-free' : ''}`}>
-                          {subject}
-                        </div>
-                        {teacher && <div className="print-teacher">{teacher}</div>}
-                      </td>
-                    );
-                  })
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          return (
+            <div 
+              key={course.id || idx} 
+              className="horarios-print-page" 
+              style={{ 
+                '--print-row-height': rowHeight, 
+                pageBreakAfter: isLast ? 'auto' : 'always', 
+                breakAfter: isLast ? 'auto' : 'page' 
+              }}
+            >
+              <div
+                className="yellow-banner"
+                style={{ 
+                  background: getHeaderColor ? getHeaderColor(course) : '#ffff00', 
+                  color: (getHeaderColor && getHeaderColor(course) === '#ff9900') ? 'black' : 'white' 
+                }}
+              >
+                HORARIO 2026 - INDUSTRIAL N°6 "X BRIGADA AÉREA"
+              </div>
+
+              <table className="meta-print-table">
+                <thead>
+                  <tr>
+                    <th>Auxiliar Docente</th>
+                    <th>Año / Curso</th>
+                    <th>Ciclo</th>
+                    <th>División</th>
+                    <th>Turno</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{course.preceptor_nombre || '---'}</td>
+                    <td>{course.ano}°</td>
+                    <td>{getCiclo ? getCiclo(course) : '---'}</td>
+                    <td>{course.division || '---'}</td>
+                    <td>{course.turno || '---'}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <table className="schedule-print-table">
+                <thead>
+                  <tr>
+                    <th className="col-time">Hora</th>
+                    {DAYS.map((day) => (
+                      <th key={day}>{day}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {gridData.map((row, rowIndex) => (
+                    <tr key={rowIndex} className={row.type === 'break' ? 'print-break-row' : ''}>
+                      <td className="print-time-cell">{row.time || ''}</td>
+                      {row.type === 'break' ? (
+                        <td colSpan={5} className="print-break-cell">{row.label || 'RECREO'}</td>
+                      ) : (
+                        DAYS.map((day) => {
+                          const cell = row.days?.[day] || {};
+                          const subject = cell.subject || 'Horario Libre';
+                          const teacher = subject.toUpperCase() === 'HORARIO LIBRE' ? '' : (cell.teacher || '');
+
+                          return (
+                            <td key={day} className="print-slot-cell">
+                              <div className={`print-subject ${subject.toUpperCase() === 'HORARIO LIBRE' ? 'is-free' : ''}`}>
+                                {subject}
+                              </div>
+                              {teacher && <div className="print-teacher">{teacher}</div>}
+                            </td>
+                          );
+                        })
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
       </div>
 
       <style>{`
         .print-only { display: none; }
-        .horarios-print-view { display: none; }
         .schedule-print-table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
         .schedule-print-table th,
         .schedule-print-table td { border: 2px solid black; padding: 6px; text-align: center; color: black; background: white; }
@@ -92,10 +125,10 @@ export default function HorariosPrintView({ selectedCourse, grid = [], getHeader
         .print-break-cell { font-weight: 900; letter-spacing: 0.15em; background: white; }
 
         @media print {
-          @page { size: landscape; }
+          @page { size: A4 landscape; margin: 10mm 10mm; }
           .no-print, .print-hide { display: none !important; }
           .print-only { display: block !important; }
-          .horarios-print-view { display: block !important; margin-bottom: 20px; }
+          .horarios-print-page { margin-bottom: 0 !important; }
           .horarios-panel { padding: 0; background: white; }
           .main-editor { background: white !important; padding: 0; border: none; }
 

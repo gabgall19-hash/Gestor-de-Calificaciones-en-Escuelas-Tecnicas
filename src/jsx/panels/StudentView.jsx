@@ -128,7 +128,7 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
   const borderStyle = { borderRight: '1px solid rgba(255,255,255,0.1)' };
 
   // Lógica para las filas de previas
-  const PREVIAS_MIN_ROWS = 20;
+  const PREVIAS_MIN_ROWS = 12;
   const PREVIAS_MAX_ROWS = 40;
   const previasData = data.previas || [];
   const rowsToShow = Math.min(Math.max(previasData.length, PREVIAS_MIN_ROWS), PREVIAS_MAX_ROWS);
@@ -136,7 +136,7 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
 
   // Lógica para altura dinámica de filas en Cara A (para que ocupe la hoja)
   const subCount = data.config.subjects.length;
-  const dynamicRowHeight = subCount <= 8 ? '14mm' : subCount <= 11 ? '11mm' : subCount <= 14 ? '8.5mm' : '7mm';
+  const dynamicRowHeight = subCount <= 8 ? '12mm' : subCount <= 12 ? '9mm' : subCount <= 15 ? '7.5mm' : '6.5mm';
 
   // Ordenar periodos: Asegurar que DEF esté al final y OTRAS INST antes
   const sortedPeriodos = [...data.config.periodos].sort((a, b) => {
@@ -166,6 +166,7 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
           }
         }
         @media print {
+          @page { size: A4 landscape; margin: 10mm 10mm; }
           body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
           .boletin-container { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
           .boletin-page { 
@@ -177,23 +178,24 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
             backdrop-filter: none !important; 
             width: 100% !important; 
             page-break-after: always;
+            break-after: page;
             --dynamic-row-height: 8mm; /* Default */
           }
           .boletin-page:last-child { page-break-after: auto; }
           .panel-toolbar, .btn, .icon-btn { display: none !important; }
           .table-container { border: 1.5px solid #000 !important; background: white !important; overflow: visible !important; }
-          table { border-collapse: collapse !important; border: 1px solid #000 !important; width: 100% !important; }
-          th, td { border: 1.2px solid #000 !important; color: black !important; padding: 4px 6px !important; background: white !important; }
+          table { border-collapse: collapse !important; border: 1.2px solid #000 !important; width: 100% !important; }
+          th, td { border: 1.2px solid #000 !important; color: black !important; padding: 2px 4px !important; background: white !important; }
           tr { height: var(--dynamic-row-height) !important; }
-          th { background: #eee !important; -webkit-print-color-adjust: exact; height: 10mm !important; border: 1.5px solid #000 !important; }
+          th { background: #eee !important; -webkit-print-color-adjust: exact; height: 8mm !important; border: 1.5px solid #000 !important; }
           .label { color: black !important; font-weight: bold !important; }
           .student-name-print { color: black !important; -webkit-print-color-adjust: exact; }
           span, div, h1, h2, h3, b, strong { color: black !important; opacity: 1 !important; border-color: black !important; }
-          .boletin-footer { margin-top: 6rem !important; }
-          .signature-line { border-top: 1.5px solid #000 !important; padding-top: 10px !important; width: 280px; margin: 0 auto; }
-          .previas-table td { height: 22px !important; font-size: 8pt !important; border: 1px solid #000 !important; }
-          .previas-table th { font-size: 8pt !important; padding: 6px 2px !important; border: 1.5px solid #000 !important; }
-          .observations-box { border: 1.5px solid #000 !important; background: white !important; }
+          .boletin-footer { margin-top: 4.5rem !important; }
+          .signature-line { border-top: 1.5px solid #000 !important; padding-top: 5px !important; width: 220px; margin: 0 auto; }
+          .previas-table td { height: 18px !important; font-size: 7.5pt !important; border: 1px solid #000 !important; padding: 1px 4px !important; }
+          .previas-table th { font-size: 7.5pt !important; padding: 4px 2px !important; border: 1.5px solid #000 !important; }
+          .observations-box { border: 1.5px solid #000 !important; background: white !important; margin-top: 1rem !important; padding: 0.5rem !important; }
           /* Forzar divisores de trimestre a ser negros en la impresion */
           td[style*="border-right: 3px"], th[style*="border-right: 3px"] { border-right: 2px solid #000 !important; }
         }
@@ -211,7 +213,6 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
       {/* CARA A: CALIFICACIONES */}
       <div className="glass-card boletin-page boletin-view" style={{ 
         position: 'relative', 
-        marginBottom: '2rem',
         '--dynamic-row-height': dynamicRowHeight 
       }}>
 
@@ -235,25 +236,36 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
         </div>
       )}
 
-      <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
-        <img src="/logo.png" alt="Logo Institucional" style={{ height: '45px', marginBottom: '0.25rem' }} />
-        <h2 style={{ fontSize: '1rem', fontWeight: '800', margin: '0', color: 'var(--text-main)', textTransform: 'uppercase' }}>
-          INDUSTRIAL N°6 "X BRIGADA AEREA"
-        </h2>
-        <h1 style={{ fontSize: '0.75rem', letterSpacing: '0.1em', color: 'var(--text-muted)', display: 'inline-block', textTransform: 'uppercase' }}>
-          BOLETÍN DE INFORMACIÓN EVALUATIVA
-        </h1>
-        <div className="student-name-print" style={{ fontSize: '1.25rem', fontWeight: '700', marginTop: '0.25rem', color: 'var(--primary)' }}>
-          {data.alumno.apellido}, {data.alumno.nombre}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        gap: '2.5rem', 
+        marginBottom: '0.75rem',
+        padding: '0 1rem'
+      }}>
+        <img src="/logo.png" alt="Logo Institucional" style={{ height: '75px', objectFit: 'contain' }} />
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: '900', margin: '0', color: 'var(--text-main)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            INDUSTRIAL N°6 "X BRIGADA AEREA"
+          </h2>
+          <h1 style={{ fontSize: '0.85rem', fontWeight: '600', margin: '2px 0', letterSpacing: '0.1em', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            BOLETÍN DE INFORMACIÓN EVALUATIVA
+          </h1>
+          <div className="student-name-print" style={{ fontSize: '1.5rem', fontWeight: '800', marginTop: '2px', color: 'var(--primary)', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2px' }}>
+            {data.alumno.apellido}, {data.alumno.nombre}
+          </div>
         </div>
+        {/* Placeholder for symmetry in flex if needed, or just let it center */}
+        <div style={{ width: '75px', display: 'none' }}></div> 
       </div>
 
       <div className="boletin-header" style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(4, 1fr)', 
         gap: '0.5rem', 
-        marginBottom: '1rem', 
-        padding: '0.5rem 1rem', 
+        marginBottom: '0.75rem', 
+        padding: '0.4rem 1rem', 
         background: 'rgba(255,255,255,0.03)', 
         borderRadius: '8px', 
         fontSize: '0.8rem',
@@ -379,17 +391,8 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
         </table>
       </div>
 
-      <div className="observations-box" style={{ marginTop: '2rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px dashed var(--glass-border)' }}>
-        <p className="label" style={{ marginBottom: '0.5rem' }}>Observaciones</p>
-        <p 
-          style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontStyle: 'italic', minHeight: '1.2em', whiteSpace: 'pre-wrap' }}
-          dangerouslySetInnerHTML={{ 
-            __html: (data.alumno.observaciones || 'Sin observaciones.').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') 
-          }}
-        />
-      </div>
 
-      <div className="boletin-footer" style={{ marginTop: '7rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', textAlign: 'center' }}>
+      <div className="boletin-footer" style={{ marginTop: '5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', textAlign: 'center' }}>
         <div className="signature-line" style={{ paddingTop: '0.75rem' }}>
           <p className="label">Firma de la Autoridad Educativa</p>
         </div>
@@ -448,7 +451,17 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
           </table>
         </div>
 
-        <div style={{ marginTop: '6rem', display: 'flex', justifyContent: 'center' }}>
+        <div className="observations-box" style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px dashed var(--glass-border)' }}>
+          <p className="label" style={{ marginBottom: '0.5rem' }}>Observaciones</p>
+          <p 
+            style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontStyle: 'italic', minHeight: '1.2em', whiteSpace: 'pre-wrap' }}
+            dangerouslySetInnerHTML={{ 
+              __html: (data.alumno.observaciones || 'Sin observaciones.').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') 
+            }}
+          />
+        </div>
+
+        <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
           <div style={{ 
             borderTop: '1.5px solid var(--glass-border)', 
             width: '300px', 
@@ -461,7 +474,7 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
           </div>
         </div>
 
-        <div style={{ marginTop: '2rem', fontSize: '0.65rem', opacity: 0.4, fontStyle: 'italic', textAlign: 'center', textTransform: 'uppercase' }}>
+        <div style={{ marginTop: '1rem', fontSize: '0.65rem', opacity: 0.4, fontStyle: 'italic', textAlign: 'center', textTransform: 'uppercase' }}>
           Industrial N°6 - Sistema de Gestión Escolar - {new Date().getFullYear()}
         </div>
       </div>

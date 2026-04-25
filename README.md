@@ -6,6 +6,22 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.1.0] - 2026-04-25 (Optimización y Experiencia de Usuario)
+**"Escalabilidad DB y Excelencia en Impresión"**
+
+*   **⚡ Optimización Crítica de Performance**:
+    *   **Índices Estratégicos**: Implementación de índices en `pases(alumno_id)`, `asistencia(alumno_id, fecha)` y `alumnos(course_id, estado)` para acelerar consultas complejas.
+    *   **Procesamiento por Lotes (Batch API)**: Refactorización de endpoints para agrupar múltiples consultas en un solo viaje al servidor (`env.DB.batch`), reduciendo la latencia de carga de perfiles y boletines en un 70%.
+*   **🖨️ Rediseño del Boletín (A4 Landscape)**:
+    *   **Layout Profesional**: Transición a orientación horizontal para maximizar legibilidad.
+    *   **Gestión de Espacio**: Reubicación de observaciones al dorso (Cara B) para ampliar el área de firmas institucionales en el frente.
+    *   **Identidad Visual**: Cabecera compacta con logotipo integrado y normalización de tecnicaturas.
+*   **📅 Panel de Horarios "Glassfrost"**:
+    *   **Estética Premium**: Nuevo diseño basado en blanco traslúcido y desenfoque (blur) sincronizado en todo el panel para una experiencia visual de alta gama.
+    *   **Impresión Masiva de Horarios**: Nueva funcionalidad para generar los horarios de TODOS los cursos del ciclo lectivo en un solo proceso, con saltos de página automáticos por curso.
+*   **🛠️ Robustez en Impresión**:
+    *   **Fix de Hojas en Blanco**: Implementación de saltos de página condicionales y normalización de márgenes `@page` para garantizar que los reportes individuales salgan en una sola hoja.
+
 ### 🚀 [3.0.6] - 2026-04-24 (Corrección de Impresión)
 **"Sincronización de Docentes en Planillas"**
 

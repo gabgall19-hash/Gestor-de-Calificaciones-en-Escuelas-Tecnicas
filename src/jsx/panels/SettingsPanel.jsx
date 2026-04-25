@@ -1,7 +1,7 @@
 import React from 'react';
 import { Users, Settings, Plus, Eye, Wrench, Trash2, Smartphone, Unlock, Lock, Copy, BookOpen, Check, ArrowUpCircle, AlertTriangle } from 'lucide-react';
 
-const SettingsPanel = ({ 
+const SettingsPanel = ({
   user, data, isMobile,
   setEditingUserId,
   setUserForm, emptyUser,
@@ -29,49 +29,49 @@ const SettingsPanel = ({
           <button className="btn btn-primary" type="button" onClick={() => { setEditingUserId('new'); setUserForm({ ...emptyUser, rol: 'profesor' }); }}>
             <Plus size={16} /> Nuevo Usuario
           </button>
-            {data.academicYears.length >= 2 && (
-              <button 
-                className="btn btn-secondary" 
-                type="button" 
-                onClick={() => {
-                  const years = data.academicYears;
-                  if (years.length < 2) {
-                    alert("Se necesitan al menos dos años lectivos para realizar copias.");
-                    return;
+          {data.academicYears.length >= 2 && (
+            <button
+              className="btn btn-secondary"
+              type="button"
+              onClick={() => {
+                const years = data.academicYears;
+                if (years.length < 2) {
+                  alert("Se necesitan al menos dos años lectivos para realizar copias.");
+                  return;
+                }
+                const to = window.prompt(`Sincronización Masiva: Copiar TODOS los roles DESDE el año anterior AL año destino. Confirma el año DESTINO:`, data.academicYears[0].nombre);
+                if (to) {
+                  const targetYear = data.academicYears.find(y => y.nombre === to || String(y.id) === to);
+                  const fromYear = data.academicYears.find(y => y.id !== targetYear?.id);
+                  if (targetYear && fromYear && window.confirm(`¿Sincronizar TODOS los usuarios de (${fromYear.nombre}) a (${targetYear.nombre})?`)) {
+                    copyYearInfo(fromYear.id, targetYear.id);
                   }
-                  const to = window.prompt(`Sincronización Masiva: Copiar TODOS los roles DESDE el año anterior AL año destino. Confirma el año DESTINO:`, data.academicYears[0].nombre);
-                  if (to) {
-                    const targetYear = data.academicYears.find(y => y.nombre === to || String(y.id) === to);
-                    const fromYear = data.academicYears.find(y => y.id !== targetYear?.id);
-                    if (targetYear && fromYear && window.confirm(`¿Sincronizar TODOS los usuarios de (${fromYear.nombre}) a (${targetYear.nombre})?`)) {
-                      copyYearInfo(fromYear.id, targetYear.id);
-                    }
-                  }
-                }}
-                title="Sincronización masiva de roles"
-              >
-                <ArrowUpCircle size={16} /> Sincronización Masiva
-              </button>
-            )}
+                }
+              }}
+              title="Sincronización masiva de roles"
+            >
+              <ArrowUpCircle size={16} /> Sincronización Masiva
+            </button>
+          )}
         </div>
         <div style={{ marginBottom: '1rem' }}>
-          <input 
-            type="text" 
-            className="input-field" 
-            placeholder="Buscar usuario por nombre o ID..." 
-            value={userSearch} 
+          <input
+            type="text"
+            className="input-field"
+            placeholder="Buscar usuario por nombre o ID..."
+            value={userSearch}
             onChange={(e) => { setUserSearch(e.target.value); setCurrentPage(1); }}
           />
         </div>
         <div className="student-list" style={{ flex: 1, maxHeight: '450px', overflowY: 'auto' }}>
           {(() => {
-            const filtered = data.users.filter(u => 
-              u.nombre.toLowerCase().includes(userSearch.toLowerCase()) || 
+            const filtered = data.users.filter(u =>
+              u.nombre.toLowerCase().includes(userSearch.toLowerCase()) ||
               u.username.toLowerCase().includes(userSearch.toLowerCase())
             );
             const totalPages = Math.ceil(filtered.length / usersPerPage);
             const paged = filtered.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
-            
+
             return (
               <>
                 {paged.map((u) => (
@@ -92,9 +92,9 @@ const SettingsPanel = ({
                     </div>
                     <div className="student-item-actions">
                       {data.academicYears.length >= 2 && (
-                        <button 
-                          className="icon-btn" 
-                          style={{ color: '#2ecc71', background: 'rgba(46,204,113,0.1)' }} 
+                        <button
+                          className="icon-btn"
+                          style={{ color: '#2ecc71', background: 'rgba(46,204,113,0.1)' }}
                           onClick={() => {
                             const years = data.academicYears;
                             if (years.length < 2) return alert("Se requieren 2 años lectivos.");
@@ -103,7 +103,7 @@ const SettingsPanel = ({
                             if (window.confirm(`¿Copiar asignaciones de ${u.nombre} desde (${fromYear.nombre}) a (${targetYear.nombre})?`)) {
                               copyYearInfo(fromYear.id, targetYear.id, u.id);
                             }
-                          }} 
+                          }}
                           title="Copiar info de año anterior"
                         >
                           <Copy size={14} />
@@ -117,7 +117,7 @@ const SettingsPanel = ({
                     </div>
                   </div>
                 ))}
-                
+
                 {totalPages > 1 && (
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '1rem', padding: '10px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                     <button className="btn btn-primary" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} style={{ padding: '4px 12px', fontSize: '0.8rem' }}>Anterior</button>
@@ -133,12 +133,12 @@ const SettingsPanel = ({
 
       <section className="management-card" style={{ display: 'flex', flexDirection: 'column' }}>
         <div className="section-title"><Settings size={16} /><h2>Sistema, Períodos y Años</h2></div>
-        
+
         <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '1.2rem' }}>
           <label style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold' }}>Modo de Visualización:</label>
           <div style={{ display: 'flex', gap: '5px', marginTop: '8px', flexWrap: 'wrap' }}>
             {['completo', 'orientadores', 'trimestrales', 'finales', 'manual'].map(m => (
-              <button 
+              <button
                 key={m}
                 className={`btn ${data.config?.period_view_mode === m ? 'btn-primary' : ''}`}
                 onClick={() => handleUpdateSystemMode(m)}
@@ -177,9 +177,9 @@ const SettingsPanel = ({
               </div>
             </div>
           )}
-          
 
-          </div>
+
+        </div>
 
         <div style={{ flex: 1 }}>
           <div className="section-title" style={{ marginTop: '0.5rem' }}><Plus size={14} /><h3>Años Lectivos</h3></div>
@@ -199,7 +199,7 @@ const SettingsPanel = ({
                 <div className="student-item-actions">
                   {(user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares') && (
                     <>
-                      <button 
+                      <button
                         className={`icon-btn ${year.es_actual ? 'active' : ''}`}
                         style={{ width: '28px', height: '28px', color: year.es_actual ? '#2ecc71' : 'rgba(255,255,255,0.3)' }}
                         onClick={() => setYearAsCurrent(year.id)}
@@ -207,23 +207,23 @@ const SettingsPanel = ({
                       >
                         <Check size={14} />
                       </button>
-                        <button 
-                          className="icon-btn" 
-                          style={{ width: '28px', height: '28px', color: '#3498db' }} 
-                          type="button" 
-                          onClick={() => {
-                            const newName = window.prompt(`Editar nombre para el año ${year.nombre}:`, year.nombre);
-                            if (newName && newName.trim() && newName !== year.nombre) {
-                              editYear(year.id, newName.trim());
-                            }
-                          }} 
-                          title="Editar"
-                        >
-                          <Wrench size={12} />
-                        </button>
-                      </>
-                    )}
-                  </div>
+                      <button
+                        className="icon-btn"
+                        style={{ width: '28px', height: '28px', color: '#3498db' }}
+                        type="button"
+                        onClick={() => {
+                          const newName = window.prompt(`Editar nombre para el año ${year.nombre}:`, year.nombre);
+                          if (newName && newName.trim() && newName !== year.nombre) {
+                            editYear(year.id, newName.trim());
+                          }
+                        }}
+                        title="Editar"
+                      >
+                        <Wrench size={12} />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -241,10 +241,10 @@ const SettingsPanel = ({
 
         <div style={{ marginTop: '1.2rem', marginBottom: '1.5rem' }}>
           <label style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '6px', display: 'block' }}>Seleccionar Carrera / Tecnicatura para gestionar:</label>
-          <select 
-            className="input-field" 
-            style={{ width: '100%', fontSize: '1rem', height: '45px' }} 
-            value={activeTecId} 
+          <select
+            className="input-field"
+            style={{ width: '100%', fontSize: '1rem', height: '45px' }}
+            value={activeTecId}
             onChange={(e) => setActiveTecId(e.target.value)}
           >
             <option value="">-- Elegir una opción --</option>
@@ -300,14 +300,14 @@ const SettingsPanel = ({
                           <button className="icon-btn" style={{ width: '32px', height: '32px' }} onClick={() => prepareEditCourse(course)} title="Configurar Curso">
                             <Settings size={14} />
                           </button>
-                          <button 
-                            className="icon-btn" 
-                            style={{ 
+                          <button
+                            className="icon-btn"
+                            style={{
                               width: '32px', height: '32px',
                               background: course.activo ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                               color: course.activo ? '#10b981' : '#ef4444'
-                            }} 
-                            onClick={() => toggleCourseActive(course)} 
+                            }}
+                            onClick={() => toggleCourseActive(course)}
                             title={course.activo ? "Deshabilitar" : "Habilitar"}
                           >
                             {course.activo ? <Unlock size={14} /> : <Lock size={14} />}
@@ -328,24 +328,24 @@ const SettingsPanel = ({
           <Smartphone size={16} />
           <h2>Otras Opciones</h2>
         </div>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1.5rem', marginTop: '1.2rem' }}>
           {/* Configuración de Preceptores */}
           <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
             <h3 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Users size={16} /> Configuración de Preceptores
+              <Users size={16} /> Configuración de Edicion de Preceptores
             </h3>
-            
+
             <div className="stack-form" style={{ gap: '15px' }}>
               {[
-                { id: 'preceptor', label: 'Preceptores (General)' },
+                { id: 'preceptor', label: 'Preceptores de Teoria' },
                 { id: 'preceptor_taller', label: 'Preceptores de Taller' },
                 { id: 'preceptor_ef', label: 'Preceptores de Educación Física' }
               ].map(pRole => (
                 <div key={pRole.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>{pRole.label}:</span>
-                  <select 
-                    className="input-field" 
+                  <select
+                    className="input-field"
                     style={{ width: '160px', padding: '5px 10px', fontSize: '0.8rem', height: 'auto' }}
                     value={data.config[`${pRole.id}_mode`] || 'view'}
                     onChange={(e) => handleUpdatePreceptorMode(pRole.id, e.target.value)}
@@ -367,9 +367,9 @@ const SettingsPanel = ({
                 </h3>
                 <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>Habilitar/Deshabilitar acceso desde celulares.</p>
               </div>
-              <button 
-                className={`btn ${data.config.mobile_login_enabled === 'true' ? 'btn-primary' : ''}`} 
-                style={{ 
+              <button
+                className={`btn ${data.config.mobile_login_enabled === 'true' ? 'btn-primary' : ''}`}
+                style={{
                   background: data.config.mobile_login_enabled === 'true' ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
                   minWidth: '120px', padding: '8px'
                 }}
@@ -386,9 +386,9 @@ const SettingsPanel = ({
                 </h3>
                 <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>T / P / Pond en materias de taller.</p>
               </div>
-              <button 
-                className={`btn ${data.config.rac_modular_enabled === 'true' ? 'btn-primary' : ''}`} 
-                style={{ 
+              <button
+                className={`btn ${data.config.rac_modular_enabled === 'true' ? 'btn-primary' : ''}`}
+                style={{
                   background: data.config.rac_modular_enabled === 'true' ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
                   minWidth: '120px', padding: '8px'
                 }}
@@ -407,15 +407,15 @@ const SettingsPanel = ({
             </div>
             <p style={{ fontSize: '0.75rem', opacity: 0.6, margin: 0 }}>Este texto aparecerá cuando un alumno intente entrar a su boletín sin haber configurado una clave previa.</p>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <textarea 
-                className="input-field" 
+              <textarea
+                className="input-field"
                 style={{ flex: 1, minHeight: '80px', fontSize: '0.85rem', lineHeight: '1.4', padding: '12px' }}
                 placeholder="Ej: Solicite la contraseña mediante atención directa en el horario de 8:00 a 13:00 de Lunes a Viernes."
                 defaultValue={data.config.password_not_set_msg || ''}
                 id="password-msg-input"
               />
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 style={{ alignSelf: 'stretch', padding: '0 1.5rem' }}
                 onClick={() => {
                   const val = document.getElementById('password-msg-input').value;

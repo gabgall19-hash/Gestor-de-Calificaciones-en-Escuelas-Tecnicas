@@ -45,13 +45,44 @@ export async function onRequestGet({ env, request }) {
     const staffPayload = token ? await verifyJWT(token, env.JWT_SECRET || "default_secret_for_dev_only") : null;
     const isStaffRequest = !!staffPayload;
 
+    // Batch queries to reduce round-trips
+    const batchRes = await env.DB.batch([
+      env.DB.prepare("SELECT institucion_destino, fecha_pase FROM pases WHERE alumno_id = ?").bind(alumno.id),
+      env.DB.prepare(`
+        SELECT g.*, m.nombre as materia_nombre, m.tipo as materia_tipo, p.nombre as periodo_nombre
+        FROM calificaciones g
+        JOIN materias m ON g.materia_id = m.id
+        JOIN periodos p ON g.periodo_id = p.id
+        WHERE g.alumno_id = ?
+      `).bind(alumno.id),
+      env.DB.prepare("SELECT * FROM ajustes"),
+      env.DB.prepare("SELECT * FROM materias WHERE tecnicatura_id = ?").bind(alumno.tecnicatura_id),
+      env.DB.prepare("SELECT * FROM periodos ORDER BY id"),
+      env.DB.prepare(`
+        SELECT p.*, m.nombre as materia_nombre
+        FROM previas p
+        LEFT JOIN materias m ON p.materia_id = m.id
+        WHERE p.alumno_id = ?
+        ORDER BY p.curso_ano DESC, p.id ASC
+      `).bind(alumno.id)
+    ]);
+
+    const pase = batchRes[0].results[0];
+    const grades = batchRes[1].results;
+    const configRaw = batchRes[2].results;
+    const all_subjects = batchRes[3].results;
+    const periods_query = batchRes[4].results;
+    const previas = batchRes[5].results;
+
+    const configData = configRaw.reduce((acc, curr) => ({ ...acc, [curr.clave]: curr.valor }), {});
+    const mode = configData.period_view_mode || 'full';
+
     // Lógica de validación de contraseña (Bypass si es staff)
     if (!isStaffRequest) {
       if (!alumno.password || alumno.password.trim() === "") {
-        const customMsg = await env.DB.prepare("SELECT valor FROM ajustes WHERE clave = 'password_not_set_msg'").first();
         return new Response(JSON.stringify({ 
           error: "PASSWORD_NOT_SET",
-          custom_message: customMsg ? customMsg.valor : null
+          custom_message: configData['password_not_set_msg'] || null
         }), { status: 403 });
       }
 
@@ -60,55 +91,21 @@ export async function onRequestGet({ env, request }) {
       }
     }
 
-    // Obtener información de pase si existe
-    const pase = await env.DB.prepare("SELECT institucion_destino, fecha_pase FROM pases WHERE alumno_id = ?").bind(alumno.id).first();
-
-    // Obtener sus notas y materias
-    const grades = await env.DB.prepare(`
-      SELECT g.*, m.nombre as materia_nombre, m.tipo as materia_tipo, p.nombre as periodo_nombre
-      FROM calificaciones g
-      JOIN materias m ON g.materia_id = m.id
-      JOIN periodos p ON g.periodo_id = p.id
-      WHERE g.alumno_id = ?
-    `).bind(alumno.id).all();
-
-    // Configuraciones de visualización
-    const configRaw = await env.DB.prepare('SELECT * FROM ajustes').all();
-    const configData = configRaw.results.reduce((acc, curr) => ({ ...acc, [curr.clave]: curr.valor }), {});
-    const mode = configData.period_view_mode || 'full';
-
-    // Obtener todas las materias y periodos
-    const all_subjects = await env.DB.prepare("SELECT * FROM materias WHERE tecnicatura_id = ?").bind(alumno.tecnicatura_id).all();
-    const periods_query = await env.DB.prepare("SELECT * FROM periodos ORDER BY id").all();
-    
     // Aplicar lógica de filtrado de periodos según el MODO
-    let visible_periods = periods_query.results;
-    
+    let visible_periods = periods_query;
     if (mode === 'orientadores') {
-      // Solo orientadores (1, 3, 5)
       visible_periods = visible_periods.filter(p => [1, 3, 5].includes(p.id));
     } else if (mode === 'manual') {
-      // Solo los marcados como activos
       visible_periods = visible_periods.filter(p => p.activo === 1);
     }
-    // Si es 'full', se muestran todos (visible_periods ya tiene todos)
-
-    // Obtener materias previas
-    const previas = await env.DB.prepare(`
-      SELECT p.*, m.nombre as materia_nombre
-      FROM previas p
-      LEFT JOIN materias m ON p.materia_id = m.id
-      WHERE p.alumno_id = ?
-      ORDER BY p.curso_ano DESC, p.id ASC
-    `).bind(alumno.id).all();
 
     return new Response(JSON.stringify({
       alumno,
       pase,
-      grades: grades.results,
-      previas: previas.results,
+      grades,
+      previas,
       config: {
-        subjects: all_subjects.results,
+        subjects: all_subjects,
         periodos: visible_periods,
         mode
       }
