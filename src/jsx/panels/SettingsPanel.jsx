@@ -109,7 +109,6 @@ const SettingsPanel = ({
                           <Copy size={14} />
                         </button>
                       )}
-                      {u.rol === 'profesor' && <button className="icon-btn" style={{ color: '#3498db' }} onClick={() => setViewingProf(u)} title="Ver asignaciones"><Eye size={14} /></button>}
                       <button className="icon-btn" onClick={() => startEditUser(u)}><Wrench size={14} /></button>
                       {(user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares') && (
                         <button className="icon-btn danger" onClick={() => deleteUser(u)} disabled={u.id === user.id}><Trash2 size={14} /></button>

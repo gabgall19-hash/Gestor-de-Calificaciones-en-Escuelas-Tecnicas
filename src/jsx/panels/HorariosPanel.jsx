@@ -632,7 +632,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
           <>
             <div className="editor-header no-print">
               <div className="course-info">
-                <h2>{selectedCourse?.ano}° {selectedCourse?.division} - {selectedCourse?.turno} - {selectedCourse?.preceptor_nombre}</h2>
+                <h2>{selectedCourse?.ano} {selectedCourse?.division} - {selectedCourse?.turno} - {selectedCourse?.preceptor_nombre}</h2>
                 <span className="badge">{selectedCourse?.tecnicatura_nombre}</span>
               </div>
               <div className="editor-actions">
@@ -788,7 +788,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                   </thead>
                   <tbody>
                     <tr>
-                      <td>{selectedCourse?.ano}°</td>
+                      <td>{selectedCourse?.ano}</td>
                       <td>{getCiclo()}</td>
                       <td>{selectedCourse?.division || '---'}</td>
                       <td>{selectedCourse?.turno || '---'}</td>

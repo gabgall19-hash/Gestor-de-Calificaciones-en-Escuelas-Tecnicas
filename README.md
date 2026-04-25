@@ -6,7 +6,19 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🚀 [3.1.0] - 2026-04-25 (Optimización y Experiencia de Usuario)
+### 🚀 [3.2.0] - 2026-04-25 (Integridad y Sincronización)
+**"Horarios como Fuente Única de Verdad"**
+
+*   **👨‍🏫 Sincronización Automática de Permisos**:
+    *   **Fuente Única de Verdad**: Se eliminó la asignación manual de materias en la gestión de usuarios. Ahora, los permisos de edición de los profesores se derivan exclusivamente del **Panel de Horarios**.
+    *   **Visualización Informativa**: Se implementó una lista de solo lectura en el perfil de usuario que muestra las materias y cursos asignados vía horarios, garantizando transparencia.
+*   **🛡️ Exclusividad de Roles Jerárquicos**:
+    *   **Blindaje Directivo**: Los roles de `Administrador`, `Secretaria de Alumnos`, `Jefe de Auxiliares`, `Director` y `Vicedirector` son ahora estrictamente administrativos. El sistema limpia y bloquea automáticamente cualquier asignación de materias o preceptoría para estos usuarios.
+*   **🧹 Refinamiento de Interfaz**:
+    *   **Limpieza de Controles**: Eliminación del botón "Ver asignaciones" en el listado de usuarios por redundancia, simplificando la vista administrativa.
+    *   **Normalización de Nomenclatura**: Corrección del error de doble símbolo de grado (`°°`) en los nombres de los cursos en paneles y reportes impresos (Partes Diarios, Horarios y Planillas).
+*   **🏗️ Seguridad en la API**: Hardening del endpoint de usuarios para proteger el campo `professor_subject_ids` contra sobreescrituras accidentales durante actualizaciones de perfil básico.
+
 **"Escalabilidad DB y Excelencia en Impresión"**
 
 *   **⚡ Optimización Crítica de Performance**:

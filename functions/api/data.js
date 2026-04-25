@@ -1560,21 +1560,33 @@ async function handleUsers(env, request, userId, body) {
     await env.DB.prepare('DELETE FROM usuarios WHERE id = ?').bind(targetUserId).run();
     return json({ success: true });
   }
+  const highLevelRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  const isHighLevel = highLevelRoles.includes(rol);
+
+  const cleanPreceptorCourseId = isHighLevel ? null : (preceptor_course_id || null);
+  const cleanProfessorCourseIds = isHighLevel ? '' : (Array.isArray(professor_course_ids) ? professor_course_ids.join(',') : professor_course_ids || '');
+  const cleanIsHybrid = isHighLevel ? 0 : (is_professor_hybrid ? 1 : 0);
 
   if (action === 'update') {
     const { targetUserId: tid } = body;
-    await env.DB.prepare(
-      `UPDATE usuarios SET nombre = ?, username = ?, rol = ?, preceptor_course_id = ?, 
-       professor_course_ids = ?, professor_subject_ids = ?, is_professor_hybrid = ?
-       WHERE id = ?`
-    ).bind(
-      nombre, username, rol, preceptor_course_id || null,
-      Array.isArray(professor_course_ids) ? professor_course_ids.join(',') : professor_course_ids || '',
-      Array.isArray(professor_subject_ids) ? professor_subject_ids.join(',') : professor_subject_ids || '',
-      is_professor_hybrid ? 1 : 0,
-      tid
-    ).run();
-    await logHistory(env, userId, null, 'gestion_usuarios', `Usuario actualizado: ${nombre}`);
+    
+    // If promoting to high level, we also MUST clear professor_subject_ids
+    if (isHighLevel) {
+      await env.DB.prepare(
+        `UPDATE usuarios SET nombre = ?, username = ?, rol = ?, preceptor_course_id = ?, 
+         professor_course_ids = ?, professor_subject_ids = ?, is_professor_hybrid = ?
+         WHERE id = ?`
+      ).bind(nombre, username, rol, null, '', '', 0, tid).run();
+    } else {
+      // Regular update: we don't touch professor_subject_ids to avoid overwriting schedule sync
+      await env.DB.prepare(
+        `UPDATE usuarios SET nombre = ?, username = ?, rol = ?, preceptor_course_id = ?, 
+         professor_course_ids = ?, is_professor_hybrid = ?
+         WHERE id = ?`
+      ).bind(nombre, username, rol, cleanPreceptorCourseId, cleanProfessorCourseIds, cleanIsHybrid, tid).run();
+    }
+
+    await logHistory(env, userId, null, 'gestion_usuarios', `Usuario actualizado: ${nombre} (Rol: ${rol})`);
     return json({ success: true });
   }
 
@@ -1590,10 +1602,7 @@ async function handleUsers(env, request, userId, body) {
     `INSERT INTO usuarios (nombre, username, password, rol, preceptor_course_id, professor_course_ids, professor_subject_ids, is_professor_hybrid)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
-    nombre, username, password, rol, preceptor_course_id || null,
-    Array.isArray(professor_course_ids) ? professor_course_ids.join(',') : professor_course_ids || '',
-    Array.isArray(professor_subject_ids) ? professor_subject_ids.join(',') : professor_subject_ids || '',
-    is_professor_hybrid ? 1 : 0,
+    nombre, username, password, rol, cleanPreceptorCourseId, cleanProfessorCourseIds, '', cleanIsHybrid
   ).run();
 
   await logHistory(env, userId, null, 'gestion_usuarios', `Usuario creado: ${nombre} (${username}) con rol ${rol}`);

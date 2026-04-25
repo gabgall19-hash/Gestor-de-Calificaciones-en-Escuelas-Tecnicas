@@ -82,7 +82,7 @@ export const handlePrintParteDiario = (data, course, scheduleData) => {
   win.document.write(`
     <html>
       <head>
-        <title>Parte Diario - ${course.ano}° ${course.division}</title>
+        <title>Parte Diario - ${course.ano} ${course.division}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap');
           
@@ -229,7 +229,7 @@ export const handlePrintParteDiario = (data, course, scheduleData) => {
 
           <div class="title-row">
             <div>Partes de Asistencia</div>
-            <div>Curso: ${course.ano}° ${course.division}</div>
+            <div>Curso: ${course.ano} ${course.division}</div>
             <div>Mes: ${currentMonth}</div>
           </div>
 
@@ -380,7 +380,7 @@ export const handlePrintParteDiarioGlobal = (data, allSchedules) => {
 
         <div class="title-row">
           <div>Partes de Asistencia</div>
-          <div>Curso: ${course.ano}° ${course.division}</div>
+          <div>Curso: ${course.ano} ${course.division}</div>
           <div>Mes: ${currentMonth}</div>
         </div>
 
@@ -588,7 +588,7 @@ export const handlePrintParteConInformacion = (data, course, scheduleData, selec
 
       <div class="title-row">
         <div>Partes de Asistencia</div>
-        <div>Curso: ${course.ano}° ${course.division}</div>
+        <div>Curso: ${course.ano} ${course.division}</div>
         <div>Mes: ${[...new Set(week.map(d => monthNames[d.getMonth()]))].join('/')}</div>
       </div>
 
@@ -655,7 +655,7 @@ export const handlePrintParteConInformacion = (data, course, scheduleData, selec
   win.document.write(`
     <html>
       <head>
-        <title>Partes de Asistencia Mensual - ${course.ano}° ${course.division}</title>
+        <title>Partes de Asistencia Mensual - ${course.ano} ${course.division}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700;900&display=swap');
           body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; background: #eee; color: black; }

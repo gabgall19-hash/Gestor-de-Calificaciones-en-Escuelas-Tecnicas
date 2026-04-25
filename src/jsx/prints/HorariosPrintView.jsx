@@ -60,7 +60,7 @@ export default function HorariosPrintView({ selectedCourse, grid = [], getHeader
                 <tbody>
                   <tr>
                     <td>{course.preceptor_nombre || '---'}</td>
-                    <td>{course.ano}°</td>
+                    <td>{course.ano}</td>
                     <td>{getCiclo ? getCiclo(course) : '---'}</td>
                     <td>{course.division || '---'}</td>
                     <td>{course.turno || '---'}</td>

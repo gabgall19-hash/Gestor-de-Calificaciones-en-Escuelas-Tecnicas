@@ -322,28 +322,6 @@ export default function PreceptorModals(props) {
         </Modal>
       )}
 
-      {viewingProf && (
-        <Modal title={`Asignaciones: ${viewingProf.nombre}`} onClose={() => setViewingProf(null)}>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '12px' }}>
-            {(() => {
-              const pairs = (viewingProf.professor_subject_ids || '').split(',').filter(Boolean);
-              if (pairs.length === 0) return <p style={{ color: 'var(--text-muted)', textAlign: 'center', margin: '2rem 0' }}>Este profesor no tiene materias asignadas.</p>;
-
-              return pairs.map((pair) => {
-                const [cid, sid] = pair.split('-');
-                const course = data.allCourses.find((item) => String(item.id) === String(cid));
-                const subject = data.allSubjects.find((item) => String(item.id) === String(sid));
-                return (
-                  <div key={pair} style={{ padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', marginBottom: '10px' }}>
-                    <div style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '0.95rem' }}>{subject?.nombre || 'Materia no encontrada'}</div>
-                    <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: '2px' }}>{course?.label} ({course?.year_nombre}) · {simplifyTecName(course?.tecnicatura_nombre)}</div>
-                  </div>
-                );
-              });
-            })()}
-          </div>
-        </Modal>
-      )}
 
       {editingUserId && (
         <Modal title={editingUserId === 'new' ? 'Crear Usuario' : 'Editar Usuario'} onClose={() => { setEditingUserId(null); setUserForm(emptyUser); }}>
@@ -365,27 +343,42 @@ export default function PreceptorModals(props) {
               <option value="profesor">Profesor</option>
             </select>
 
-            {(userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller' || userForm.rol === 'preceptor_ef') && (
+            {!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(userForm.rol) && (userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller' || userForm.rol === 'preceptor_ef') && (
               <select className="input-field" value={userForm.preceptor_course_id || ''} onChange={(e) => setUserForm((prev) => ({ ...prev, preceptor_course_id: e.target.value }))}>
                 <option value="">-- Seleccionar Curso --</option>
                 {data.allCourses.map((course) => <option key={course.id} value={course.id}>{course.year_nombre} · {course.label} · {simplifyTecName(course.tecnicatura_nombre)}</option>)}
               </select>
             )}
 
-            {(userForm.rol === 'profesor' || userForm.is_professor_hybrid || (userForm.professor_subject_ids && userForm.professor_subject_ids.length > 0)) && (
-              <MultiSelect
-                label="Asignar Materias (Como Profesor)"
-                options={data.allCourses.flatMap((course) =>
-                  data.allSubjects
-                    .filter((subject) => subject.tecnicatura_id === course.tecnicatura_id)
-                    .map((subject) => ({
-                      id: `${course.id}-${subject.id}`,
-                      label: `${course.label} (${course.year_nombre}) · ${truncateSubject(subject.nombre)}`
-                    }))
-                )}
-                selected={userForm.professor_subject_ids || []}
-                onChange={(vals) => setUserForm((prev) => ({ ...prev, professor_subject_ids: vals }))}
-              />
+            {/* Read-only view of subjects assigned via Schedules (Hidden for high-level roles) */}
+            {!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(userForm.rol) && (userForm.rol === 'profesor' || userForm.is_professor_hybrid || (userForm.professor_subject_ids && userForm.professor_subject_ids.length > 0)) && editingUserId !== 'new' && (
+              <div className="read-only-assignments" style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '10px', opacity: 0.7, fontWeight: 'bold', color: 'var(--primary)' }}>Materias Asignadas (vía Horarios):</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {(() => {
+                    const pairs = Array.isArray(userForm.professor_subject_ids) 
+                      ? userForm.professor_subject_ids 
+                      : (userForm.professor_subject_ids || '').split(',').filter(Boolean);
+                    
+                    if (pairs.length === 0) return <p style={{ fontSize: '0.85rem', opacity: 0.5, fontStyle: 'italic' }}>Sin materias asignadas en horarios.</p>;
+
+                    return pairs.map((pair) => {
+                      const [cid, sid] = pair.split('-');
+                      const course = data.allCourses.find((item) => String(item.id) === String(cid));
+                      const subject = data.allSubjects.find((item) => String(item.id) === String(sid));
+                      return (
+                        <div key={pair} style={{ fontSize: '0.82rem', padding: '6px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', borderLeft: '3px solid var(--primary)' }}>
+                          <strong>{subject?.nombre || 'Materia no encontrada'}</strong>
+                          <div style={{ opacity: 0.6, fontSize: '0.75rem' }}>{course?.label} ({course?.year_nombre})</div>
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+                <p style={{ fontSize: '0.7rem', marginTop: '12px', opacity: 0.4, fontStyle: 'italic', lineHeight: '1.3' }}>
+                  * Los accesos se gestionan exclusivamente desde la sección de Horarios de cada curso.
+                </p>
+              </div>
             )}
 
             <button className="btn btn-primary" type="submit"><Save size={16} /> {editingUserId === 'new' ? 'Crear Usuario' : 'Guardar Cambios'}</button>
