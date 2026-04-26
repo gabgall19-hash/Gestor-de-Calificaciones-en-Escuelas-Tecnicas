@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Save, Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
+import { Save, Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, ChevronLeft, ChevronRight, Printer, Layers } from 'lucide-react';
 import { TableSkeleton } from '../UI/Skeleton';
 import SaveStatusButton from '../UI/SaveStatusButton';
 import '../../css/panels/AttendancePanel.css';
@@ -9,6 +9,11 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   const [attendance, setAttendance] = useState({}); // { studentId|date: value }
   const [pending, setPending] = useState({}); // { studentId|date: value }
   const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().slice(0, 7)); // YYYY-MM
+  const [selectedSector, setSelectedSector] = useState(() => {
+    if (user.rol === 'preceptor_taller') return 'taller';
+    if (user.rol === 'preceptor_ef') return 'ed_fisica';
+    return 'teoria';
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileDayIndex, setMobileDayIndex] = useState(-1);
   
@@ -21,6 +26,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   const monthOptions = useMemo(() => {
     const options = [];
     const months = [
+      { id: '02', name: 'Febrero' },
       { id: '03', name: 'Marzo' },
       { id: '04', name: 'Abril' },
       { id: '05', name: 'Mayo' },
@@ -111,7 +117,11 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     if (!selectedCourseId) return;
     setLoading(true);
     try {
-      const res = await apiService.get('asistencia', { courseId: selectedCourseId, month: selectedMonth });
+      const res = await apiService.get('asistencia', { 
+        courseId: selectedCourseId, 
+        month: selectedMonth,
+        sector: selectedSector
+      });
       const map = {};
       res.forEach(item => {
         map[`${item.alumno_id}|${item.fecha}`] = item.valor;
@@ -127,7 +137,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
   useEffect(() => {
     loadAttendance();
-  }, [selectedCourseId, selectedMonth]);
+  }, [selectedCourseId, selectedMonth, selectedSector]);
 
   const handleCellChange = (alumnoId, day, value) => {
     if (!canEdit) return;
@@ -194,7 +204,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
     setLoading(true);
     try {
-      await apiService.post('asistencia', { updates });
+      await apiService.post('asistencia', { updates, sector: selectedSector });
       showToast('Cambios guardados correctamente', 'success');
       await loadAttendance();
     } catch (err) {
@@ -245,6 +255,21 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
       <div className="attendance-container">
         <div className="attendance-header glass-card">
+          <div className="month-selector-wrapper">
+            <label htmlFor="sector-select">Visión:</label>
+            <select 
+              id="sector-select" 
+              className="month-select"
+              value={selectedSector}
+              onChange={(e) => setSelectedSector(e.target.value)}
+              disabled={['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)}
+            >
+              <option value="teoria">Teoría (Común)</option>
+              <option value="taller">Taller</option>
+              <option value="ed_fisica">Ed. Física</option>
+            </select>
+          </div>
+
           <div className="month-selector-wrapper">
             <label htmlFor="month-select">Período:</label>
             <select 
@@ -299,14 +324,16 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
               canEdit={canEdit}
             />
 
-            <button 
-              className="btn btn-secondary" 
-              onClick={() => onPrintInformacion?.(selectedMonth, attendance)}
-              disabled={loading}
-              title="Imprimir Parte Mensual con Asistencias"
-            >
-              {isMobile ? <Printer size={18} /> : <span>Imprimir Parte Semanal</span>}
-            </button>
+            {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'director', 'vicedirector'].includes(user.rol) && (
+              <button 
+                className="btn btn-secondary" 
+                onClick={() => onPrintInformacion?.(selectedMonth, attendance)}
+                disabled={loading}
+                title="Imprimir Parte Mensual con Asistencias"
+              >
+                {isMobile ? <Printer size={18} /> : <span>Imprimir Parte Semanal</span>}
+              </button>
+            )}
           </div>
         </div>
 
