@@ -185,7 +185,7 @@ export const handlePrintParteSemanal = (data, course, scheduleData) => {
           .sched-date-row th { height: 12px !important; border: 1px solid black !important; }
           .sched-date-cell { background: white !important; }
 
-          .row-break { background: #cccccc !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 14px !important; }
+          .row-break { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 11px !important; }
 
           .cell-subject { font-weight: 900; display: block; line-height: 1; margin-top: 3px; padding: 0 2px; }
           .cell-teacher { font-size: 0.48rem; font-style: italic; color: #333; display: block; margin-top: 2px; padding: 0 2px; }
@@ -206,7 +206,7 @@ export const handlePrintParteSemanal = (data, course, scheduleData) => {
             body { background: white; padding: 0; }
             .no-print-toolbar { display: none; }
             .printable-page { margin: 0; box-shadow: none; width: 100%; height: auto; padding: 5mm; }
-            .row-break { background: #cccccc !important; -webkit-print-color-adjust: exact; }
+            .row-break { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; }
           }
         </style>
       </head>
@@ -268,8 +268,8 @@ export const handlePrintParteSemanal = (data, course, scheduleData) => {
                   if (row.type === 'break' || row.isRecreo) {
                     return `
                       <tr class="row-break">
-                        <td style="vertical-align: middle !important; height: 14px !important;">${row.time || ''}</td>
-                        <td colspan="5" style="vertical-align: middle !important;">RECREO</td>
+                        <td style="vertical-align: middle !important; height: 11px !important;">${row.time || ''}</td>
+                        <td colspan="5" style="vertical-align: middle !important; font-size: 0.45rem;">RECREO</td>
                       </tr>
                     `;
                   }
