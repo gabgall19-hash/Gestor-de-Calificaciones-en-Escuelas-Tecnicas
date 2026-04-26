@@ -1,17 +1,88 @@
-﻿import React from 'react';
-import { User, Shield, Home, Phone, Mail, Calendar, BookOpen, Save, X, ArrowLeft, History } from 'lucide-react';
+import React from 'react';
+import { User, Shield, Home, Phone, Mail, Calendar, BookOpen, Save, X, ArrowLeft, History, Image as ImageIcon, Plus, Trash2, Eye, Maximize2 } from 'lucide-react';
 import Modal from '../UI/Modal';
 import { formatDNI } from '../functions/PreceptorHelpers';
 
 const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, studentForm, setStudentForm, fullPage = false, getHistorial }) => {
   const [historial, setHistorial] = React.useState([]);
   const [loadingHistorial, setLoadingHistorial] = React.useState(false);
+  const [images, setImages] = React.useState([]);
+  const [isUploading, setIsUploading] = React.useState(false);
 
   React.useEffect(() => {
     if (student?.id) {
       loadHistorial();
+      loadImages();
     }
   }, [student?.id]);
+
+  const loadImages = async () => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      const res = await fetch(`/api/data?type=student_images&studentId=${student.id}`, {
+        headers: { 'Authorization': `Bearer ${currentUser?.token}` }
+      });
+      const json = await res.json();
+      setImages(Array.isArray(json) ? json : []);
+    } catch (err) { console.error("Error loading images:", err); }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const titulo = window.prompt("Título de la imagen (ej: DNI Frente, Certificado Médico):");
+    if (!titulo) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=48bf2f480ae36924a8d74ae9a38ed6d3`, {
+        method: 'POST',
+        body: formData
+      });
+      const json = await res.json();
+      
+      if (json.success) {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        await fetch(`/api/data?type=student_images&userId=${currentUser.id}`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${currentUser.token}`
+          },
+          body: JSON.stringify({
+            action: 'create',
+            alumno_id: student.id,
+            titulo: titulo,
+            url: json.data.url
+          })
+        });
+        loadImages();
+      }
+    } catch (err) {
+      alert("Error al subir imagen");
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const deleteImage = async (id) => {
+    if (!window.confirm("¿Eliminar esta imagen adjunta?")) return;
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    await fetch(`/api/data?type=student_images&userId=${currentUser.id}`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${currentUser.token}`
+      },
+      body: JSON.stringify({ action: 'delete', id })
+    });
+    loadImages();
+  };
 
   const loadHistorial = async () => {
     if (!getHistorial) return;
@@ -27,6 +98,40 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
   };
   if (!student) return null;
 
+  const formatDateForInput = (dateStr) => {
+    if (!dateStr) return '';
+    try {
+      // Si ya está en formato YYYY-MM-DD, devolverlo
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+      
+      // Intentar parsear si viene en formato DD/MM/YYYY o similar
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString().split('T')[0];
+      }
+      
+      // Fallback para DD/MM/YYYY manual
+      const parts = dateStr.split(/[-/]/);
+      if (parts.length === 3) {
+        if (parts[2].length === 4) return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        if (parts[0].length === 4) return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
+      }
+    } catch (e) { return ''; }
+    return '';
+  };
+
+  const calculateAge = (birthday) => {
+    if (!birthday) return '';
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : '';
+  };
+
   const handleChange = (field, value) => {
     const numericFields = ['dni', 'tutor_dni', 'libro', 'folio', 'legajo', 'edad', 'cuil'];
     if (numericFields.includes(field)) {
@@ -34,8 +139,30 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
       if (field === 'dni' || field === 'tutor_dni') value = value.slice(0, 8);
       if (field === 'cuil') value = value.slice(0, 11);
     }
-    setStudentForm(prev => ({ ...prev, [field]: value }));
+    
+    setStudentForm(prev => {
+      const next = { ...prev, [field]: value };
+      // Si cambia la fecha de nacimiento, calculamos la edad
+      if (field === 'fecha_nacimiento') {
+        const autoAge = calculateAge(value);
+        if (autoAge !== '') next.edad = String(autoAge);
+      }
+      return next;
+    });
   };
+
+  // Limpieza automática al entrar en modo edición para evitar errores de validación
+  React.useEffect(() => {
+    if (isEditing) {
+      setStudentForm(prev => {
+        const next = { ...prev };
+        if (next.cuil) next.cuil = next.cuil.replace(/\D/g, '');
+        if (next.dni) next.dni = next.dni.replace(/\D/g, '');
+        if (next.tutor_dni) next.tutor_dni = next.tutor_dni.replace(/\D/g, '');
+        return next;
+      });
+    }
+  }, [isEditing]);
 
   const emailDomains = ["@gmail.com", "@hotmail.com", "@outlook.com", "@yahoo.com", "@live.com.ar", "@me.com", "@icloud.com"];
 
@@ -134,7 +261,7 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
                           list={f.list}
                           className="input-field" 
                           style={f.icon ? { paddingLeft: '35px' } : {}}
-                          value={studentForm[f.key] || ''} 
+                          value={f.type === 'date' ? formatDateForInput(studentForm[f.key]) : (studentForm[f.key] || '')} 
                           onChange={(e) => handleChange(f.key, e.target.value)}
                         />
                       </div>
@@ -153,7 +280,10 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
                     }}>
                       {f.icon && <span style={{ opacity: 0.4 }}>{f.icon}</span>}
                       <span style={{ fontWeight: '500' }}>
-                        {f.formatter ? f.formatter(studentForm[f.key]) : (studentForm[f.key] || <span style={{ opacity: 0.3, fontStyle: 'italic' }}>No especificado</span>)}
+                        {f.key === 'fecha_nacimiento' && studentForm[f.key] && !isNaN(new Date(studentForm[f.key]).getTime())
+                          ? new Date(studentForm[f.key]).toLocaleDateString('es-AR', { timeZone: 'UTC' }) 
+                          : (f.formatter ? f.formatter(studentForm[f.key]) : (studentForm[f.key] || <span style={{ opacity: 0.3, fontStyle: 'italic' }}>No especificado</span>))
+                        }
                       </span>
                     </div>
                   )}
@@ -163,9 +293,7 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
           </div>
         ))}
 
-
-
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '2.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.2rem', color: 'var(--primary)' }}>
             <History size={18} />
             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Historial Escolar</h3>
@@ -223,7 +351,88 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
             )}
           </div>
         </div>
+
+        <div style={{ marginBottom: '2.5rem', marginTop: '2.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--primary)' }}>
+              <ImageIcon size={18} />
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Imágenes Adjuntas</h3>
+            </div>
+            {isEditing && (
+              <label className="btn" style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+                {isUploading ? '⌛ Subiendo...' : <><Plus size={14} /> Adjuntar Imagen</>}
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={isUploading} />
+              </label>
+            )}
+          </div>
+
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', 
+            gap: '1.2rem' 
+          }}>
+            {images.map((img) => (
+              <div key={img.id} className="glass-card" style={{ 
+                padding: '10px', 
+                background: 'rgba(255,255,255,0.03)', 
+                border: '1px solid rgba(255,255,255,0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}>
+                <div 
+                  onClick={() => window.open(img.url, '_blank')}
+                  style={{ 
+                    width: '100%', 
+                    height: '100px', 
+                    borderRadius: '6px', 
+                    overflow: 'hidden', 
+                    cursor: 'pointer',
+                    position: 'relative',
+                    background: '#000'
+                  }}
+                >
+                  <img src={img.url} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} alt="" />
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translateY(-50%) translateX(-50%)', opacity: 0.5 }}>
+                    <Maximize2 size={20} color="white" />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button 
+                    onClick={() => window.open(img.url, '_blank')}
+                    style={{ 
+                      fontSize: '0.8rem', 
+                      fontWeight: 'bold', 
+                      background: 'none', 
+                      border: 'none', 
+                      color: 'white', 
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {img.titulo} <span style={{ opacity: 0.5, fontWeight: 'normal', fontSize: '0.7rem' }}>({new Date(img.fecha_creacion).toLocaleDateString()})</span>
+                  </button>
+                  {isEditing && (
+                    <button className="icon-btn danger" onClick={() => deleteImage(img.id)} style={{ padding: '4px' }}>
+                      <Trash2 size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {images.length === 0 && !isUploading && (
+              <div style={{ gridColumn: '1 / -1', padding: '2rem', textAlign: 'center', opacity: 0.3, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '12px' }}>
+                No hay imágenes o documentos adjuntos.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
       <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem', paddingTop: '2rem', borderTop: '1px solid var(--glass-border)' }}>
         {isEditing ? (
           <>

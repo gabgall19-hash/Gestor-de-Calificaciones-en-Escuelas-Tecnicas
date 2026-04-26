@@ -1751,6 +1751,12 @@ export async function onRequestGet({ env, request }) {
       return json(results);
     }
     if (type === 'asistencia') return await handleAttendanceLoad(env, request, url);
+    if (type === 'student_images') {
+      const studentId = url.searchParams.get('studentId');
+      if (!studentId) throw new Error('ID de alumno requerido');
+      const { results } = await env.DB.prepare('SELECT * FROM alumno_imagenes WHERE alumno_id = ? ORDER BY id DESC').bind(studentId).all();
+      return json(results);
+    }
     return json({ error: 'Tipo no especificado' }, 400);
   } catch (err) {
     return json({ error: err.message }, 500);
@@ -1778,6 +1784,17 @@ export async function onRequestPost({ env, request }) {
     if (type === 'end_cycle') return await handleEndCycle(env, request, userId, body);
     if (type === 'horarios') return await handleSchedules(env, request, userId, body);
     if (type === 'asistencia') return await handleAttendanceSave(env, request, userId, body);
+    if (type === 'student_images') {
+      await validateUser(env, request, userId, 'admin', 'preceptor', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector');
+      const { action, id, alumno_id, titulo, url: imageUrl } = body;
+      if (action === 'create') {
+        await env.DB.prepare('INSERT INTO alumno_imagenes (alumno_id, titulo, url) VALUES (?, ?, ?)')
+          .bind(alumno_id, titulo || 'Sin título', imageUrl).run();
+      } else if (action === 'delete') {
+        await env.DB.prepare('DELETE FROM alumno_imagenes WHERE id = ?').bind(id).run();
+      }
+      return json({ success: true });
+    }
     return json({ error: 'Tipo no soportado' }, 400);
   } catch (err) {
     return json({ error: err.message }, 500);

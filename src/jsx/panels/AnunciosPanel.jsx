@@ -1,202 +1,215 @@
-import React, { useState } from 'react';
-import { Megaphone, Plus, Trash2, Edit2, CheckCircle, XCircle, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Megaphone, Plus, Trash2, Edit2, CheckCircle, XCircle, Image as ImageIcon, Video, Type, ChevronUp, ChevronDown, Save } from 'lucide-react';
 
 const AnunciosPanel = ({ data, post, loadData, isMobile }) => {
   const [editingAnuncio, setEditingAnuncio] = useState(null);
-  const [anuncioForm, setAnuncioForm] = useState({ titulo: '', contenido: '', activo: 1 });
+  const [titulo, setTitulo] = useState('');
+  const [activo, setActivo] = useState(1);
+  const [blocks, setBlocks] = useState([{ type: 'text', content: '' }]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Convertir texto plano de la DB a bloques para el editor
+  useEffect(() => {
+    if (editingAnuncio) {
+      setTitulo(editingAnuncio.titulo || '');
+      setActivo(editingAnuncio.activo);
+      
+      const lines = editingAnuncio.contenido.split('\n');
+      const newBlocks = [];
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        const isImage = trimmed.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || trimmed.includes('i.ibb.co') || trimmed.includes('imgur.com');
+        const isVideo = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        
+        if (isImage && trimmed.startsWith('http')) {
+          newBlocks.push({ type: 'image', content: trimmed });
+        } else if (isVideo) {
+          newBlocks.push({ type: 'video', content: trimmed });
+        } else {
+          // Si el último bloque era texto, añadir a ese, si no, crear uno nuevo
+          if (newBlocks.length > 0 && newBlocks[newBlocks.length - 1].type === 'text') {
+            newBlocks[newBlocks.length - 1].content += (newBlocks[newBlocks.length - 1].content ? '\n' : '') + line;
+          } else {
+            newBlocks.push({ type: 'text', content: line });
+          }
+        }
+      });
+      setBlocks(newBlocks.length > 0 ? newBlocks : [{ type: 'text', content: '' }]);
+    } else {
+      setTitulo('');
+      setActivo(1);
+      setBlocks([{ type: 'text', content: '' }]);
+    }
+  }, [editingAnuncio]);
+
+  const saveAnuncio = async (e) => {
+    e.preventDefault();
+    // Unir bloques en un solo string para la DB
+    const contenido = blocks.map(b => b.content.trim()).filter(Boolean).join('\n');
+    if (!contenido) return alert('El anuncio no puede estar vacío');
+
+    const action = editingAnuncio ? 'update' : 'create';
+    await post('anuncios', { action, id: editingAnuncio?.id, titulo, contenido, activo, tipo: 'texto' });
+    
+    setEditingAnuncio(null);
+    setBlocks([{ type: 'text', content: '' }]);
+    setTitulo('');
+    await loadData();
+  };
+
+  const addTextBlock = () => setBlocks([...blocks, { type: 'text', content: '' }]);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setIsUploading(true);
     const formData = new FormData();
     formData.append('image', file);
-
     try {
-      // API Key provided by user: 48bf2f480ae36924a8d74ae9a38ed6d3
       const res = await fetch(`https://api.imgbb.com/1/upload?key=48bf2f480ae36924a8d74ae9a38ed6d3`, {
         method: 'POST',
         body: formData
       });
       const json = await res.json();
       if (json.success) {
-        const imageUrl = json.data.url;
-        setAnuncioForm(p => ({
-          ...p,
-          contenido: p.contenido + (p.contenido ? '\n' : '') + imageUrl
-        }));
-      } else {
-        alert('Error al subir imagen: ' + (json.error?.message || 'Error desconocido'));
+        setBlocks([...blocks, { type: 'image', content: json.data.url }]);
       }
-    } catch (err) {
-      alert('Error de conexión al subir imagen');
-    } finally {
-      setIsUploading(false);
-      e.target.value = ''; // Reset input
-    }
+    } catch (err) { alert('Error al subir imagen'); }
+    finally { setIsUploading(false); e.target.value = ''; }
   };
 
-  const renderContent = (content) => {
-    if (!content) return null;
+  const updateBlock = (index, newContent) => {
+    const next = [...blocks];
+    next[index].content = newContent;
+    setBlocks(next);
+  };
+
+  const removeBlock = (index) => {
+    if (blocks.length === 1) return setBlocks([{ type: 'text', content: '' }]);
+    setBlocks(blocks.filter((_, i) => i !== index));
+  };
+
+  const moveBlock = (index, dir) => {
+    const next = [...blocks];
+    const target = index + dir;
+    if (target < 0 || target >= blocks.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    setBlocks(next);
+  };
+
+  const renderPreview = (content) => {
     const lines = content.split('\n');
     return lines.map((line, i) => {
-      const trimmedLine = line.trim();
-      
-      // YouTube Regex
-      const ytMatch = trimmedLine.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      const trimmed = line.trim();
+      const ytMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
       if (ytMatch) {
         return (
-          <div key={i} className="video-container" style={{ margin: '10px 0', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <iframe
-              width="100%"
-              height="200"
-              src={`https://www.youtube.com/embed/${ytMatch[1]}`}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+          <div key={i} className="video-container" style={{ margin: '10px 0', borderRadius: '12px', overflow: 'hidden' }}>
+            <iframe width="100%" height="200" src={`https://www.youtube.com/embed/${ytMatch[1]}`} frameBorder="0" allowFullScreen />
           </div>
         );
       }
-      
-      // Image Check
-      const isImageUrl = trimmedLine.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || 
-                         trimmedLine.includes('i.ibb.co') || 
-                         trimmedLine.includes('imgur.com');
-      
-      if (isImageUrl && (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://'))) {
-        return (
-          <div key={i} style={{ margin: '12px 0' }}>
-            <img 
-              src={trimmedLine} 
-              alt="Adjunto" 
-              style={{ 
-                maxWidth: '100%', 
-                borderRadius: '12px', 
-                boxShadow: '0 8px 24px rgba(0,0,0,0.3)', 
-                border: '1px solid rgba(255,255,255,0.1)',
-                display: 'block'
-              }} 
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-          </div>
-        );
+      const isImg = trimmed.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || trimmed.includes('i.ibb.co') || trimmed.includes('imgur.com');
+      if (isImg && trimmed.startsWith('http')) {
+        return <img key={i} src={trimmed} alt="" style={{ maxWidth: '100%', borderRadius: '12px', margin: '10px 0', display: 'block' }} />;
       }
-
-      return <div key={i} style={{ marginBottom: '4px', lineHeight: '1.5' }}>{line}</div>;
+      return <div key={i} style={{ marginBottom: '4px' }}>{line}</div>;
     });
-  };
-
-  const saveAnuncio = async (e) => {
-    e.preventDefault();
-    const action = editingAnuncio ? 'update' : 'create';
-    await post('anuncios', { action, id: editingAnuncio?.id, ...anuncioForm, tipo: 'texto' });
-    setEditingAnuncio(null);
-    setAnuncioForm({ titulo: '', contenido: '', activo: 1 });
-    await loadData();
-  };
-
-  const startEdit = (a) => {
-    setEditingAnuncio(a);
-    setAnuncioForm({ titulo: a.titulo, contenido: a.contenido, activo: a.activo });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const deleteAnuncio = async (id) => {
-    if (!window.confirm('¿Eliminar este anuncio permanentemente?')) return;
-    await post('anuncios', { action: 'delete', id });
-    await loadData();
-  };
-
-  const toggleStatus = async (a) => {
-    await post('anuncios', { action: 'update', ...a, activo: a.activo === 1 ? 0 : 1 });
-    await loadData();
   };
 
   return (
     <section className="page-section">
       <div className="section-title"><Megaphone size={16} /><h2>Tablón de Anuncios Institucionales</h2></div>
       
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '2rem', marginTop: '1rem' }}>
-        {/* Formulario */}
-        <div className="management-card" style={{ height: 'fit-content' }}>
-          <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {editingAnuncio ? <Edit2 size={18} /> : <Plus size={18} />}
-            {editingAnuncio ? 'Editar Anuncio' : 'Nuevo Anuncio'}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr', gap: '2rem', marginTop: '1rem' }}>
+        
+        {/* EDITOR VISUAL POR BLOQUES */}
+        <div className="management-card">
+          <h3 style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              {editingAnuncio ? <Edit2 size={18} /> : <Plus size={18} />}
+              {editingAnuncio ? 'Editar Anuncio' : 'Nuevo Anuncio'}
+            </span>
+            {editingAnuncio && (
+              <button className="btn" style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.1)' }} onClick={() => setEditingAnuncio(null)}>Cancelar</button>
+            )}
           </h3>
-          <form className="stack-form" onSubmit={saveAnuncio}>
+
+          <div className="stack-form">
             <input 
               className="input-field" 
               placeholder="Título del anuncio (Opcional)" 
-              value={anuncioForm.titulo} 
-              onChange={(e) => setAnuncioForm(p => ({ ...p, titulo: e.target.value }))} 
+              value={titulo} 
+              onChange={(e) => setTitulo(e.target.value)} 
+              style={{ marginBottom: '1rem', fontWeight: 'bold' }}
             />
-            <textarea 
-              className="input-field" 
-              placeholder="Escribe el mensaje aquí. Puedes subir imágenes con el botón de abajo o pegar enlaces de YouTube." 
-              value={anuncioForm.contenido} 
-              onChange={(e) => setAnuncioForm(p => ({ ...p, contenido: e.target.value }))} 
-              rows="10" 
-              required 
-            />
-            
-            <div style={{ marginBottom: '1.5rem' }}>
-              <input 
-                type="file" 
-                id="anuncio-img-upload" 
-                accept="image/*" 
-                style={{ display: 'none' }} 
-                onChange={handleImageUpload} 
-              />
-              <button 
-                type="button" 
-                className="btn" 
-                disabled={isUploading}
-                onClick={() => document.getElementById('anuncio-img-upload').click()}
-                style={{ 
-                  background: 'rgba(255,255,255,0.05)', 
-                  fontSize: '0.85rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  gap: '10px',
-                  border: '1px dashed rgba(255,255,255,0.2)',
-                  width: '100%',
-                  padding: '12px'
-                }}
-              >
-                {isUploading ? (
-                  <>⌛ Subiendo archivo...</>
-                ) : (
-                  <>
-                    <ImageIcon size={18} />
-                    Añadir Imagen (ImgBB)
-                  </>
-                )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '1.5rem' }}>
+              {blocks.map((block, idx) => (
+                <div key={idx} className="glass-card" style={{ 
+                  padding: '10px', 
+                  background: 'rgba(255,255,255,0.03)', 
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  position: 'relative'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.65rem', opacity: 0.5, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      {block.type === 'text' ? <Type size={12}/> : block.type === 'image' ? <ImageIcon size={12}/> : <Video size={12}/>}
+                      Bloque de {block.type}
+                    </span>
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                      <button onClick={() => moveBlock(idx, -1)} className="icon-btn" style={{ padding: '2px' }}><ChevronUp size={14}/></button>
+                      <button onClick={() => moveBlock(idx, 1)} className="icon-btn" style={{ padding: '2px' }}><ChevronDown size={14}/></button>
+                      <button onClick={() => removeBlock(idx)} className="icon-btn danger" style={{ padding: '2px' }}><Trash2 size={14}/></button>
+                    </div>
+                  </div>
+
+                  {block.type === 'text' ? (
+                    <textarea 
+                      className="input-field" 
+                      rows="4" 
+                      value={block.content} 
+                      onChange={(e) => updateBlock(idx, e.target.value)}
+                      placeholder="Escribe aquí..."
+                      style={{ background: 'transparent', border: 'none', padding: '0' }}
+                    />
+                  ) : block.type === 'image' ? (
+                    <img src={block.content} style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px' }} alt="" />
+                  ) : (
+                    <div style={{ background: '#000', padding: '20px', borderRadius: '8px', textAlign: 'center', fontSize: '0.8rem' }}>
+                      📹 Video de YouTube Detectado
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* BOTONES DE ACCIÓN */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.5rem' }}>
+              <button className="btn" onClick={addTextBlock} style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.75rem' }}>
+                <Type size={16} /> + Texto
+              </button>
+              
+              <label className="btn" style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.75rem', cursor: 'pointer', textAlign: 'center' }}>
+                <ImageIcon size={16} /> {isUploading ? '...' : '+ Imagen'}
+                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={isUploading} />
+              </label>
+
+              <button className="btn" onClick={() => {
+                const url = window.prompt('Pega el enlace de YouTube:');
+                if (url) setBlocks([...blocks, { type: 'video', content: url }]);
+              }} style={{ background: 'rgba(255,255,255,0.05)', fontSize: '0.75rem' }}>
+                <Video size={16} /> + Video
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button className="btn btn-primary" type="submit" style={{ flex: 1 }}>
-                {editingAnuncio ? 'Guardar Cambios' : 'Publicar Ahora'}
-              </button>
-              {editingAnuncio && (
-                <button 
-                  className="btn" 
-                  type="button" 
-                  style={{ background: 'rgba(255,255,255,0.1)' }} 
-                  onClick={() => { setEditingAnuncio(null); setAnuncioForm({ titulo: '', contenido: '', activo: 1 }); }}
-                >
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </form>
+            <button className="btn btn-primary" onClick={saveAnuncio} style={{ width: '100%', padding: '12px' }}>
+              <Save size={18} /> {editingAnuncio ? 'Actualizar Anuncio' : 'Publicar Ahora'}
+            </button>
+          </div>
         </div>
 
-        {/* Lista de Anuncios */}
+        {/* LISTA DE ANUNCIOS */}
         <div className="management-card">
           <h3 style={{ marginBottom: '1.5rem' }}>Anuncios Publicados</h3>
           <div style={{ maxHeight: '700px', overflowY: 'auto', paddingRight: '10px' }}>
@@ -206,40 +219,26 @@ const AnunciosPanel = ({ data, post, loadData, isMobile }) => {
                 padding: '1.2rem', 
                 background: 'rgba(255,255,255,0.03)',
                 borderLeft: `4px solid ${a.activo ? 'var(--success)' : '#64748b'}`,
-                boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.8rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Megaphone size={18} color="var(--primary)" />
-                    <strong style={{ fontSize: '1.1rem' }}>{a.titulo || 'Anuncio Institucional'}</strong>
-                  </div>
+                  <strong style={{ fontSize: '1rem' }}>{a.titulo || 'Anuncio'}</strong>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button className="icon-btn" onClick={() => toggleStatus(a)} title={a.activo ? 'Ocultar' : 'Mostrar'}>
-                      {a.activo ? <CheckCircle size={16} color="var(--success)" /> : <XCircle size={16} color="#64748b" />}
-                    </button>
-                    <button className="icon-btn" onClick={() => startEdit(a)} title="Editar"><Edit2 size={16} /></button>
-                    <button className="icon-btn danger" onClick={() => deleteAnuncio(a.id)} title="Eliminar"><Trash2 size={16} /></button>
+                    <button className="icon-btn" onClick={async () => {
+                      await post('anuncios', { action: 'update', ...a, activo: a.activo ? 0 : 1 });
+                      await loadData();
+                    }}>{a.activo ? <CheckCircle size={14} color="var(--success)" /> : <XCircle size={14} color="#64748b" />}</button>
+                    <button className="icon-btn" onClick={() => setEditingAnuncio(a)}><Edit2 size={14}/></button>
+                    <button className="icon-btn danger" onClick={async () => {
+                      if (window.confirm('¿Eliminar?')) {
+                        await post('anuncios', { action: 'delete', id: a.id });
+                        await loadData();
+                      }
+                    }}><Trash2 size={14}/></button>
                   </div>
                 </div>
-                <div style={{ 
-                  fontSize: '0.9rem', 
-                  opacity: 0.9, 
-                  color: 'white',
-                  wordBreak: 'break-word'
-                }}>
-                  {renderContent(a.contenido)}
-                </div>
-                <div style={{ marginTop: '1rem', fontSize: '0.75rem', opacity: 0.5 }}>
-                  Publicado: {new Date(a.fecha_creacion).toLocaleDateString()}
-                </div>
+                <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>{renderPreview(a.contenido)}</div>
               </div>
             ))}
-            {data.anuncios.length === 0 && (
-              <div style={{ textAlign: 'center', opacity: 0.4, padding: '3rem 0' }}>
-                <Megaphone size={40} style={{ marginBottom: '1rem' }} />
-                <p>No hay anuncios publicados actualmente.</p>
-              </div>
-            )}
           </div>
         </div>
       </div>
