@@ -24,8 +24,7 @@ export const handlePrintHorario = (course, grid) => {
     if (isBreak) {
       return `
         <tr class="print-break-row">
-          <td class="print-time-cell">${row.time || ''}</td>
-          <td colspan="5" class="print-break-cell">${row.label || 'RECREO'}</td>
+          <td colspan="6" class="print-break-cell">${row.label || 'RECREO'}</td>
         </tr>
       `;
     }
@@ -115,21 +114,33 @@ export const handlePrintHorario = (course, grid) => {
           }
           .schedule-print-table th { font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; }
           
-          .print-time-cell, .print-slot-cell, .print-break-cell { 
+          .print-time-cell, .print-slot-cell { 
             height: ${rowHeight}; 
           }
           .print-time-cell { font-weight: 900; white-space: nowrap; font-size: 0.85rem; }
           .print-subject { font-weight: 700; color: black; font-size: 0.72rem; line-height: 1; margin-bottom: 2px; }
           .print-subject.is-free { font-weight: 500; font-style: italic; opacity: 0.7; font-size: 0.65rem; }
           .print-teacher { color: black; font-size: 0.62rem; font-weight: normal; line-height: 1; }
-          .print-break-cell { font-weight: 900; letter-spacing: 0.15em; background: #fff; }
+          .print-break-cell { 
+            height: 6mm; 
+            font-weight: 400; 
+            font-size: 0.65rem; 
+            letter-spacing: 0.4em; 
+            background: #fff; 
+            text-transform: uppercase;
+          }
 
           @media print {
             body { background: white; padding: 0; }
             .no-print-toolbar { display: none; }
             .horarios-print-page { box-shadow: none; margin: 0; padding: 0; width: 100%; height: auto; }
             @page { size: A4 landscape; margin: 10mm; }
-            .yellow-banner { -webkit-print-color-adjust: exact; background: ${getHeaderColor(course)} !important; }
+            .yellow-banner { 
+              -webkit-print-color-adjust: exact; 
+              print-color-adjust: exact; 
+              background: ${getHeaderColor(course)} !important; 
+              color: black !important;
+            }
           }
         </style>
       </head>

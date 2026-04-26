@@ -139,6 +139,31 @@ body {
   cursor: not-allowed;
 }
 
+/* Badges */
+.badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.badge-admin { background: #ef4444; color: white; border: 1px solid #dc2626; }
+.badge-preceptor { background: #6366f1; color: white; border: 1px solid #4f46e5; }
+.badge-preceptor_taller { background: #10b981; color: white; border: 1px solid #059669; }
+.badge-preceptor_ef { background: #f59e0b; color: white; border: 1px solid #d97706; }
+.badge-profesor { background: #94a3b8; color: white; border: 1px solid #64748b; }
+.badge-secretaria_de_alumnos { background: #ec4899; color: white; border: 1px solid #db2777; }
+.badge-jefe_de_auxiliares { background: #8b5cf6; color: white; border: 1px solid #7c3aed; }
+.badge-director { background: #f43f5e; color: white; border: 1px solid #e11d48; }
+.badge-vicedirector { background: #fb7185; color: white; border: 1px solid #f43f5e; }
+
 /* Generic Table Styles */
 .table-container {
   overflow-x: auto;

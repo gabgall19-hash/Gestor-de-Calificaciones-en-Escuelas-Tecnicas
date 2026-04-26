@@ -25,17 +25,8 @@
 }
 
 .course-info h2 { margin: 0; font-size: 1.6rem; font-weight: 800; color: white; }
-.badge { 
-  background: var(--dynamic-primary, var(--primary)); 
-  color: white; 
-  padding: 4px 12px; 
-  border-radius: 20px; 
-  font-size: 0.75rem; 
-  margin-top: 8px; 
-  display: inline-block; 
-  font-weight: 700; 
-  text-transform: uppercase; 
-}
+
+.editor-actions { display: flex; gap: 12px; align-items: center; }
 
 .editor-actions { display: flex; gap: 12px; align-items: center; }
 

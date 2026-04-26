@@ -6,6 +6,17 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.4.1] - 2026-04-26 (Excelencia en Impresión y Pulido Visual)
+**"Color Fiel y Consistencia de Identidad"**
+
+*   **🖨️ Color Fiel en Impresión**:
+    *   **Hardening de Fondos**: Implementación de `print-color-adjust: exact` para forzar la impresión de banners de colores, superando las restricciones por defecto de los navegadores.
+    *   **Consistencia Masiva**: Asegurada la preservación de colores institucionales en la generación masiva de PDF para todos los cursos.
+    *   **Recreos Refinados**: Rediseño de la fila de descanso en el PDF; ahora es una línea fina (6mm), con tipografía minimalista y espaciado técnico que unifica todas las columnas.
+*   **🎨 Consolidación de Identidad Visual**:
+    *   **Sistema de Badges Global**: Unificación de las etiquetas de roles en un único motor de estilos (`index.css`), eliminando conflictos entre paneles.
+    *   **Estética Sólida**: Transición de fondos traslúcidos a colores sólidos y vibrantes con tipografía Extra Bold, mejorando la legibilidad inmediata de los cargos jerárquicos.
+
 ### 🚀 [3.4.0] - 2026-04-26 (Automatización y Estructura Horaria)
 **"Sincronización Inteligente y Validación de Integridad"**
 
