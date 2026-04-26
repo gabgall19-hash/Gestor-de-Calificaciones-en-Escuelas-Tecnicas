@@ -6,7 +6,16 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
-### 🚀 [3.2.0] - 2026-04-25 (Integridad y Sincronización)
+### 🚀 [3.2.1] - 2026-04-26 (Comunicación Visual)
+**"Anuncios con Multimedia Enriquecida"**
+
+*   **📸 Integración con ImgBB**:
+    *   **Subida Directa**: Nuevo sistema de carga de imágenes desde el panel de anuncios con integración nativa a la API de ImgBB.
+    *   **Hosting Gratuito**: Las imágenes se alojan externamente de forma automática, optimizando el rendimiento de la base de datos local.
+*   **📺 Renderizado Inteligente**:
+    *   **Detección de Contenido**: El sistema ahora detecta automáticamente URLs de imágenes y videos de YouTube dentro del cuerpo del anuncio, renderizándolos con un diseño premium.
+    *   **Interfaz de Alumnos**: Actualización del feed público para una experiencia de lectura más visual y moderna.
+
 **"Horarios como Fuente Única de Verdad"**
 
 *   **👨‍🏫 Sincronización Automática de Permisos**:

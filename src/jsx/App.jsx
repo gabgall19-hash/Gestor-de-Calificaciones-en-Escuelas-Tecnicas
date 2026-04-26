@@ -376,9 +376,43 @@ function App() {
                       </div>
                     )}
                     
-                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', opacity: 0.9, whiteSpace: 'pre-wrap' }}>
-                      {a.contenido.replace(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/gi, '').trim()}
-                    </p>
+                    <div style={{ fontSize: '0.95rem', lineHeight: '1.6', opacity: 0.9 }}>
+                      {(() => {
+                        const lines = a.contenido.split('\n');
+                        return lines.map((line, i) => {
+                          const trimmedLine = line.trim();
+                          
+                          // Skip rendering the line if it's the video ID we already showed
+                          if (videoId && trimmedLine.includes(videoId)) return null;
+
+                          // Image Regex
+                          const isImageUrl = trimmedLine.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i) || 
+                                             trimmedLine.includes('i.ibb.co') || 
+                                             trimmedLine.includes('imgur.com');
+                          
+                          if (isImageUrl && (trimmedLine.startsWith('http://') || trimmedLine.startsWith('https://'))) {
+                            return (
+                              <div key={i} style={{ margin: '12px 0' }}>
+                                <img 
+                                  src={trimmedLine} 
+                                  alt="Imagen adjunta" 
+                                  style={{ 
+                                    maxWidth: '100%', 
+                                    borderRadius: '12px', 
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)', 
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    display: 'block'
+                                  }} 
+                                  onError={(e) => { e.target.style.display = 'none'; }}
+                                />
+                              </div>
+                            );
+                          }
+
+                          return <div key={i} style={{ marginBottom: '4px', whiteSpace: 'pre-wrap' }}>{line}</div>;
+                        });
+                      })()}
+                    </div>
                     
                     <div style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '0.75rem', opacity: 0.5 }}>
                       Publicado el {new Date(a.fecha_creacion).toLocaleDateString('es-AR')}
