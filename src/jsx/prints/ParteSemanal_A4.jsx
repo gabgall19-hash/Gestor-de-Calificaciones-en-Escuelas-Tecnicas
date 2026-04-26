@@ -185,8 +185,8 @@ export const handlePrintParteSemanal = (data, course, scheduleData) => {
           .sched-date-row th { height: 12px !important; border: 1px solid black !important; }
           .sched-date-cell { background: white !important; }
 
-          .row-break { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 8px !important; }
-          .row-break td { height: 8px !important; min-height: 8px !important; line-height: 8px !important; padding: 0 !important; }
+          .row-break { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 5px !important; }
+          .row-break td { height: 5px !important; min-height: 5px !important; line-height: 5px !important; padding: 0 !important; }
 
           .cell-subject { font-weight: 900; display: block; line-height: 1; margin-top: 3px; padding: 0 2px; }
           .cell-teacher { font-size: 0.48rem; font-style: italic; color: #333; display: block; margin-top: 2px; padding: 0 2px; }
@@ -269,8 +269,8 @@ export const handlePrintParteSemanal = (data, course, scheduleData) => {
                   if (row.type === 'break' || row.isRecreo) {
                     return `
                       <tr class="row-break">
-                        <td style="vertical-align: middle !important; height: 8px !important;">${row.time || ''}</td>
-                        <td colspan="5" style="vertical-align: middle !important; font-size: 0.38rem; height: 8px !important;">RECREO</td>
+                        <td style="vertical-align: middle !important; height: 5px !important;">${row.time || ''}</td>
+                        <td colspan="5" style="vertical-align: middle !important; font-size: 3pt; height: 5px !important; line-height: 5px !important;">RECREO</td>
                       </tr>
                     `;
                   }
