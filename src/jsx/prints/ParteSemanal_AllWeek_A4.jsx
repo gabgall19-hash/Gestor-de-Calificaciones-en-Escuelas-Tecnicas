@@ -145,8 +145,8 @@ export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, sele
               if (row.type === 'break' || row.isRecreo) {
                 return `
                   <tr class="row-break">
-                    <td style="vertical-align: middle !important; height: 5px !important;">${row.time || ''}</td>
-                    <td colspan="5" style="vertical-align: middle !important; font-size: 3pt; height: 5px !important; line-height: 5px !important;">RECREO</td>
+                    <td style="vertical-align: middle !important; height: 7px !important;">${row.time || ''}</td>
+                    <td colspan="5" style="vertical-align: middle !important; font-size: 3.8pt; height: 7px !important; line-height: 7px !important;">RECREO</td>
                   </tr>
                 `;
               }
@@ -207,8 +207,8 @@ export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, sele
           .schedule-table th { background: #fff; font-weight: 900; height: 22px; vertical-align: middle; }
           .sched-date-row th { height: 12px !important; border: 1px solid black !important; }
           .sched-date-cell { background: white !important; }
-          .row-break { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 5px !important; }
-          .row-break td { height: 5px !important; min-height: 5px !important; line-height: 5px !important; padding: 0 !important; }
+          .row-break { background: #eeeeee !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 7px !important; }
+          .row-break td { height: 7px !important; min-height: 7px !important; line-height: 7px !important; padding: 0 !important; }
           .cell-subject { font-weight: 900; display: block; line-height: 1; margin-top: 3px; padding: 0 2px; }
           .cell-teacher { font-size: 0.48rem; font-style: italic; color: #333; display: block; margin-top: 2px; padding: 0 2px; }
           .signature-line { border-top: 1px solid black; width: 100%; margin-top: 6px; height: 24px; display: block; }
