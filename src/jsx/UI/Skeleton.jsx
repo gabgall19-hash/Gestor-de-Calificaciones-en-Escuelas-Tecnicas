@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../css/Skeleton.css';
+import '../../css/UI/Skeleton.css';
 
 const Skeleton = ({ type = 'text', className = '' }) => {
   const classes = `skeleton skeleton-${type} ${className}`;
@@ -8,11 +8,11 @@ const Skeleton = ({ type = 'text', className = '' }) => {
 
 export const TableSkeleton = ({ rows = 5, cols = 6 }) => {
   return (
-    <div className="skeleton-table-wrapper" style={{ width: '100%' }}>
+    <div className="skeleton-table-wrapper">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} style={{ display: 'flex', gap: '8px', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <div key={i} className="skeleton-table-row-flex">
           {Array.from({ length: cols }).map((_, j) => (
-            <Skeleton key={j} type="text" style={{ flex: j === 0 ? 2 : 1, height: '20px' }} />
+            <Skeleton key={j} type="text" className={`skeleton-cell-dynamic ${j === 0 ? 'first' : ''}`} />
           ))}
         </div>
       ))}

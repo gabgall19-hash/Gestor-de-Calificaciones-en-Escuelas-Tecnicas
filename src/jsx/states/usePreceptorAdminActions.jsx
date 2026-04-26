@@ -159,7 +159,7 @@ export default function usePreceptorAdminActions(deps) {
       id: userRow.id,
       nombre: userRow.nombre,
       username: userRow.username,
-      password: userRow.password,
+      password: '',
       rol: userRow.rol,
       preceptor_course_id: userRow.preceptor_course_id,
       is_professor_hybrid: !!userRow.is_professor_hybrid,

@@ -329,7 +329,16 @@ export default function PreceptorModals(props) {
             <input className="input-field" placeholder="Nombre completo" value={userForm.nombre} onChange={(e) => setUserForm((prev) => ({ ...prev, nombre: e.target.value }))} required />
             <div className="grid-2">
               <input className="input-field" placeholder="Usuario" value={userForm.username} onChange={(e) => setUserForm((prev) => ({ ...prev, username: e.target.value }))} required />
-              <input className="input-field" placeholder="Contraseña" value={userForm.password} onChange={(e) => setUserForm((prev) => ({ ...prev, password: e.target.value }))} required />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <input 
+                  className="input-field" 
+                  placeholder={editingUserId === 'new' ? "Contraseña" : "Nueva contraseña (opcional)"} 
+                  value={userForm.password} 
+                  onChange={(e) => setUserForm((prev) => ({ ...prev, password: e.target.value }))} 
+                  required={editingUserId === 'new'} 
+                />
+                {editingUserId !== 'new' && <span style={{ fontSize: '0.65rem', opacity: 0.5, marginLeft: '4px' }}>Vacío para mantener actual</span>}
+              </div>
             </div>
             <select className="input-field" value={userForm.rol} onChange={(e) => setUserForm((prev) => ({ ...prev, rol: e.target.value }))}>
               <option value="admin">Administrador</option>

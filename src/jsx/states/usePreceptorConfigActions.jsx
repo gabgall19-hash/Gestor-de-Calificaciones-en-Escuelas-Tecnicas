@@ -1,9 +1,12 @@
 import apiService from '../functions/apiService';
-import { handlePrintAllCourses } from '../prints/SeguimientoA4';
-import { handlePrintSeguimientoGlobal } from '../prints/SeguimientoAllA4';
-import { handlePrintPlanillasCurso } from '../prints/CalificacionesA4';
-import { handlePrintRAC } from '../prints/RACA4';
-import { handlePrintParteDiario, handlePrintParteDiarioGlobal, handlePrintParteConInformacion } from '../prints/ParteDiarioA4';
+import { handlePrintAllCourses } from '../prints/Seguimiento_A4';
+import { handlePrintSeguimientoGlobal } from '../prints/Seguimiento_AllGrades_A4';
+import { handlePrintPlanillas_AllSubjects } from '../prints/Calificaciones_AllSubjects_A4';
+import { handlePrintRAC_Student } from '../prints/RAC_Student_A4';
+import { handlePrintRAC_AllStudents } from '../prints/RAC_AllStudents_A4';
+import { handlePrintParteSemanal } from '../prints/ParteSemanal_A4';
+import { handlePrintParteSemanal_AllGrades } from '../prints/ParteSemanal_AllGrades_A4';
+import { handlePrintParteSemanal_AllWeek } from '../prints/ParteSemanal_AllWeek_A4';
 
 export default function usePreceptorConfigActions(deps) {
   const {
@@ -116,16 +119,18 @@ export default function usePreceptorConfigActions(deps) {
     setLoading(true);
     try {
       const scheduleRes = await apiService.get('horarios', { courseId: selectedCourseId, userId: user.id });
-      handlePrintPlanillasCurso(data, selectedCourseId, scheduleRes);
+      handlePrintPlanillas_AllSubjects(data, selectedCourseId, scheduleRes);
     } catch (err) {
       console.error('Error fetching schedule for planillas:', err);
       // Fallback to existing data if schedule fails
-      handlePrintPlanillasCurso(data, selectedCourseId);
+      handlePrintPlanillas_AllSubjects(data, selectedCourseId);
     } finally {
       setLoading(false);
     }
   };
-  const onPrintRAC = (student) => handlePrintRAC(data, student);
+
+  const onPrintRAC_Student = (student) => handlePrintRAC_Student(data, student);
+  const onPrintRAC_AllStudents = () => handlePrintRAC_AllStudents(data);
 
   const onPrintParteDiario = async () => {
     if (!selectedCourseId) return;
@@ -134,7 +139,7 @@ export default function usePreceptorConfigActions(deps) {
     setLoading(true);
     try {
       const scheduleRes = await apiService.get('horarios', { courseId: selectedCourseId, userId: user.id });
-      handlePrintParteDiario(data, course, scheduleRes);
+      handlePrintParteSemanal(data, course, scheduleRes);
     } catch (err) {
       console.error('Error fetching schedule for parte:', err);
       showToast('Error al obtener el horario del curso', 'error');
@@ -147,7 +152,7 @@ export default function usePreceptorConfigActions(deps) {
     setLoading(true);
     try {
       const allSchedules = await apiService.get('horarios', { userId: user.id });
-      handlePrintParteDiarioGlobal(data, allSchedules);
+      handlePrintParteSemanal_AllGrades(data, allSchedules);
     } catch (err) {
       console.error('Error fetching all schedules for global parte:', err);
       showToast('Error al obtener los horarios institucionales', 'error');
@@ -163,7 +168,7 @@ export default function usePreceptorConfigActions(deps) {
     setLoading(true);
     try {
       const scheduleRes = await apiService.get('horarios', { courseId: selectedCourseId, userId: user.id });
-      handlePrintParteConInformacion(data, course, scheduleRes, month, attendanceMap);
+      handlePrintParteSemanal_AllWeek(data, course, scheduleRes, month, attendanceMap);
     } catch (err) {
       console.error('Error fetching schedule for parte info:', err);
       showToast('Error al obtener el horario del curso', 'error');
@@ -185,7 +190,8 @@ export default function usePreceptorConfigActions(deps) {
     onPrintAllCourses,
     onPrintSeguimientoGlobal,
     onPrintPlanillasCurso,
-    onPrintRAC,
+    onPrintRAC_Student,
+    onPrintRAC_AllStudents,
     onPrintParteDiario,
     onPrintParteDiarioGlobal,
     onPrintParteConInformacion

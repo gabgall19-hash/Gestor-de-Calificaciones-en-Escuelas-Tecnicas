@@ -1,10 +1,10 @@
 import { FileText, Printer, Search, Users, Wrench, RotateCcw, Eye, ClipboardList, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { formatDNI } from '../functions/PreceptorHelpers';
-import '../../css/ReportViews.css';
+import '../../css/panels/ReportViews.css';
 
 const RACPanel = ({ 
   data, selectedYearId, racSearch, setRacSearch, 
-  handlePrintRAC, setSelectedRacStudent, setShowPreviasModal, 
+  handlePrintRAC_Student, handlePrintRAC_AllStudents, setSelectedRacStudent, setShowPreviasModal, 
   onPreviewStudent, undoPase, updateStudentField, setViewingFichaStudent,
   isSelectionMode, setIsSelectionMode, selectedStudentIds, setSelectedStudentIds, onEndCycle
 }) => {
@@ -23,7 +23,7 @@ const RACPanel = ({
           >
             <AlertTriangle size={16} /> TERMINACIÓN DE CICLO
           </button>
-          <button className="btn btn-primary" onClick={() => handlePrintRAC()}>
+          <button className="btn btn-primary" onClick={() => handlePrintRAC_AllStudents()}>
             <Printer size={16} /> IMPRIMIR RAC
           </button>
         </div>
@@ -146,7 +146,7 @@ const RACPanel = ({
                         <button className="btn" style={{ padding: '6px 12px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)' }} onClick={() => { setSelectedRacStudent(student); setShowPreviasModal(true); }}>
                           <Wrench size={14} />
                         </button>
-                        <button className="icon-btn" style={{ background: 'rgba(99,102,241,0.1)', color: '#a5b4fc', width: '32px', height: '32px' }} onClick={() => handlePrintRAC(student)} title="Imprimir RAC Individual">
+                        <button className="icon-btn" style={{ background: 'rgba(99,102,241,0.1)', color: '#a5b4fc', width: '32px', height: '32px' }} onClick={() => handlePrintRAC_Student(student)} title="Imprimir RAC Individual">
                           <Printer size={16} />
                         </button>
                       </div>

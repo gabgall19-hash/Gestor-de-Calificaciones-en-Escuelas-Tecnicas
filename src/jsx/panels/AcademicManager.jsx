@@ -1,7 +1,7 @@
 import React from 'react';
 import { ClipboardList, Search, Lock, Unlock } from 'lucide-react';
 import { truncateSubject } from '../functions/PreceptorHelpers';
-import '../../css/AcademicManager.css';
+import '../../css/panels/AcademicManager.css';
 
 const PERIOD_GROUPS = [
   { ids: [1], label: '1er Inf.' },
@@ -41,48 +41,23 @@ const AcademicManager = ({
 
   return (
     <section className="page-section">
-      <div
-        className="section-title"
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: isMobile ? 'stretch' : 'center',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: isMobile ? '0.8rem' : '0.5rem'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="section-title academic-section-title">
+        <div className="academic-title-wrapper">
           <ClipboardList size={16} className="text-primary" />
           <h2>Gestión de Materias y Bloqueos</h2>
         </div>
-        <div className="panel-actions" style={{ width: isMobile ? '100%' : 'auto', gap: isMobile ? '0.45rem' : '0.75rem', flexWrap: 'nowrap' }}>
+        <div className="panel-actions academic-toolbar-actions">
           <button
-            className="btn"
+            className="btn academic-btn-block"
             onClick={() => handleUpdateLocks(null, null, true, true)}
-            style={{
-              background: 'rgba(231, 76, 60, 0.2)',
-              color: '#e74c3c',
-              flex: isMobile ? 1 : 'none',
-              padding: isMobile ? '0.55rem 0.65rem' : undefined,
-              fontSize: isMobile ? '0.68rem' : undefined,
-              justifyContent: 'center'
-            }}
           >
             {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol)
               ? 'BLOQUEAR TODO EL CURSO'
               : 'BLOQUEAR MIS MATERIAS'}
           </button>
           <button
-            className="btn"
+            className="btn academic-btn-unblock"
             onClick={() => handleUpdateLocks(null, null, false, true)}
-            style={{
-              background: 'rgba(46, 204, 113, 0.2)',
-              color: '#27ae60',
-              flex: isMobile ? 1 : 'none',
-              padding: isMobile ? '0.55rem 0.65rem' : undefined,
-              fontSize: isMobile ? '0.68rem' : undefined,
-              justifyContent: 'center'
-            }}
           >
             {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol)
               ? 'DESBLOQUEAR TODO'
@@ -91,9 +66,9 @@ const AcademicManager = ({
         </div>
       </div>
 
-      <div className="glass-card table-container" style={{ marginTop: '0.4rem', overflowX: 'auto' }}>
+      <div className="glass-card table-container academic-table-card">
         {isMobile && (
-          <div style={{ padding: '0.85rem 1rem 0', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          <div className="academic-mobile-filters">
             <label style={{ fontSize: '0.76rem', color: 'var(--text-muted)', fontWeight: '600' }}>Periodo</label>
             <select className="input-field" value={mobilePeriodLabel} onChange={(e) => setMobilePeriodLabel(e.target.value)} style={{ width: '100%' }}>
               {PERIOD_GROUPS.map((group) => (
@@ -103,18 +78,17 @@ const AcademicManager = ({
           </div>
         )}
 
-        <div style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--glass-border)', position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: '25px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+        <div className="academic-search-wrapper">
+          <Search size={18} className="academic-search-icon" />
           <input
-            className="input-field"
+            className="input-field academic-search-input"
             placeholder="Buscar materia por nombre..."
             value={materiasSearch}
             onChange={(e) => setMateriasSearch(e.target.value)}
-            style={{ paddingLeft: '45px' }}
           />
         </div>
 
-        <table className="grades-table academic-locks-table" style={{ fontSize: '0.8rem' }}>
+        <table className="grades-table academic-locks-table">
           <thead>
             <tr>
               <th className="academic-locks-header academic-locks-header-main" style={{ width: isMobile ? '140px' : '250px' }}>

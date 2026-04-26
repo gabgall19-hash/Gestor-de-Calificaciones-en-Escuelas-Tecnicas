@@ -1,6 +1,6 @@
 import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
 
-export const handlePrintPlanillasCurso = (data, selectedCourseId, scheduleRes = null) => {
+export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, scheduleRes = null) => {
   const activeCourse = data.courses.find(c => c.id === selectedCourseId);
   if (!activeCourse) return;
 

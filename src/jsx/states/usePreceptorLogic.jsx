@@ -406,7 +406,8 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     onPrintAllCourses,
     onPrintSeguimientoGlobal,
     onPrintPlanillasCurso,
-    onPrintRAC,
+    onPrintRAC_Student,
+    onPrintRAC_AllStudents,
     onPrintParteDiario,
     onPrintParteDiarioGlobal,
     onPrintParteConInformacion
@@ -446,6 +447,6 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     handleUpdateLocks, handleUpdateSystemMode, handleUpdateMobileLogin, handleUpdateRACModular, handleUpdatePreceptorMode,
     handleUpdatePasswordMsg,
     duplicateTec, savePrevia, deletePrevia, page, setPage, handleUpdatePeriods,
-    onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC, onPrintParteDiario, onPrintParteDiarioGlobal, onPrintParteConInformacion
+    onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC_Student, onPrintRAC_AllStudents, onPrintParteDiario, onPrintParteDiarioGlobal, onPrintParteConInformacion
   };
 }

@@ -1,0 +1,309 @@
+.horarios-panel { 
+  padding: 10px; 
+  animation: fadeIn 0.3s ease; 
+}
+
+.main-editor { 
+  padding: 25px; 
+  min-height: 600px; 
+  display: flex; 
+  flex-direction: column; 
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+}
+
+.editor-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 25px; 
+  border-bottom: 1px solid rgba(255,255,255,0.1); 
+  padding-bottom: 20px; 
+}
+
+.course-info h2 { margin: 0; font-size: 1.6rem; font-weight: 800; color: white; }
+.badge { 
+  background: var(--dynamic-primary, var(--primary)); 
+  color: white; 
+  padding: 4px 12px; 
+  border-radius: 20px; 
+  font-size: 0.75rem; 
+  margin-top: 8px; 
+  display: inline-block; 
+  font-weight: 700; 
+  text-transform: uppercase; 
+}
+
+.editor-actions { display: flex; gap: 12px; align-items: center; }
+
+.schedule-table-container { 
+  overflow-x: auto; 
+  flex: 1; 
+  border-radius: 12px; 
+  border: 1px solid rgba(255,255,255,0.12); 
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)),
+    radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent 40%),
+    rgba(119, 125, 132, 0.15);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.schedule-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+.schedule-table th { 
+  padding: 15px 10px; 
+  text-align: center; 
+  background: var(--dynamic-primary, rgba(255,255,255,0.15)); 
+  color: #f8fafc; 
+  font-size: 0.85rem; 
+  font-weight: 900; 
+  text-transform: uppercase; 
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.schedule-table td { 
+  padding: 10px; 
+  border: 1px solid rgba(255,255,255,0.08); 
+  vertical-align: middle; 
+  background: rgba(255,255,255,0.04); 
+}
+
+/* Specific column widths */
+.col-time { width: 130px; }
+.col-actions { width: 40px; }
+
+/* Specific input overrides to avoid white background */
+.horarios-panel input.input-time,
+.horarios-panel input.input-break,
+.horarios-panel input.input-subject-search,
+.horarios-panel input.input-teacher-search {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s;
+}
+
+/* READ-ONLY fields (Time and Breaks) */
+.horarios-panel input.input-time,
+.horarios-panel input.input-break {
+  background: transparent !important;
+  border: none !important;
+  cursor: default;
+}
+
+/* RECUADRO solo para campos modificables (Materias y Docentes) */
+.horarios-panel input.input-subject-search,
+.horarios-panel input.input-teacher-search {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 6px;
+}
+
+.horarios-panel input.input-subject-search:focus,
+.horarios-panel input.input-teacher-search:focus {
+  border-color: var(--dynamic-primary, var(--primary)) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* INVALID fields (Red border) */
+.horarios-panel input.input-subject-search.invalid,
+.horarios-panel input.input-teacher-search.invalid {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  box-shadow: 0 0 5px rgba(239, 68, 68, 0.3) !important;
+}
+
+.horarios-panel input.input-time {
+  color: #fff !important;
+  width: 100%;
+  text-align: center;
+  font-weight: 900;
+  font-size: 0.95rem;
+}
+
+.horarios-panel .cell-time {
+  background: rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+/* RECREO styling: thin and small */
+.row-break td { 
+  padding: 4px !important; 
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.input-break { 
+  width: 100%; 
+  background: transparent !important; 
+  border: none !important; 
+  color: rgba(255, 255, 255, 0.3) !important; 
+  text-align: center; 
+  font-style: italic; 
+  letter-spacing: 2px !important; 
+  font-weight: 400 !important; 
+  font-size: 0.7rem !important;
+  outline: none;
+}
+
+.bulk-editor-section {
+  margin-top: 28px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05)),
+    radial-gradient(circle at top left, rgba(255,255,255,0.12), transparent 34%),
+    rgba(119, 125, 132, 0.18);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 24px 40px rgba(0,0,0,0.18);
+}
+
+.bulk-editor-meta,
+.bulk-editor-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bulk-editor-meta th {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bulk-editor-meta td {
+  padding: 15px;
+  text-align: center;
+  font-weight: 700;
+  color: white;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.bulk-editor-table th {
+  background: rgba(251, 146, 60, 0.16);
+  padding: 12px 10px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bulk-editor-table td {
+  background: rgba(255,255,255,0.04);
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.bulk-col-number { width: 64px; }
+.bulk-col-type { width: 110px; }
+.bulk-number-cell,
+.bulk-type-cell { text-align: center; font-weight: 800; }
+.bulk-subject-cell { font-weight: 700; }
+.bulk-type-cell { color: #dbeafe; letter-spacing: 0.08em; }
+
+.horarios-panel .bulk-teacher-input,
+.horarios-panel .bulk-readonly-teacher {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  background: rgba(255,255,255,0.06) !important;
+  color: #f8fafc !important;
+  padding: 8px 10px;
+  font-size: 0.92rem;
+  outline: none;
+}
+
+.bulk-teacher-input::placeholder {
+  color: rgba(255,255,255,0.45);
+}
+
+.bulk-teacher-input.is-substitute {
+  color: #fbbf24 !important;
+}
+
+.bulk-teacher-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bulk-empty {
+  padding: 40px !important;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+}
+
+.empty-state, .loading-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.empty-icon { opacity: 0.15; margin-bottom: 20px; color: white; }
+.empty-state h3 { font-size: 1.4rem; color: white; margin-bottom: 10px; }
+.empty-state p { color: rgba(255,255,255,0.5); max-width: 300px; }
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: var(--dynamic-primary, var(--primary));
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.slot-editor { display: flex; flex-direction: column; gap: 4px; }
+
+.horarios-panel .input-subject-search, 
+.horarios-panel .input-teacher-search { 
+  background: rgba(255,255,255,0.08) !important; 
+  border: 1px solid rgba(255,255,255,0.15) !important; 
+  color: white !important; 
+  font-size: 0.75rem; 
+  padding: 6px; 
+  border-radius: 6px; 
+  outline: none;
+  width: 100%; 
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.view-subject { font-weight: 700; font-size: 0.85rem; color: white; text-align: center; }
+.view-subject.is-free { color: rgba(255,255,255,0.2); font-style: italic; font-weight: 400; font-size: 0.75rem; min-height: 32px; display: flex; align-items: center; justify-content: center; }
+.view-subject.centered-free { text-align: center; }
+.view-teacher { font-size: 0.75rem; color: var(--dynamic-primary, var(--primary)); text-align: center; opacity: 0.8; }
+
+.row-break { background: rgba(255,255,255,0.08); }
+
+.editor-footer { 
+  display: flex; 
+  gap: 15px; 
+  margin-top: 30px; 
+  padding-top: 20px; 
+  border-top: 1px solid rgba(255,255,255,0.1); 
+}
+
+@media (max-width: 1100px) {
+  .bulk-editor-section { overflow-x: auto; }
+  .bulk-editor-meta,
+  .bulk-editor-table { min-width: 860px; }
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

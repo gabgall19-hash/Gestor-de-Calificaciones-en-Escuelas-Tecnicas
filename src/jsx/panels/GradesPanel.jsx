@@ -3,7 +3,7 @@ import { ClipboardList, Search, Save, BookOpen, Users } from 'lucide-react';
 import { truncate, truncateSubject, formatDNI, numberToWords } from '../functions/PreceptorHelpers';
 import { TableSkeleton } from '../UI/Skeleton';
 import SaveStatusButton from '../UI/SaveStatusButton';
-import '../../css/GradesPanel.css';
+import '../../css/panels/GradesPanel.css';
 
 const GradesPanel = ({ 
   data, user, pending, loading, viewMode, setViewMode, 

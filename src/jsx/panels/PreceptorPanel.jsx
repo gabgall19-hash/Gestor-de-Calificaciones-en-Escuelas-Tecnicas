@@ -84,7 +84,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     handleSetPassword,
     racSearch,
     setRacSearch,
-    onPrintRAC,
+    onPrintRAC_Student,
+    onPrintRAC_AllStudents,
     setSelectedRacStudent,
     setShowPreviasModal,
     updateStudentField,
@@ -504,7 +505,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           selectedYearId={selectedYearId}
           racSearch={racSearch}
           setRacSearch={setRacSearch}
-          handlePrintRAC={onPrintRAC}
+          handlePrintRAC_Student={onPrintRAC_Student}
+          handlePrintRAC_AllStudents={onPrintRAC_AllStudents}
           setSelectedRacStudent={setSelectedRacStudent}
           setShowPreviasModal={setShowPreviasModal}
           updateStudentField={updateStudentField}

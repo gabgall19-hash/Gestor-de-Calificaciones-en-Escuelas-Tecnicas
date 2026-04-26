@@ -31,7 +31,7 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
     const file = e.target.files[0];
     if (!file) return;
 
-    const titulo = window.prompt("Título de la imagen (ej: DNI Frente, Certificado Médico):");
+    const titulo = window.prompt("Título del archivo (ej: DNI Frente, Certificado Médico):");
     if (!titulo) return;
 
     setIsUploading(true);
@@ -63,7 +63,7 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
         loadImages();
       }
     } catch (err) {
-      alert("Error al subir imagen");
+      alert("Error al subir archivo");
     } finally {
       setIsUploading(false);
       e.target.value = '';
@@ -71,7 +71,7 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
   };
 
   const deleteImage = async (id) => {
-    if (!window.confirm("¿Eliminar esta imagen adjunta?")) return;
+    if (!window.confirm("¿Eliminar este archivo adjunto?")) return;
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     await fetch(`/api/data?type=student_images&userId=${currentUser.id}`, {
       method: 'POST',
@@ -356,13 +356,16 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--primary)' }}>
               <ImageIcon size={18} />
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Imágenes Adjuntas</h3>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Archivos adjuntos</h3>
             </div>
             {isEditing && (
-              <label className="btn" style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer' }}>
-                {isUploading ? '⌛ Subiendo...' : <><Plus size={14} /> Adjuntar Imagen</>}
-                <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={isUploading} />
-              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                <label className="btn" style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+                  {isUploading ? '⌛ Subiendo...' : <><Plus size={14} /> Adjuntar Archivo</>}
+                  <input type="file" accept="image/*,application/pdf" style={{ display: 'none' }} onChange={handleImageUpload} disabled={isUploading} />
+                </label>
+                <span style={{ fontSize: '0.65rem', opacity: 0.5 }}>Formatos soportado (menos de 32mb): JPG, PNG, BMP, GIF, TIFF, WEBP, HEIC, AVIF y PDF.</span>
+              </div>
             )}
           </div>
 

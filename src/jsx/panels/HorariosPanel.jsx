@@ -10,11 +10,70 @@ import {
   AlertCircle,
   GripVertical
 } from 'lucide-react';
+import { TableSkeleton } from '../UI/Skeleton';
 import apiService from '../functions/apiService';
 import SaveStatusButton from '../UI/SaveStatusButton';
-import HorariosPrintView from '../prints/HorariosPrintView';
+import '../../css/panels/HorariosPanel.css';
+import { handlePrintHorario } from '../prints/Horario_A4';
+import { handlePrintHorario_AllGrades } from '../prints/Horario_AllGrades_A4';
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+const HORARIOS_TEMPLATES = {
+  'Mañana': {
+    'Básico': [
+      { type: 'slot', time: '07:10 a 07:50 hrs' },
+      { type: 'slot', time: '07:50 a 08:30 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '08:40 a 09:20 hrs' },
+      { type: 'slot', time: '09:20 a 10:00 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '10:10 a 10:50 hrs' },
+      { type: 'slot', time: '10:50 a 11:30 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '11:40 a 12:20 hrs' },
+      { type: 'slot', time: '12:20 a 13:00 hrs' },
+    ],
+    'Superior': [
+      { type: 'slot', time: '07:10 a 07:50 hrs' },
+      { type: 'slot', time: '07:50 a 08:30 hrs' },
+      { type: 'slot', time: '08:30 a 09:10 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '09:20 a 10:00 hrs' },
+      { type: 'slot', time: '10:00 a 10:40 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '10:50 a 11:30 hrs' },
+      { type: 'slot', time: '11:30 a 12:10 hrs' },
+      { type: 'slot', time: '12:10 a 12:50 hrs' },
+    ]
+  },
+  'Tarde': {
+    'Básico': [
+      { type: 'slot', time: '13:20 a 14:00 hrs' },
+      { type: 'slot', time: '14:00 a 14:40 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '14:50 a 15:30 hrs' },
+      { type: 'slot', time: '15:30 a 16:10 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '16:20 a 17:00 hrs' },
+      { type: 'slot', time: '17:00 a 17:40 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '17:50 a 18:30 hrs' },
+      { type: 'slot', time: '18:30 a 19:10 hrs' },
+    ],
+    'Superior': [
+      { type: 'slot', time: '13:20 a 14:00 hrs' },
+      { type: 'slot', time: '14:00 a 14:40 hrs' },
+      { type: 'slot', time: '14:40 a 15:20 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '15:30 a 16:10 hrs' },
+      { type: 'slot', time: '16:10 a 16:50 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '17:00 a 17:40 hrs' },
+      { type: 'slot', time: '17:40 a 18:20 hrs' },
+      { type: 'slot', time: '18:20 a 19:00 hrs' },
+    ]
+  }
+};
 const normalize = (str) => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 const isSlotRow = (row) => row?.type !== 'break' && !!row?.days;
 const getSubjectLogicalId = (subject) => {
@@ -76,7 +135,6 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   const [isSaving, setIsSaving] = useState(false);
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState('');
-  const [allSchedules, setAllSchedules] = useState(null);
   const [isPrintingAll, setIsPrintingAll] = useState(false);
 
   const isAdmin = user.rol === 'admin';
@@ -97,6 +155,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
 
   const handleCourseSelect = async (courseId) => {
     setLoading(true);
+    const currentCourse = allCourses?.find(c => c.id === courseId);
     try {
       const res = await apiService.get('horarios', { userId: user.id, courseId });
       let parsed;
@@ -146,8 +205,42 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
         };
       });
 
-      setGrid(finalGrid);
-      setLastSavedSnapshot(buildSnapshot(nextMeta, finalGrid));
+      const syncWithTemplate = (currentGrid) => {
+        const turno = currentCourse?.turno;
+        const ano = Number(currentCourse?.ano);
+        const ciclo = (ano && ano <= 2) ? 'Básico' : 'Superior';
+        const template = HORARIOS_TEMPLATES[turno]?.[ciclo];
+        
+        if (!template) return currentGrid;
+        
+        const isCompatible = currentGrid.length === template.length && 
+                             currentGrid.every((row, i) => row.type === template[i].type && row.time === template[i].time);
+                             
+        if (isCompatible && currentGrid.length > 0) return currentGrid;
+        
+        // Robust data extraction: get all rows that have actual content
+        const existingSlotsWithData = currentGrid.filter(r => r.days && Object.values(r.days).some(d => d.subject));
+        
+        let slotCounter = 0;
+        return template.map(tRow => {
+          if (tRow.type === 'break') return { ...tRow };
+          
+          const existing = existingSlotsWithData[slotCounter];
+          slotCounter++;
+          
+          return {
+            ...tRow,
+            days: existing?.days || DAYS.reduce((acc, day) => ({ 
+              ...acc, 
+              [day]: { subject: '', teacher: '', subject_id: null, subject_logical_id: null, teacher_id: null } 
+            }), {})
+          };
+        });
+      };
+
+      const synchronizedGrid = syncWithTemplate(finalGrid);
+      setGrid(synchronizedGrid);
+      setLastSavedSnapshot(buildSnapshot(nextMeta, synchronizedGrid));
     } catch (err) {
       console.error('Error fetching schedule:', err);
       showMsg('error', 'Error al cargar horario');
@@ -166,6 +259,27 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
 
   const handleSave = async () => {
     if (!selectedCourseId || !isAdmin) return;
+
+    // Validation
+    for (let r = 0; r < grid.length; r++) {
+      const row = grid[r];
+      if (row.type === 'slot' && row.days) {
+        for (const day of DAYS) {
+          const cell = row.days[day];
+          if (cell?.subject && cell.subject.toUpperCase() !== 'HORARIO LIBRE') {
+            if (!cell.subject_id) {
+              showMsg('error', `Materia inexistente: "${cell.subject}" en ${day} ${row.time}`);
+              return;
+            }
+            if (cell.teacher && !cell.teacher_id) {
+              showMsg('error', `Profesor inexistente: "${cell.teacher}" en ${day} ${row.time}`);
+              return;
+            }
+          }
+        }
+      }
+    }
+
     setIsSaving(true);
     try {
       await apiService.post('horarios', user.id, {
@@ -198,6 +312,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
       showMsg('error', 'Error al eliminar');
     }
   };
+
 
   const addRow = (type = 'slot') => {
     if (!isAdmin) return;
@@ -254,20 +369,14 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   };
 
   const handlePrint = () => {
-    setAllSchedules(null); // Ensure single print
-    setTimeout(() => window.print(), 100);
+    handlePrintHorario(selectedCourse, grid);
   };
 
   const handlePrintAll = async () => {
     setIsPrintingAll(true);
     try {
       const res = await apiService.get('horarios', { userId: user.id });
-      setAllSchedules(res);
-      // Wait for React to render the batch print view
-      setTimeout(() => {
-        window.print();
-        setAllSchedules(null);
-      }, 500);
+      handlePrintHorario_AllGrades(allCourses, res);
     } catch (err) {
       console.error('Error fetching all schedules:', err);
       showMsg('error', 'Error al cargar todos los horarios');
@@ -509,14 +618,17 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
         const { key, assignmentKeys } = getSubjectAssignment(subjectId, subject?.nombre || subjectName, subjectLogicalId);
 
         if (!grouped.has(key)) {
+          const curriculumSubject = curriculumSubjects.find(s => s.id === subjectId || (subjectId === null && normalize(s.nombre) === normalize(subjectName)));
+          if (!curriculumSubject) return; // Skip subjects not in the current curriculum
+
           const slotCount = isModularWorkshop(subject) ? 2 : 1;
           grouped.set(key, {
             key,
-            subjectId,
-            subjectLogicalId,
-            subjectName: subject?.nombre || subjectName,
-            subjectType: getSubjectTypeLabel(subject),
-            subjectOrder: subject?.id ? (subjectOrderMap.get(String(subject.id)) ?? Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER,
+            subjectId: curriculumSubject.id,
+            subjectLogicalId: curriculumSubject.orden !== undefined ? curriculumSubject.orden + 1 : subjectLogicalId,
+            subjectName: curriculumSubject.nombre,
+            subjectType: getSubjectTypeLabel(curriculumSubject),
+            subjectOrder: subjectOrderMap.get(String(curriculumSubject.id)) ?? orderCounter,
             currentTeachers: new Set(),
             currentTeacherIds: new Set(),
             occurrences: 0,
@@ -598,8 +710,10 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
     return 'Superior';
   };
 
+  const dynamicPrimary = getHeaderColor();
+
   return (
-    <div className="horarios-panel">
+    <div className="horarios-panel" style={{ '--dynamic-primary': dynamicPrimary }}>
       {/* Datalists for autocomplete */}
       <datalist id="list-subjects">
         <option value="Horario Libre" />
@@ -664,20 +778,11 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
               </div>
             </div>
 
-            <HorariosPrintView
-              selectedCourse={selectedCourse}
-              grid={grid}
-              getHeaderColor={getHeaderColor}
-              getCiclo={getCiclo}
-              allSchedules={allSchedules}
-              allCourses={allCourses}
-            />
 
             <div className="schedule-table-container print-hide">
               <table className="schedule-table">
                 <thead>
                   <tr>
-                    {isAdmin && <th className="col-drag print-hide"></th>}
                     <th className="col-time">Hora</th>
                     {DAYS.map(day => <th key={day}>{day}</th>)}
                     {isAdmin && <th className="col-actions print-hide"></th>}
@@ -693,17 +798,12 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                       onDragOver={(e) => onDragOver(e, rowIndex)}
                       onDragEnd={onDragEnd}
                     >
-                      {isAdmin && (
-                        <td className={`cell-drag print-hide ${row.type !== 'break' ? 'no-drag' : ''}`}>
-                          {row.type === 'break' && <GripVertical size={16} className="drag-handle" />}
-                        </td>
-                      )}
                       <td className="cell-time">
                         <input 
                           type="text" 
                           className="input-time" 
                           value={row.time || ''} 
-                          readOnly={!isAdmin}
+                          readOnly={true}
                           onChange={(e) => updateCell(rowIndex, 'time', null, e.target.value)}
                         />
                       </td>
@@ -713,7 +813,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                             type="text" 
                             className="input-break" 
                             value={row.label} 
-                            readOnly={!isAdmin}
+                            readOnly={true}
                             onChange={(e) => updateCell(rowIndex, 'label', null, e.target.value)}
                           />
                         </td>
@@ -727,7 +827,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                                     <input 
                                       type="text"
                                       list="list-subjects"
-                                      className={`input-subject-search ${(row.days?.[day]?.subject?.toUpperCase() === 'HORARIO LIBRE' || !row.days?.[day]?.subject) ? 'centered-free' : ''}`}
+                                      className={`input-subject-search ${(row.days?.[day]?.subject?.toUpperCase() === 'HORARIO LIBRE' || !row.days?.[day]?.subject) ? 'centered-free' : ''} ${row.days?.[day]?.subject && row.days?.[day]?.subject.toUpperCase() !== 'HORARIO LIBRE' && !row.days?.[day]?.subject_id ? 'invalid' : ''}`}
                                       placeholder="Materia..."
                                       value={row.days?.[day]?.subject || ''} 
                                       onChange={(e) => updateCell(rowIndex, day, 'subject', e.target.value)}
@@ -736,7 +836,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                                       <input 
                                         type="text"
                                         list="list-teachers"
-                                        className="input-teacher-search"
+                                        className={`input-teacher-search ${row.days?.[day]?.teacher && !row.days?.[day]?.teacher_id ? 'invalid' : ''}`}
                                         placeholder="Profesor..."
                                         value={row.days?.[day]?.teacher || ''} 
                                         onChange={(e) => updateCell(rowIndex, day, 'teacher', e.target.value)}
@@ -760,9 +860,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                       )}
                       {isAdmin && (
                         <td className="cell-actions print-hide">
-                          <button className="btn-remove" onClick={() => removeRow(rowIndex)}>
-                            <X size={14} />
-                          </button>
+                          {/* Removed remove button as per user request */}
                         </td>
                       )}
                     </tr>
@@ -882,223 +980,12 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
 
             {isAdmin && (
               <div className="editor-footer print-hide">
-                <button className="btn btn-outline" onClick={() => addRow('slot')}>
-                  <Plus size={18} />
-                  <span>Agregar Hora</span>
-                </button>
-                <button className="btn btn-outline" onClick={() => addRow('break')}>
-                  <Plus size={18} />
-                  <span>Agregar Recreo</span>
-                </button>
+                {/* Fixed structure enforced automatically */}
               </div>
             )}
           </>
         )}
       </div>
-
-      <style jsx>{`
-        .horarios-panel { padding: 10px; animation: fadeIn 0.3s ease; }
-        .main-editor { 
-          padding: 25px; 
-          min-height: 600px; 
-          display: flex; 
-          flex-direction: column; 
-          background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255,255,255,0.08);
-          box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-        }
-        .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; }
-        .course-info h2 { margin: 0; font-size: 1.6rem; font-weight: 800; color: white; }
-        .badge { background: var(--primary-color); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; margin-top: 8px; display: inline-block; font-weight: 700; text-transform: uppercase; }
-        
-        .editor-actions { display: flex; gap: 12px; align-items: center; }
-        
-        .schedule-table-container { 
-          overflow-x: auto; 
-          flex: 1; 
-          border-radius: 12px; 
-          border: 1px solid rgba(255,255,255,0.12); 
-          background:
-            linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)),
-            radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent 40%),
-            rgba(119, 125, 132, 0.15);
-          backdrop-filter: blur(15px);
-          -webkit-backdrop-filter: blur(15px);
-          box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-        .schedule-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        .schedule-table th { 
-          padding: 15px 10px; 
-          text-align: center; 
-          background: rgba(255,255,255,0.15); 
-          color: #f8fafc; 
-          font-size: 0.85rem; 
-          font-weight: 900; 
-          text-transform: uppercase; 
-          letter-spacing: 0.05em;
-          border: 1px solid rgba(255,255,255,0.1);
-        }
-        .schedule-table td { 
-          padding: 10px; 
-          border: 1px solid rgba(255,255,255,0.08); 
-          vertical-align: middle; 
-          background: rgba(255,255,255,0.04); 
-        }
-
-        .bulk-editor-section {
-          margin-top: 28px;
-          border: 1px solid rgba(255,255,255,0.12);
-          border-radius: 18px;
-          overflow: hidden;
-          background:
-            linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05)),
-            radial-gradient(circle at top left, rgba(255,255,255,0.12), transparent 34%),
-            rgba(119, 125, 132, 0.18);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-          box-shadow: 0 24px 40px rgba(0,0,0,0.18);
-        }
-        .bulk-editor-meta,
-        .bulk-editor-table {
-          width: 100%;
-          border-collapse: collapse;
-          table-layout: fixed;
-        }
-        .bulk-editor-meta th,
-        .bulk-editor-meta td,
-        .bulk-editor-table th,
-        .bulk-editor-table td {
-          border: 1px solid rgba(255,255,255,0.1);
-          color: #f8fafc;
-        }
-        .bulk-editor-meta thead tr:first-child th {
-          background: rgba(191, 219, 254, 0.18);
-          font-size: 1.05rem;
-          font-weight: 900;
-          padding: 14px 10px;
-          text-align: center;
-        }
-        .bulk-editor-meta thead tr:last-child th {
-          background: rgba(191, 219, 254, 0.1);
-          padding: 10px 8px;
-          font-size: 0.82rem;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-        }
-        .bulk-editor-meta td {
-          background: rgba(15, 23, 42, 0.24);
-          padding: 12px 10px;
-          text-align: center;
-          font-weight: 700;
-        }
-        .bulk-editor-table th {
-          background: rgba(251, 146, 60, 0.16);
-          padding: 12px 10px;
-          font-size: 0.82rem;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-        }
-        .bulk-editor-table td {
-          background: rgba(255,255,255,0.04);
-          padding: 10px;
-          font-size: 0.95rem;
-        }
-        .bulk-col-number { width: 64px; }
-        .bulk-col-type { width: 110px; }
-        .bulk-number-cell,
-        .bulk-type-cell { text-align: center; font-weight: 800; }
-        .bulk-subject-cell { font-weight: 700; }
-        .bulk-type-cell { color: #dbeafe; letter-spacing: 0.08em; }
-        .bulk-teacher-input,
-        .bulk-readonly-teacher {
-          width: 100%;
-          min-height: 40px;
-          border-radius: 10px;
-          border: 1px solid rgba(255,255,255,0.12);
-          background: rgba(255,255,255,0.06);
-          color: #f8fafc;
-          padding: 8px 10px;
-          font-size: 0.92rem;
-          outline: none;
-        }
-        .bulk-teacher-input::placeholder {
-          color: rgba(255,255,255,0.45);
-        }
-        .bulk-teacher-input.is-substitute {
-          color: #fbbf24;
-        }
-        .bulk-teacher-stack {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        .bulk-teacher-input:focus {
-          border-color: rgba(96, 165, 250, 0.9);
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
-        }
-        .bulk-empty {
-          text-align: center;
-          padding: 18px;
-          color: rgba(255,255,255,0.72);
-          font-style: italic;
-        }
-
-        .col-drag { width: 40px; }
-        .col-time { width: 140px; }
-        .col-actions { width: 45px; }
-
-        .cell-drag { cursor: grab; display: flex; align-items: center; justify-content: center; height: 100%; min-height: 50px; opacity: 0.3; transition: 0.2s; }
-        .cell-drag.no-drag { cursor: default; opacity: 0 !important; }
-        tr:hover .cell-drag { opacity: 1; }
-        tr:hover .cell-drag.no-drag { opacity: 0 !important; }
-        .dragging { opacity: 0.4; background: rgba(var(--primary-rgb), 0.1) !important; }
-
-        .cell-time { background: rgba(255,255,255,0.08); text-align: center; }
-        .input-time { 
-          background: transparent; border: none; color: #fff; width: 100%; text-align: center; 
-          font-weight: 900; font-size: 0.95rem; outline: none;
-        }
-        
-        .slot-editor { display: flex; flex-direction: column; gap: 4px; }
-        .input-subject-search, .input-teacher-search { 
-          background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); 
-          color: white; font-size: 0.75rem; padding: 6px; border-radius: 6px; outline: none;
-          width: 100%; transition: all 0.2s;
-        }
-        .input-subject-search:focus, .input-teacher-search:focus {
-          background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.4);
-        }
-        .input-subject-search.centered-free { text-align: center; color: rgba(255,255,255,0.3); font-style: italic; }
-        .input-teacher-search { color: #f1f5f9; opacity: 1; }
-        .view-subject { font-weight: 700; font-size: 0.85rem; color: white; text-align: center; }
-        .view-subject.is-free { color: rgba(255,255,255,0.2); font-style: italic; font-weight: 400; font-size: 0.75rem; min-height: 32px; display: flex; align-items: center; justify-content: center; }
-        .view-subject.centered-free { text-align: center; }
-        .view-teacher { font-size: 0.75rem; color: var(--primary-color); text-align: center; opacity: 0.8; }
-        
-        .row-break { background: rgba(255,255,255,0.08); }
-        .input-break { 
-          width: 100%; background: transparent; border: none; color: #ffcc00; 
-          text-align: center; font-style: italic; letter-spacing: 4px; font-weight: 700; outline: none;
-        }
-
-        .btn-remove { 
-          background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; 
-          padding: 6px; border-radius: 50%; cursor: pointer; opacity: 0; transition: 0.2s;
-        }
-        tr:hover .btn-remove { opacity: 1; }
-
-        .editor-footer { display: flex; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-        
-        @media (max-width: 1100px) {
-          .bulk-editor-section { overflow-x: auto; }
-          .bulk-editor-meta,
-          .bulk-editor-table { min-width: 860px; }
-        }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `}</style>
     </div>
   );
 };

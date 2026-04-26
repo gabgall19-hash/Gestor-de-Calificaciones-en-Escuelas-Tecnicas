@@ -6,6 +6,23 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.4.0] - 2026-04-26 (Automatización y Estructura Horaria)
+**"Sincronización Inteligente y Validación de Integridad"**
+
+*   **📅 Automatización de Estructura Horaria**:
+    *   **Plantillas Institucionales**: Implementación de 4 escenarios fijos (Mañana/Tarde x Ciclo Básico/Superior) con bloques de recreo automatizados.
+    *   **Sincronización Invisible**: El sistema ahora detecta y aplica automáticamente la estructura correcta al cargar cualquier curso, re-ubicando materias y profesores en los slots fijos sin pérdida de datos.
+    *   **Estética "Recreo"**: Diseño minimalista para los bloques de descanso, con tipografía reducida y bordes finos para servir exclusivamente como guía visual.
+*   **🛡️ Validación de Integridad en Tiempo Real**:
+    *   **Blindaje de Estructura**: Eliminación de controles para agregar o borrar filas, garantizando que el cronograma siempre respete la normativa institucional.
+    *   **Detección de Errores (Red Glow)**: Sistema de validación en tiempo real que resalta con bordes rojos y resplandor a cualquier materia o profesor que no coincida exactamente con la base de datos oficial.
+    *   **Bloqueo de Guardado**: Protección activa que impide guardar el horario si existen campos con datos inválidos o inexistentes.
+*   **👥 Gestión de Usuarios Refinada**:
+    *   **Contraseña Opcional en Edición**: Se habilitó la posibilidad de editar perfiles de usuario sin necesidad de resetear la contraseña (dejar el campo vacío preserva la actual).
+    *   **Ayuda Contextual**: Incorporación de mensajes de guía en el formulario de edición de usuarios.
+*   **🧹 Depuración del Editor Masivo**:
+    *   **Filtro de Currículum**: El editor de profesores ahora filtra automáticamente nombres de materias obsoletas o "zombies" que no pertenecen a la tecnicatura actual del curso, mostrando solo la estructura curricular vigente.
+
 ### 🚀 [3.3.0] - 2026-04-26 (Legajo Digital y Automatización)
 **"Legajo Fotográfico y Ficha Inteligente"**
 

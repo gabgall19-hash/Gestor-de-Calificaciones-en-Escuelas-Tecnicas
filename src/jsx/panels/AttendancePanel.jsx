@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Save, Calendar, CheckCircle, XCircle, AlertCircle, Info, Search, ChevronLeft, ChevronRight, Printer } from 'lucide-react';
 import { TableSkeleton } from '../UI/Skeleton';
 import SaveStatusButton from '../UI/SaveStatusButton';
-import '../../css/AttendancePanel.css';
+import '../../css/panels/AttendancePanel.css';
 
 const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, isMobile, onPrintInformacion }) => {
   const [loading, setLoading] = useState(false);
@@ -305,7 +305,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
               disabled={loading}
               title="Imprimir Parte Mensual con Asistencias"
             >
-              {isMobile ? <Printer size={18} /> : <span>Imprimir Parte</span>}
+              {isMobile ? <Printer size={18} /> : <span>Imprimir Parte Semanal</span>}
             </button>
           </div>
         </div>

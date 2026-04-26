@@ -12,16 +12,16 @@ const PlanillasPanel = ({ user, handlePrintPlanillasCurso, handlePrintAllCourses
         {/* Row 1: Qualifications (Full Width) */}
         <div className="glass-card" style={{ padding: '1.5rem', margin: 0 }}>
           <button className="btn btn-primary" style={{ background: 'var(--primary)', border: 'none', width: '100%', justifyContent: 'center' }} onClick={handlePrintPlanillasCurso}>
-            🖨️ IMPRIMIR PLANILLAS DE CALIFICACIONES (A4 VERTICAL)
+            🖨️ IMPRIMIR PLANILLAS DE CALIFICACIONES DEL CURSO
           </button>
-          <p className="helper-text" style={{ marginTop: '10px' }}>Genera las planillas oficiales de TODAS las materias del curso seleccionado (un espacio curricular por hoja A4).</p>
+          <p className="helper-text" style={{ marginTop: '10px' }}>Genera las planillas oficiales de TODAS las materias del curso seleccionado.</p>
         </div>
 
-        {/* Row 2: Parte Diario (Individual and Global) */}
+        {/* Row 2: Parte Semanal (Individual and Global) */}
         <div style={{ display: 'grid', gridTemplateColumns: isAdmin ? '1fr 1fr' : '1fr', gap: '1rem' }}>
           <div className="glass-card" style={{ padding: '1.5rem', margin: 0, border: '1px solid rgba(16, 185, 129, 0.3)' }}>
             <button className="btn btn-primary" style={{ background: '#10b981', border: 'none', width: '100%', justifyContent: 'center' }} onClick={handlePrintParteDiario}>
-              📋 PARTE DIARIO (CURSO ACTUAL)
+              📋 PARTE SEMANAL (CURSO ACTUAL)
             </button>
             <p className="helper-text" style={{ marginTop: '10px' }}>Lista de alumnos y horario semanal integrado.</p>
           </div>
@@ -29,7 +29,7 @@ const PlanillasPanel = ({ user, handlePrintPlanillasCurso, handlePrintAllCourses
           {isAdmin && (
             <div className="glass-card" style={{ padding: '1.5rem', margin: 0, border: '1px solid rgba(16, 185, 129, 0.3)' }}>
               <button className="btn btn-primary" style={{ background: '#059669', border: 'none', width: '100%', justifyContent: 'center' }} onClick={handlePrintParteDiarioGlobal}>
-                📋 PARTE DIARIO (TODOS LOS CURSOS)
+                📋 PARTE SEMANAL (TODOS LOS CURSOS)
               </button>
               <p className="helper-text" style={{ marginTop: '10px' }}>Reporte masivo de toda la institución.</p>
             </div>

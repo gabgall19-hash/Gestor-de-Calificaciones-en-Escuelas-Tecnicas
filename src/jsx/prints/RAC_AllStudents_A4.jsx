@@ -1,9 +1,9 @@
 import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
 
-export const handlePrintRAC = (data, singleStudent = null) => {
+export const handlePrintRAC_AllStudents = (data) => {
   const activeCourse = data.selectedCourse;
   if (!activeCourse) return;
-  const studentsToPrint = singleStudent ? [singleStudent] : data.students;
+  const studentsToPrint = data.students;
 
   const win = window.open('', '_blank');
   const subjects = data.allSubjects.filter(s => s.tecnicatura_id === data.selectedTecnicaturaId);
@@ -295,7 +295,7 @@ export const handlePrintRAC = (data, singleStudent = null) => {
   win.document.write(`
     <html>
       <head>
-        <title>RAC - ${activeCourse.label}</title>
+        <title>RAC Completo - ${activeCourse.label}</title>
         <style>
           body { font-family: 'Verdana', Geneva, sans-serif; margin: 0; padding: 0; background: #f0f0f0; color: black; }
           .rac-container { background: white; width: 210mm; margin: 0 auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -315,6 +315,7 @@ export const handlePrintRAC = (data, singleStudent = null) => {
           .no-print { position: fixed; top: 15px; right: 15px; z-index: 1000; }
           .btn-print { padding: 10px 20px; background: #334155; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
           @media print {
+            @page { size: A4; margin: 0; }
             body { background: white; }
             .rac-container { box-shadow: none; width: 100%; }
             .printable-page { margin: 0; page-break-after: always; padding: 8mm 10mm; border: none; }
@@ -324,7 +325,7 @@ export const handlePrintRAC = (data, singleStudent = null) => {
       </head>
       <body>
         <div class="no-print">
-          <button class="btn-print" onclick="window.print()">🖨️ IMPRIMIR PLANILLAS RAC</button>
+          <button class="btn-print" onclick="window.print()">🖨️ IMPRIMIR RAC COMPLETO (TODO EL CURSO)</button>
         </div>
         ${studentsHTML}
       </body>
