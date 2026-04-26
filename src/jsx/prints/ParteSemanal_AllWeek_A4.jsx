@@ -145,8 +145,8 @@ export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, sele
               if (row.type === 'break' || row.isRecreo) {
                 return \`
                   <tr class="row-break">
-                    <td style="vertical-align: middle !important; height: 11px !important;">\${row.time || ''}</td>
-                    <td colspan="5" style="vertical-align: middle !important; font-size: 0.45rem;">RECREO</td>
+                    <td style="vertical-align: middle !important; height: 8px !important;">\${row.time || ''}</td>
+                    <td colspan="5" style="vertical-align: middle !important; font-size: 0.38rem; height: 8px !important;">RECREO</td>
                   </tr>
                 \`;
               }
@@ -207,7 +207,8 @@ export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, sele
           .schedule-table th { background: #fff; font-weight: 900; height: 22px; vertical-align: middle; }
           .sched-date-row th { height: 12px !important; border: 1px solid black !important; }
           .sched-date-cell { background: white !important; }
-          .row-break { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 11px !important; }
+          .row-break { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 8px !important; }
+          .row-break td { height: 8px !important; min-height: 8px !important; line-height: 8px !important; padding: 0 !important; }
           .cell-subject { font-weight: 900; display: block; line-height: 1; margin-top: 3px; padding: 0 2px; }
           .cell-teacher { font-size: 0.48rem; font-style: italic; color: #333; display: block; margin-top: 2px; padding: 0 2px; }
           .signature-line { border-top: 1px solid black; width: 100%; margin-top: 6px; height: 24px; display: block; }
