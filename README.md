@@ -6,8 +6,26 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.5.0] - 2026-04-27 (Sectores, Navegación y Pulido Editorial)
+**"Estructura Multi-Sector y Navegación Inteligente"**
+
+*   **🏆 Asistencia Multi-Sector**:
+    *   **Segmentación de Carga**: Implementación de sectores diferenciados (**Teoría**, **Taller** y **Educación Física**) para el registro de asistencia, permitiendo una gestión precisa por área académica.
+    *   **Consistencia en Base de Datos**: Actualización del esquema SQL y los handlers de la API para soportar la persistencia de datos por sector.
+*   **🏹 Navegación Ágil de Cursos**:
+    *   **Quick-Switch**: Incorporación de flechas de navegación (Chevron) junto al selector de cursos para un cambio rápido y fluido entre divisiones sin necesidad de re-abrir el menú desplegable.
+    *   **Detección de Límites**: Lógica inteligente que inhabilita las flechas al llegar al principio o final del listado institucional.
+*   **🖨️ Excelencia Editorial en Impresión**:
+    *   **Precisión en Recreos**: Estandarización de la barra de descanso a **15px** con tipografía de **7pt**, logrando el equilibrio perfecto entre "línea vistosa" y ahorro de espacio.
+    *   **Horario Libre Automático**: Las celdas sin materia asignada ahora muestran automáticamente la etiqueta **"HORARIO LIBRE"** centrada y en gris tenue, eliminando el ruido visual de campos vacíos.
+    *   **Fix de Plantillas (AllWeek)**: Resolución de errores de interpolación en los reportes mensuales masivos, asegurando que los datos de curso y mes se rendericen correctamente.
+*   **🎨 Pulido Visual de Horarios**:
+    *   **High-Visibility (Golden Border)**: Los campos de entrada de "Horario Libre" en el editor ahora se resaltan con un borde dorado sólido (`#ffb300`) para una identificación inmediata durante la carga.
+    *   **Identidad Recuperada**: Restauración de la lógica de colores dinámicos en los badges de especialidad y aumento de su tamaño de fuente a **0.8rem** para máxima legibilidad.
+*   **🛡️ Auditoría de Roles**:
+    *   **Reporte de Permisos**: Creación de una matriz técnica detallada de roles y permisos (`reporte_roles_permisos.txt`) para auditorías de seguridad institucional.
+
 ### 🚀 [3.4.1] - 2026-04-26 (Excelencia en Impresión y Pulido Visual)
-**"Color Fiel y Consistencia de Identidad"**
 
 *   **🖨️ Color Fiel en Impresión**:
     *   **Hardening de Fondos**: Implementación de `print-color-adjust: exact` para forzar la impresión de banners de colores, superando las restricciones por defecto de los navegadores.
