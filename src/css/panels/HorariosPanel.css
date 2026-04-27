@@ -27,6 +27,14 @@
 .course-info h2 { margin: 0; font-size: 1.6rem; font-weight: 800; color: white; }
 
 .editor-actions { display: flex; gap: 12px; align-items: center; }
+.horarios-panel .badge {
+  background: var(--dynamic-primary, rgba(255, 255, 255, 0.15));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 800;
+}
 
 .editor-actions { display: flex; gap: 12px; align-items: center; }
 
