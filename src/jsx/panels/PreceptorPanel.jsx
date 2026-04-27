@@ -13,7 +13,9 @@ import {
   Save,
   UserCog,
   Users,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { emptyUser, simplifyTecName } from '../functions/PreceptorHelpers';
 import usePreceptorLogic from '../states/usePreceptorLogic';
@@ -389,9 +391,35 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         {data.courses.length > 0 && (
           <div className="filter-item">
             <label className="label" style={{ fontSize: isMobile ? '0.7rem' : '0.76rem', whiteSpace: 'nowrap' }}>Curso:</label>
-            <select className="input-field compact-select" value={selectedCourseId ?? ''} onChange={async (e) => { await loadData(Number(e.target.value), selectedYearId); }}>
-              {data.courses.map((course) => <option key={course.id} value={course.id}>{course.label} · {simplifyTecName(course.tecnicatura_nombre)}</option>)}
-            </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <button 
+                className="btn btn-secondary compact-btn" 
+                style={{ padding: '4px' }}
+                onClick={async () => {
+                  const idx = data.courses.findIndex(c => c.id === selectedCourseId);
+                  if (idx > 0) await loadData(data.courses[idx - 1].id, selectedYearId);
+                }}
+                disabled={data.courses.findIndex(c => c.id === selectedCourseId) <= 0}
+              >
+                <ChevronLeft size={16} />
+              </button>
+              
+              <select className="input-field compact-select" value={selectedCourseId ?? ''} onChange={async (e) => { await loadData(Number(e.target.value), selectedYearId); }}>
+                {data.courses.map((course) => <option key={course.id} value={course.id}>{course.label} · {simplifyTecName(course.tecnicatura_nombre)}</option>)}
+              </select>
+
+              <button 
+                className="btn btn-secondary compact-btn" 
+                style={{ padding: '4px' }}
+                onClick={async () => {
+                  const idx = data.courses.findIndex(c => c.id === selectedCourseId);
+                  if (idx !== -1 && idx < data.courses.length - 1) await loadData(data.courses[idx + 1].id, selectedYearId);
+                }}
+                disabled={selectedCourseId === null || data.courses.findIndex(c => c.id === selectedCourseId) >= data.courses.length - 1}
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         )}
 
