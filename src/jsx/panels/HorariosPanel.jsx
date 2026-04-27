@@ -819,17 +819,15 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                         </td>
                       ) : (
                         <>
-                          {DAYS.map(day => {
-                            const isFree = !row.days?.[day]?.subject || row.days?.[day]?.subject.toUpperCase() === 'HORARIO LIBRE';
-                            return (
-                              <td key={day} className={`cell-slot ${isFree ? 'free-border' : ''}`}>
+                          {DAYS.map(day => (
+                            <td key={day} className="cell-slot">
                               <div className="slot-editor">
                                 {isAdmin ? (
                                   <>
                                     <input 
                                       type="text"
                                       list="list-subjects"
-                                      className={`input-subject-search ${(row.days?.[day]?.subject?.toUpperCase() === 'HORARIO LIBRE' || !row.days?.[day]?.subject) ? 'centered-free' : ''} ${row.days?.[day]?.subject && row.days?.[day]?.subject.toUpperCase() !== 'HORARIO LIBRE' && !row.days?.[day]?.subject_id ? 'invalid' : ''}`}
+                                      className={`input-subject-search ${(!row.days?.[day]?.subject || row.days?.[day]?.subject.toUpperCase() === 'HORARIO LIBRE') ? 'centered-free is-free-input' : ''} ${row.days?.[day]?.subject && row.days?.[day]?.subject.toUpperCase() !== 'HORARIO LIBRE' && !row.days?.[day]?.subject_id ? 'invalid' : ''}`}
                                       placeholder="Materia..."
                                       value={row.days?.[day]?.subject || ''} 
                                       onChange={(e) => updateCell(rowIndex, day, 'subject', e.target.value)}
@@ -857,8 +855,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                                 )}
                               </div>
                               </td>
-                            );
-                          })}
+                          ))}
                         </>
                       )}
                       {isAdmin && (

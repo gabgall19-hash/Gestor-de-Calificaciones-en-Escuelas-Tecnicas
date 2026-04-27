@@ -64,11 +64,11 @@
   vertical-align: middle; 
   background: rgba(255,255,255,0.04); 
 }
-.schedule-table td.cell-slot.free-border {
-  border: 2px solid #ffb300 !important;
-  background: rgba(255, 179, 0, 0.08) !important;
-  z-index: 2;
-  position: relative;
+.horarios-panel input.is-free-input {
+  border: 1px solid #ffb300 !important;
+  background: rgba(255, 179, 0, 0.1) !important;
+  color: #ffb300 !important;
+  font-weight: 900 !important;
 }
 
 /* Specific column widths */
