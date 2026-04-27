@@ -277,13 +277,21 @@ export const handlePrintParteSemanal = (data, course, scheduleData) => {
                   return `
                     <tr>
                       <td style="font-weight: 900; vertical-align: middle;">${row.time || ''}</td>
-                      ${['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].map(day => `
-                        <td>
-                          <span class="cell-subject">${row.days?.[day]?.subject || ''}</span>
-                          <span class="cell-teacher">${row.days?.[day]?.teacher ? (row.days[day].teacher.startsWith('Prof.') ? row.days[day].teacher : 'Prof. ' + row.days[day].teacher) : ''}</span>
-                          <span class="signature-line"></span>
-                        </td>
-                      `).join('')}
+                      ${['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'].map(day => {
+                        const d = row.days?.[day];
+                        const subject = d?.subject || '';
+                        const isLibre = !subject || subject.toLowerCase().includes('libre');
+                        if (isLibre) {
+                          return `<td style="vertical-align: middle !important; color: #bbb; font-weight: 900; font-size: 0.45rem; text-align: center;">HORARIO LIBRE</td>`;
+                        }
+                        return `
+                          <td>
+                            <span class="cell-subject">${subject}</span>
+                            <span class="cell-teacher">${d?.teacher ? (d.teacher.startsWith('Prof.') ? d.teacher : 'Prof. ' + d.teacher) : ''}</span>
+                            <span class="signature-line"></span>
+                          </td>
+                        `;
+                      }).join('')}
                     </tr>
                   `;
                 }).join('')}
