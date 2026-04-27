@@ -253,9 +253,23 @@ export async function handleTecnicaturas(env, request, userId, body) {
 }
 
 export async function handleLocks(env, request, userId, body) {
-  const user = await validateUser(env, request, userId);
+  const currentUser = await validateUser(env, request, userId);
+  
+  // Fetch up-to-date user record from DB
+  const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
+
   if (user.rol === 'profesor') return json({ error: 'No autorizado' }, 403);
   const { action, courseId, materiaId, periodoId, bloqueado, all = false } = body;
+
+  // Security: Check if preceptor has access to this course
+  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  if (!highRoles.includes(user.rol)) {
+    const ids = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
+    if (user.preceptor_course_id) ids.push(Number(user.preceptor_course_id));
+    if (!ids.includes(Number(courseId))) {
+      return json({ error: 'No tienes permiso para gestionar bloqueos en este curso.' }, 403);
+    }
+  }
   if (action === 'toggle') {
     if (all) {
       if (bloqueado) {
@@ -315,9 +329,23 @@ export async function handleLocks(env, request, userId, body) {
 
 export async function handleSchedules(env, request, userId, body) {
   const { action, course_id, grid_data } = body;
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor_ef', 'preceptor_taller');
+  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor_ef', 'preceptor_taller');
+  
+  // Fetch up-to-date user record from DB
+  const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
+
   if (action === 'save') {
     if (!course_id) throw new Error('ID de curso requerido');
+
+    // Security check for preceptors
+    const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+    if (!highRoles.includes(user.rol)) {
+      const ids = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
+      if (user.preceptor_course_id) ids.push(Number(user.preceptor_course_id));
+      if (!ids.includes(Number(course_id))) {
+        throw new Error('No tienes permiso para modificar el horario de este curso.');
+      }
+    }
     await env.DB.prepare('INSERT INTO course_schedules (course_id, grid_data) VALUES (?, ?) ON CONFLICT(course_id) DO UPDATE SET grid_data = excluded.grid_data').bind(course_id, grid_data).run();
     try { await syncProfessorAssignmentsForCourse(env, course_id, grid_data); } catch (e) { console.error('Permission sync error:', e); }
     await logHistory(env, userId, course_id, 'horarios_save', `Se actualizó el horario del curso.`);

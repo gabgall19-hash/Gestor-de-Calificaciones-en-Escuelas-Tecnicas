@@ -1,8 +1,11 @@
 import { toNumber, toTitleCase, validateUser, logHistory, json } from "../_helpers.js";
 
 export async function handleStudents(env, request, userId, body) {
-  const user = await validateUser(env, request, userId, 'admin', 'preceptor', 'preceptor_taller', 'preceptor_ef');
+  const currentUser = await validateUser(env, request, userId, 'admin', 'preceptor', 'preceptor_taller', 'preceptor_ef');
   const { action, nombre, apellido, dni, course_id, studentId } = body;
+
+  // Fetch up-to-date user record from DB
+  const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
   if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
     const ids = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);

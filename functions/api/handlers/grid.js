@@ -13,6 +13,16 @@ export async function handleGrid(env, request, url) {
 
   const currentUser = await validateUser(env, request, userId);
 
+  // Fetch full user record from DB to ensure we have up-to-date permissions (preceptor_course_id, etc)
+  // as the JWT payload might be limited.
+  let userRecord = currentUser;
+  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  
+  if (!highRoles.includes(currentUser.rol)) {
+    const fromDb = await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first();
+    if (fromDb) userRecord = fromDb;
+  }
+
   const statements = [
     env.DB.prepare(`
       SELECT y.*, COALESCE(stats.total, 0) as student_count
@@ -58,8 +68,7 @@ export async function handleGrid(env, request, url) {
     locks: -1, grades: -1, previas: -1, historial: -1, anuncios: -1
   };
 
-  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
-  if (highRoles.includes(currentUser.rol)) {
+  if (highRoles.includes(userRecord.rol)) {
     idx.pases = statements.length;
     statements.push(env.DB.prepare(`SELECT p.*, (c.ano || ' ' || c.division || ' · ' || c.turno) as course_label, y.nombre as year_nombre FROM pases p LEFT JOIN cursos c ON c.id = p.course_id_origen LEFT JOIN años_lectivos y ON y.id = c.year_id ORDER BY p.id DESC`));
     idx.users = statements.length;
@@ -92,7 +101,7 @@ export async function handleGrid(env, request, url) {
   const results = await env.DB.batch(statements);
 
   let years = results[idx.years].results;
-  if (!highRoles.includes(currentUser.rol)) {
+  if (!highRoles.includes(userRecord.rol)) {
     years = years.filter(y => y.es_actual === 1);
     if (years.length === 0 && results[idx.years].results.length > 0) years = [results[idx.years].results[0]];
   }
@@ -110,12 +119,12 @@ export async function handleGrid(env, request, url) {
 
   const allCourses = allCoursesRaw.filter(c => c.year_id === finalYearId).map(c => ({ ...c, label: `${c.ano} ${c.division} · ${c.turno}` }));
   let accessibleCourses = allCourses;
-  if (!highRoles.includes(currentUser.rol)) {
-    const ids = (currentUser.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
-    if (currentUser.rol === 'profesor' && currentUser.professor_subject_ids) {
-      currentUser.professor_subject_ids.split(',').filter(Boolean).forEach(pair => { const cId = Number(pair.split('-')[0]); if (!isNaN(cId)) ids.push(cId); });
+  if (!highRoles.includes(userRecord.rol)) {
+    const ids = (userRecord.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
+    if (userRecord.rol === 'profesor' && userRecord.professor_subject_ids) {
+      userRecord.professor_subject_ids.split(',').filter(Boolean).forEach(pair => { const cId = Number(pair.split('-')[0]); if (!isNaN(cId)) ids.push(cId); });
     }
-    if (currentUser.preceptor_course_id) ids.push(Number(currentUser.preceptor_course_id));
+    if (userRecord.preceptor_course_id) ids.push(Number(userRecord.preceptor_course_id));
     const uniqueIds = [...new Set(ids)];
     accessibleCourses = allCourses.filter((c) => uniqueIds.includes(c.id));
   }

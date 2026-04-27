@@ -1,9 +1,12 @@
 import { validateUser, logHistory, json } from "../_helpers.js";
 
 export async function handleGradeUpdates(env, request, userId, body) {
-  const user = await validateUser(env, request, userId);
+  const currentUser = await validateUser(env, request, userId);
   const { updates = [] } = body;
   if (!updates.length) return json({ success: true });
+
+  // Fetch up-to-date user record from DB
+  const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
   const studentIds = [...new Set(updates.map(u => u.alumno_id))];
   const materiaIds = [...new Set(updates.map(u => u.materia_id))];
@@ -24,6 +27,8 @@ export async function handleGradeUpdates(env, request, userId, body) {
   const p_subjects = (user.professor_subject_ids ?? '').split(',');
 
   let canEditRoleMode = false;
+  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  
   if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
     const ajustes = await env.DB.prepare('SELECT valor FROM ajustes WHERE clave = ?').bind(`${user.rol}_mode`).first();
     canEditRoleMode = ajustes ? ajustes.valor === 'edit' : false;
