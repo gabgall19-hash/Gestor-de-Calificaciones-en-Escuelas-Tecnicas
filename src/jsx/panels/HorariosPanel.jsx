@@ -819,8 +819,10 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                         </td>
                       ) : (
                         <>
-                          {DAYS.map(day => (
-                            <td key={day} className="cell-slot">
+                          {DAYS.map(day => {
+                            const isFree = !row.days?.[day]?.subject || row.days?.[day]?.subject.toUpperCase() === 'HORARIO LIBRE';
+                            return (
+                              <td key={day} className={`cell-slot ${isFree ? 'free-border' : ''}`}>
                               <div className="slot-editor">
                                 {isAdmin ? (
                                   <>
@@ -854,8 +856,9 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                                   </>
                                 )}
                               </div>
-                            </td>
-                          ))}
+                              </td>
+                            );
+                          })}
                         </>
                       )}
                       {isAdmin && (
