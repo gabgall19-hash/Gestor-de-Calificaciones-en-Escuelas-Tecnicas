@@ -346,13 +346,14 @@ export default function PreceptorModals(props) {
               <option value="jefe_de_auxiliares">Jefe de Auxiliares</option>
               <option value="director">Director</option>
               <option value="vicedirector">Vicedirector</option>
+              <option value="regente_profesores">Regente de Profesores</option>
               <option value="preceptor">Preceptor</option>
               <option value="preceptor_taller">Preceptor Taller</option>
               <option value="preceptor_ef">Preceptor Ed. Física</option>
               <option value="profesor">Profesor</option>
             </select>
 
-            {!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(userForm.rol) && (userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller' || userForm.rol === 'preceptor_ef') && (
+            {!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores'].includes(userForm.rol) && (userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller' || userForm.rol === 'preceptor_ef') && (
               <select className="input-field" value={userForm.preceptor_course_id || ''} onChange={(e) => setUserForm((prev) => ({ ...prev, preceptor_course_id: e.target.value }))}>
                 <option value="">-- Seleccionar Curso --</option>
                 {data.allCourses.map((course) => <option key={course.id} value={course.id}>{course.year_nombre} · {course.label} · {simplifyTecName(course.tecnicatura_nombre)}</option>)}
@@ -360,7 +361,7 @@ export default function PreceptorModals(props) {
             )}
 
             {/* Read-only view of subjects assigned via Schedules (Hidden for high-level roles) */}
-            {!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(userForm.rol) && (userForm.rol === 'profesor' || userForm.is_professor_hybrid || (userForm.professor_subject_ids && userForm.professor_subject_ids.length > 0)) && editingUserId !== 'new' && (
+            {!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores'].includes(userForm.rol) && (userForm.rol === 'profesor' || userForm.is_professor_hybrid || (userForm.professor_subject_ids && userForm.professor_subject_ids.length > 0)) && editingUserId !== 'new' && (
               <div className="read-only-assignments" style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
                 <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '10px', opacity: 0.7, fontWeight: 'bold', color: 'var(--primary)' }}>Materias Asignadas (vía Horarios):</label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

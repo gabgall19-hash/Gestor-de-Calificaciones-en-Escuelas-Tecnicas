@@ -16,7 +16,7 @@ export async function handleGrid(env, request, url) {
   // Fetch full user record from DB to ensure we have up-to-date permissions (preceptor_course_id, etc)
   // as the JWT payload might be limited.
   let userRecord = currentUser;
-  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores'];
   
   if (!highRoles.includes(currentUser.rol)) {
     const fromDb = await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first();
@@ -121,7 +121,7 @@ export async function handleGrid(env, request, url) {
   let accessibleCourses = allCourses;
   if (!highRoles.includes(userRecord.rol)) {
     const ids = (userRecord.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
-    if (userRecord.rol === 'profesor' && userRecord.professor_subject_ids) {
+    if (userRecord.professor_subject_ids) {
       userRecord.professor_subject_ids.split(',').filter(Boolean).forEach(pair => { const cId = Number(pair.split('-')[0]); if (!isNaN(cId)) ids.push(cId); });
     }
     if (userRecord.preceptor_course_id) ids.push(Number(userRecord.preceptor_course_id));

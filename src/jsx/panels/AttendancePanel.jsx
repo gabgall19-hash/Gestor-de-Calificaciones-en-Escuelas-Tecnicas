@@ -18,7 +18,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   const [mobileDayIndex, setMobileDayIndex] = useState(-1);
   
   const canEdit = useMemo(() => {
-    const editRoles = ['preceptor', 'admin', 'jefe_de_auxiliares', 'secretaria_de_alumnos', 'director', 'vicedirector'];
+    const editRoles = ['preceptor', 'admin', 'jefe_de_auxiliares'];
     return editRoles.includes(user.rol);
   }, [user.rol]);
 

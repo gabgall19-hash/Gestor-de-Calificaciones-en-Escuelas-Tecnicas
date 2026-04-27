@@ -101,7 +101,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
           <History size={16} />
           <h2>Historial de Actividad</h2>
         </div>
-        {(user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares') && (
+        {(user.rol === 'admin' || user.rol === 'jefe_de_auxiliares') && (
           <button 
             className="btn btn-danger" 
             style={{ padding: '4px 12px', fontSize: '0.75rem', height: 'auto' }}
@@ -223,7 +223,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
                       </div>
                     </div>
                     
-                    {(user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares') && (
+                    {(user.rol === 'admin' || user.rol === 'jefe_de_auxiliares') && (
                       <button 
                         onClick={() => handleDeleteOne(h.id)}
                         style={{ background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', opacity: 0.4, padding: '4px' }}

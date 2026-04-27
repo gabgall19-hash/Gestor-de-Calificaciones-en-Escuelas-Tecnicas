@@ -6,6 +6,21 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.5.1] - 2026-04-27 (Seguridad de Roles y Regente de Profesores)
+**"Blindaje de Permisos y Expansión Administrativa"**
+
+*   **👑 Nuevo Rol: Regente de Profesores**:
+    *   **Gestión Académica**: Acceso especializado para la administración de **Horarios** y **Ajustes de Materias/Carreras**.
+    *   **Supervisión Lectora**: Permisos de solo lectura en Calificaciones (RAC) e Historial para monitoreo institucional.
+    *   **Integración UI/UX**: Incorporación del rol en el selector de creación de usuarios y lógica de exclusión de cursos (rol administrativo puro).
+*   **🛡️ Sincronización de Matriz de Permisos**:
+    *   **Hardening Administrativo**: Ajuste estricto de permisos para los roles de **Secretaría de Alumnos** y **Directivos** (Director/Vicedirector). Ahora operan en modo **Solo Lectura** en los módulos de Asistencia e Historial, preservando la integridad de la carga operativa.
+    *   **Protección de Metadatos RAC**: Restricción de edición de datos maestros (Matrícula, Libro, Folio, Legajo) en el panel RAC, reservada exclusivamente para roles con permisos de gestión de alumnos.
+*   **🛠️ Robustez del Sistema**:
+    *   **Fix de Crash en Horarios**: Resolución definitiva del error `ReferenceError: isAdmin is not defined` mediante la unificación de la lógica de permisos en el panel de cronogramas.
+    *   **Actualización de Esquema DB**: Ejecución de migración SQL para ampliar la restricción `CHECK` de la tabla `usuarios`, permitiendo la persistencia de los nuevos roles institucionales.
+    *   **Seguridad en API**: Refuerzo de los handlers de backend (`attendance`, `students`, `admin`) para validar permisos de escritura contra la matriz oficial de roles.
+
 ### 🚀 [3.5.0] - 2026-04-27 (Sectores, Navegación y Pulido Editorial)
 **"Estructura Multi-Sector y Navegación Inteligente"**
 

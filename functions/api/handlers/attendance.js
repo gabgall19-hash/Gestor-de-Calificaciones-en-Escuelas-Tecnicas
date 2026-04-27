@@ -14,8 +14,12 @@ export async function handleAttendanceLoad(env, request, url) {
   // Security: Check if preceptor has access to this course
   const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
   if (!highRoles.includes(user.rol)) {
-    if (user.rol.startsWith('preceptor') && Number(user.preceptor_course_id) !== courseId) {
-      return json({ error: 'No tienes permiso para acceder a la asistencia de este curso.' }, 403);
+    if (user.rol.startsWith('preceptor')) {
+      if (Number(user.preceptor_course_id) !== courseId) {
+        return json({ error: 'No tienes permiso para acceder a la asistencia de este curso.' }, 403);
+      }
+    } else {
+      return json({ error: 'No tienes permisos para ver la asistencia.' }, 403);
     }
   }
 
@@ -49,13 +53,13 @@ export async function handleAttendanceSave(env, request, userId, body) {
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
-  const allowedRoles = ['admin', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  const allowedRoles = ['admin', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'jefe_de_auxiliares'];
   if (!allowedRoles.includes(user.rol)) {
     throw new Error('No tienes permiso para guardar asistencias.');
   }
 
   // Security: Check course assignment for preceptors
-  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  const highRoles = ['admin', 'jefe_de_auxiliares'];
   if (!highRoles.includes(user.rol) && user.rol.startsWith('preceptor')) {
     // Get courseId from the first student in updates (they should all be from the same course in a batch save)
     const firstStudent = await env.DB.prepare('SELECT course_id FROM alumnos WHERE id = ?').bind(updates[0].alumno_id).first();

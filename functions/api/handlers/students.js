@@ -1,16 +1,13 @@
 import { toNumber, toTitleCase, validateUser, logHistory, json } from "../_helpers.js";
 
 export async function handleStudents(env, request, userId, body) {
-  const currentUser = await validateUser(env, request, userId, 'admin', 'preceptor', 'preceptor_taller', 'preceptor_ef');
+  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor');
   const { action, nombre, apellido, dni, course_id, studentId } = body;
 
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
-  if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
-    const ids = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
-    if (user.preceptor_course_id) ids.push(Number(user.preceptor_course_id));
-
+  if (user.rol === 'preceptor') {
     let courseToCheck = null;
     if (action === 'create') {
       courseToCheck = Number(course_id);
@@ -19,8 +16,8 @@ export async function handleStudents(env, request, userId, body) {
       courseToCheck = current?.course_id;
     }
 
-    if (courseToCheck && !ids.includes(courseToCheck)) {
-      throw new Error('No tienes permisos para gestionar alumnos fuera de tu(s) curso(s) asignado(s).');
+    if (courseToCheck && Number(user.preceptor_course_id) !== courseToCheck) {
+      throw new Error('No tienes permisos para gestionar alumnos fuera de tu curso asignado.');
     }
   }
 
@@ -121,7 +118,7 @@ export async function handleStudents(env, request, userId, body) {
   if (action === 'update') {
     const student = await env.DB.prepare('SELECT course_id FROM alumnos WHERE id = ?').bind(studentId).first();
     if (!student) throw new Error('Alumno no encontrado');
-    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'jefe_de_auxiliares') {
+    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector') {
       if (Number(user.preceptor_course_id) !== student.course_id) {
         throw new Error('Permiso denegado: Solo puedes editar la ficha de alumnos de tu curso asignado.');
       }
@@ -186,7 +183,7 @@ export async function handleStudents(env, request, userId, body) {
   }
 
   if (action === 'transfer') {
-    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'preceptor' && user.rol !== 'preceptor_taller' && user.rol !== 'jefe_de_auxiliares') {
+    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'preceptor' && user.rol !== 'preceptor_taller' && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector') {
       throw new Error('No tienes permisos para realizar transferencias.');
     }
     const student = await env.DB.prepare(
@@ -218,7 +215,7 @@ export async function handleStudents(env, request, userId, body) {
   }
 
   if (action === 'undo_pase') {
-    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'jefe_de_auxiliares') throw new Error('Solo el administrador o jefe puede deshacer pases.');
+    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'jefe_de_auxiliares') throw new Error('Solo el personal administrativo puede deshacer pases.');
     const { paseId } = body;
     const pase = await env.DB.prepare('SELECT alumno_id, course_id_origen FROM pases WHERE id = ?').bind(paseId).first();
     if (pase) {

@@ -82,7 +82,7 @@ const StudentManager = ({
             <GraduationCap size={16} />
             <h2>Listado del Curso</h2>
           </div>
-          {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol) && (
+          {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol) && (
             <button 
               className="btn btn-primary" 
               onClick={() => setShowAddModal(true)}
@@ -174,9 +174,9 @@ const StudentManager = ({
                     className="icon-btn danger" 
                     type="button" 
                     onClick={() => deleteStudent(student)} 
-                    disabled={!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol)} 
-                    title={['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol) ? "Eliminar Alumno" : "No tienes permisos para eliminar"}
-                    style={!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol) ? { opacity: 0.3, cursor: 'not-allowed' } : {}}
+                    disabled={!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol)} 
+                    title={['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol) ? "Eliminar Alumno" : "No tienes permisos para eliminar"}
+                    style={!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol) ? { opacity: 0.3, cursor: 'not-allowed' } : {}}
                   >
                     <Trash2 size={14} />
                   </button>

@@ -68,7 +68,7 @@ export async function handleUsers(env, request, userId, body) {
 }
 
 export async function handleConfig(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'director', 'vicedirector');
+  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'director', 'vicedirector', 'regente_profesores');
   const { action, valor, periodos = [] } = body;
 
   const updateAjuste = async (clave, v) => {
@@ -93,7 +93,7 @@ export async function handleConfig(env, request, userId, body) {
 }
 
 export async function handleAnuncios(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector');
+  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'director', 'vicedirector');
   const { action, id, titulo, contenido, tipo, activo } = body;
   if (action === 'create') {
     await env.DB.prepare('INSERT INTO anuncios (titulo, contenido, tipo, activo) VALUES (?, ?, ?, ?)')
@@ -108,7 +108,7 @@ export async function handleAnuncios(env, request, userId, body) {
 }
 
 export async function handleHistorialDelete(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares');
+  await validateUser(env, request, userId, 'admin', 'jefe_de_auxiliares');
   const { action, logId, courseId } = body;
   if (action === 'delete_all') {
     await env.DB.prepare('DELETE FROM historial WHERE course_id = ?').bind(courseId).run();

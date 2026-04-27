@@ -111,7 +111,7 @@ async function syncProfessorAssignmentsForCourse(env, courseId, gridData) {
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
 export async function handleCourses(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector');
+  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores');
   const { action, ano, division, turno, tecnicatura_id, year_id } = body;
   if (action === 'create') {
     const r = await env.DB.prepare('INSERT INTO cursos (ano, division, turno, tecnicatura_id, year_id, detalle) VALUES (?, ?, ?, ?, ?, ?) RETURNING *').bind(ano, division, turno, tecnicatura_id, year_id, body.detalle || '').first();
@@ -138,7 +138,7 @@ export async function handleCourses(env, request, userId, body) {
 }
 
 export async function handleYears(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector');
+  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores');
   const { action, nombre, yearId } = body;
   if (action === 'delete') {
     await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares');
@@ -183,7 +183,7 @@ export async function handleYears(env, request, userId, body) {
 }
 
 export async function handleTecnicaturas(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector');
+  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores');
   const { action, nombre, materias = [], tecnicaturaId } = body;
   const sanitizedNombre = String(nombre || '').trim();
   const sanitizedMaterias = sanitizeTecMaterias(materias);
@@ -262,7 +262,7 @@ export async function handleLocks(env, request, userId, body) {
   const { action, courseId, materiaId, periodoId, bloqueado, all = false } = body;
 
   // Security: Check if preceptor has access to this course
-  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
+  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores'];
   if (!highRoles.includes(user.rol)) {
     const ids = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
     if (user.preceptor_course_id) ids.push(Number(user.preceptor_course_id));
@@ -329,10 +329,17 @@ export async function handleLocks(env, request, userId, body) {
 
 export async function handleSchedules(env, request, userId, body) {
   const { action, course_id, grid_data } = body;
-  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor_ef', 'preceptor_taller');
+  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor_ef', 'preceptor_taller', 'regente_profesores');
   
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
+
+  if (action === 'save' || action === 'delete' || action === 'import_batch') {
+    const edRoles = ['admin', 'secretaria_de_alumnos', 'director', 'vicedirector', 'regente_profesores'];
+    if (!edRoles.includes(user.rol)) {
+      throw new Error('No tienes permiso para modificar horarios (Acceso de solo lectura).');
+    }
+  }
 
   if (action === 'save') {
     if (!course_id) throw new Error('ID de curso requerido');

@@ -54,7 +54,11 @@ export async function handleGradeUpdates(env, request, userId, body) {
     if (!student) throw new Error(`Alumno ${u.alumno_id} no existe`);
     if (!materia) throw new Error(`Materia ${u.materia_id} no existe`);
 
-    if (user.rol !== 'admin' && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector') {
+    if (user.rol === 'regente_profesores') {
+      throw new Error('No tienes permiso para modificar calificaciones (Acceso de solo lectura).');
+    }
+
+    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector') {
       const pair = `${student.course_id}-${u.materia_id}`;
       const isAssignedAsProfessor = p_subjects.includes(pair);
 

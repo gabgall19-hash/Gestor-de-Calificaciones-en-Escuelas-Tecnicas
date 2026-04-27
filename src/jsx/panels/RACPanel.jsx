@@ -3,11 +3,14 @@ import { formatDNI } from '../functions/PreceptorHelpers';
 import '../../css/panels/ReportViews.css';
 
 const RACPanel = ({ 
-  data, selectedYearId, racSearch, setRacSearch, 
+  user, data, selectedYearId, racSearch, setRacSearch, 
   handlePrintRAC_Student, handlePrintRAC_AllStudents, setSelectedRacStudent, setShowPreviasModal, 
   onPreviewStudent, undoPase, updateStudentField, setViewingFichaStudent,
   isSelectionMode, setIsSelectionMode, selectedStudentIds, setSelectedStudentIds, onEndCycle
 }) => {
+  const canEditRAC = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor'].includes(user.rol);
+  const canEndCycle = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol);
+
   return (
     <section className="page-section">
       <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -16,13 +19,15 @@ const RACPanel = ({
           <h2>Registro Anual de Calificaciones (RAC)</h2>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button 
-            className="btn btn-primary" 
-            style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)', border: 'none' }}
-            onClick={() => setIsSelectionMode(true)}
-          >
-            <AlertTriangle size={16} /> TERMINACIÓN DE CICLO
-          </button>
+          {canEndCycle && (
+            <button 
+              className="btn btn-primary" 
+              style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)', border: 'none' }}
+              onClick={() => setIsSelectionMode(true)}
+            >
+              <AlertTriangle size={16} /> TERMINACIÓN DE CICLO
+            </button>
+          )}
           <button className="btn btn-primary" onClick={() => handlePrintRAC_AllStudents()}>
             <Printer size={16} /> IMPRIMIR RAC
           </button>
@@ -88,8 +93,9 @@ const RACPanel = ({
                       <input 
                         type="text" 
                         className="cell-input" 
-                        style={{ width: '100%' }} 
+                        style={{ width: '100%', ...(canEditRAC ? {} : { pointerEvents: 'none', background: 'transparent', border: 'none' }) }} 
                         value={student.matricula || ''} 
+                        readOnly={!canEditRAC}
                         onChange={(e) => updateStudentField(student, 'matricula', e.target.value)}
                       />
                     </td>
@@ -97,8 +103,9 @@ const RACPanel = ({
                       <input 
                         type="text" 
                         className="cell-input" 
-                        style={{ width: '100%', textAlign: 'center' }} 
+                        style={{ width: '100%', textAlign: 'center', ...(canEditRAC ? {} : { pointerEvents: 'none', background: 'transparent', border: 'none' }) }} 
                         value={student.libro || ''} 
+                        readOnly={!canEditRAC}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '');
                           updateStudentField(student, 'libro', val);
@@ -109,8 +116,9 @@ const RACPanel = ({
                       <input 
                         type="text" 
                         className="cell-input" 
-                        style={{ width: '100%', textAlign: 'center' }} 
+                        style={{ width: '100%', textAlign: 'center', ...(canEditRAC ? {} : { pointerEvents: 'none', background: 'transparent', border: 'none' }) }} 
                         value={student.folio || ''} 
+                        readOnly={!canEditRAC}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '');
                           updateStudentField(student, 'folio', val);
@@ -121,8 +129,9 @@ const RACPanel = ({
                       <input 
                         type="text" 
                         className="cell-input" 
-                        style={{ width: '100%', textAlign: 'center' }} 
+                        style={{ width: '100%', textAlign: 'center', ...(canEditRAC ? {} : { pointerEvents: 'none', background: 'transparent', border: 'none' }) }} 
                         value={student.legajo || ''} 
+                        readOnly={!canEditRAC}
                         onChange={(e) => {
                           const val = e.target.value.replace(/\D/g, '');
                           updateStudentField(student, 'legajo', val);

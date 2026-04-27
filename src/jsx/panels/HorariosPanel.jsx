@@ -137,7 +137,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState('');
   const [isPrintingAll, setIsPrintingAll] = useState(false);
 
-  const isAdmin = user.rol === 'admin';
+  const canEdit = ['admin', 'secretaria_de_alumnos', 'director', 'vicedirector', 'regente_profesores'].includes(user.rol);
   const professors = users.filter((userRow) =>
     ['profesor', 'preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userRow.rol) || userRow.is_professor_hybrid === 1
   );
@@ -258,7 +258,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   };
 
   const handleSave = async () => {
-    if (!selectedCourseId || !isAdmin) return;
+    if (!selectedCourseId || !canEdit) return;
 
     // Validation
     for (let r = 0; r < grid.length; r++) {
@@ -298,7 +298,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   };
 
   const handleDelete = async () => {
-    if (!selectedCourseId || !isAdmin || !window.confirm('¿Estás seguro de eliminar el horario de este curso?')) return;
+    if (!selectedCourseId || !canEdit || !window.confirm('¿Estás seguro de eliminar el horario de este curso?')) return;
     try {
       await apiService.post('horarios', user.id, {
         action: 'delete',
@@ -315,7 +315,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
 
 
   const addRow = (type = 'slot') => {
-    if (!isAdmin) return;
+    if (!canEdit) return;
     if (type === 'break') {
       setGrid([...grid, { type: 'break', label: 'RECREO', time: '00:00 hrs' }]);
     } else {
@@ -328,14 +328,14 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   };
 
   const removeRow = (index) => {
-    if (!isAdmin) return;
+    if (!canEdit) return;
     const newGrid = [...grid];
     newGrid.splice(index, 1);
     setGrid(newGrid);
   };
 
   const updateCell = (rowIndex, day, field, value) => {
-    if (!isAdmin) return;
+    if (!canEdit) return;
     const newGrid = [...grid];
     if (day === 'time') {
       newGrid[rowIndex].time = value;
@@ -459,7 +459,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
     });
   };
   const applyTeacherToSubject = (subjectRow, field, slotIndex, teacherValue) => {
-    if (!isAdmin) return;
+    if (!canEdit) return;
 
     const nextTeacher = getTeacherValue(teacherValue, null);
     const nextSlots = subjectRow.teacherSlots.map((slot, index) => {
@@ -534,14 +534,14 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   };
 
   const onDragStart = (e, index) => {
-    if (!isAdmin || grid[index].type !== 'break') return;
+    if (!canEdit || grid[index].type !== 'break') return;
     setDraggedItemIndex(index);
     e.dataTransfer.effectAllowed = "move";
   };
 
   const onDragOver = (e, index) => {
     e.preventDefault();
-    if (!isAdmin || draggedItemIndex === null || draggedItemIndex === index) return;
+    if (!canEdit || draggedItemIndex === null || draggedItemIndex === index) return;
     
     const items = [...grid];
     const draggedItem = items[draggedItemIndex];
@@ -750,12 +750,12 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                 <span className="badge">{selectedCourse?.tecnicatura_nombre}</span>
               </div>
               <div className="editor-actions">
-                {isAdmin && (
+                {canEdit && (
                   <SaveStatusButton
                     onClick={handleSave}
                     loading={isSaving}
                     hasChanges={hasPendingChanges}
-                    canEdit={isAdmin}
+                    canEdit={canEdit}
                   />
                 )}
                 <button className="btn btn-icon" onClick={handlePrint} title="Imprimir">
@@ -770,7 +770,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                   <Printer size={16} />
                   <span>{isPrintingAll ? 'Cargando...' : 'Imprimir todos'}</span>
                 </button>
-                {isAdmin && (
+                {canEdit && (
                   <button className="btn btn-icon text-danger" onClick={handleDelete} title="Eliminar horario">
                     <Trash2 size={20} />
                   </button>
@@ -785,7 +785,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                   <tr>
                     <th className="col-time">Hora</th>
                     {DAYS.map(day => <th key={day}>{day}</th>)}
-                    {isAdmin && <th className="col-actions print-hide"></th>}
+                    {canEdit && <th className="col-actions print-hide"></th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -793,7 +793,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                     <tr 
                       key={rowIndex} 
                       className={`${row.type === 'break' ? 'row-break' : 'row-slot'} ${draggedItemIndex === rowIndex ? 'dragging' : ''}`}
-                      draggable={isAdmin && row.type === 'break'}
+                      draggable={canEdit && row.type === 'break'}
                       onDragStart={(e) => onDragStart(e, rowIndex)}
                       onDragOver={(e) => onDragOver(e, rowIndex)}
                       onDragEnd={onDragEnd}
@@ -822,7 +822,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                           {DAYS.map(day => (
                             <td key={day} className="cell-slot">
                               <div className="slot-editor">
-                                {isAdmin ? (
+                                {canEdit ? (
                                   <>
                                     <input 
                                       type="text"
@@ -858,7 +858,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                           ))}
                         </>
                       )}
-                      {isAdmin && (
+                      {canEdit && (
                         <td className="cell-actions print-hide">
                           {/* Removed remove button as per user request */}
                         </td>
@@ -920,7 +920,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                             <td className="bulk-subject-cell">{subjectRow.subjectName}</td>
                             <td className="bulk-type-cell">{subjectRow.subjectType}</td>
                             <td>
-                              {isAdmin ? (
+                              {canEdit ? (
                                 <div className="bulk-teacher-stack">
                                   {subjectRow.teacherSlots.map((slot, slotIndex) => (
                                     <input
@@ -945,7 +945,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                               )}
                             </td>
                             <td>
-                              {isAdmin ? (
+                              {canEdit ? (
                                 <div className="bulk-teacher-stack">
                                   {subjectRow.teacherSlots.map((slot, slotIndex) => (
                                     <input
@@ -978,7 +978,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
               </div>
             )}
 
-            {isAdmin && (
+            {canEdit && (
               <div className="editor-footer print-hide">
                 {/* Fixed structure enforced automatically */}
               </div>

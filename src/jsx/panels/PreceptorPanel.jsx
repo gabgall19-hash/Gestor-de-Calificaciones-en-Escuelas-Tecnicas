@@ -529,6 +529,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
 
       {page === 'rac' && !isMobile && (
         <RACPanel
+          user={user}
           data={data}
           selectedYearId={selectedYearId}
           racSearch={racSearch}
