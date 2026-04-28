@@ -11,15 +11,20 @@ export async function handleAttendanceLoad(env, request, url) {
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(currentUser.id).first()) || currentUser;
 
-  // Security: Check if preceptor has access to this course
+  // Security: Check if user has access to this course
   const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
   if (!highRoles.includes(user.rol)) {
-    if (user.rol.startsWith('preceptor')) {
-      if (Number(user.preceptor_course_id) !== courseId) {
-        return json({ error: 'No tienes permiso para acceder a la asistencia de este curso.' }, 403);
-      }
-    } else {
-      return json({ error: 'No tienes permisos para ver la asistencia.' }, 403);
+    const accessibleIds = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
+    if (user.preceptor_course_id) accessibleIds.push(Number(user.preceptor_course_id));
+    if (user.professor_subject_ids) {
+      user.professor_subject_ids.split(',').filter(Boolean).forEach(pair => {
+        const cId = Number(pair.split('-')[0]);
+        if (!isNaN(cId)) accessibleIds.push(cId);
+      });
+    }
+
+    if (!accessibleIds.includes(courseId)) {
+      return json({ error: 'No tienes permiso para acceder a la asistencia de este curso.' }, 403);
     }
   }
 
@@ -53,18 +58,30 @@ export async function handleAttendanceSave(env, request, userId, body) {
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
-  const allowedRoles = ['admin', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'jefe_de_auxiliares'];
-  if (!allowedRoles.includes(user.rol)) {
+  const allowedRoles = ['admin', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'jefe_de_auxiliares', 'profesor'];
+  if (!allowedRoles.includes(user.rol) || (user.rol === 'profesor' && !user.is_professor_hybrid)) {
     throw new Error('No tienes permiso para guardar asistencias.');
   }
 
-  // Security: Check course assignment for preceptors
+  // Security: Check course assignment
   const highRoles = ['admin', 'jefe_de_auxiliares'];
-  if (!highRoles.includes(user.rol) && user.rol.startsWith('preceptor')) {
-    // Get courseId from the first student in updates (they should all be from the same course in a batch save)
+  if (!highRoles.includes(user.rol)) {
+    // Get courseId from the first student in updates
     const firstStudent = await env.DB.prepare('SELECT course_id FROM alumnos WHERE id = ?').bind(updates[0].alumno_id).first();
-    if (firstStudent && Number(user.preceptor_course_id) !== Number(firstStudent.course_id)) {
-      throw new Error('No tienes permiso para modificar la asistencia de este curso.');
+    if (firstStudent) {
+      const targetCourseId = Number(firstStudent.course_id);
+      const accessibleIds = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
+      if (user.preceptor_course_id) accessibleIds.push(Number(user.preceptor_course_id));
+      if (user.professor_subject_ids) {
+        user.professor_subject_ids.split(',').filter(Boolean).forEach(pair => {
+          const cId = Number(pair.split('-')[0]);
+          if (!isNaN(cId)) accessibleIds.push(cId);
+        });
+      }
+
+      if (!accessibleIds.includes(targetCourseId)) {
+        throw new Error('No tienes permiso para modificar la asistencia de este curso.');
+      }
     }
   }
 

@@ -189,27 +189,38 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
 
   const tabs = useMemo(() => {
     const list = [];
-    if (user.rol !== 'profesor') list.push({ id: 'asistencia', label: 'Asistencia', icon: <Calendar size={16} /> });
+    const isHybrid = !!user.is_professor_hybrid;
+    
+    if (user.rol !== 'profesor' || isHybrid) list.push({ id: 'asistencia', label: 'Asistencia', icon: <Calendar size={16} /> });
     list.push({ id: 'grades', label: 'Notas', icon: <ClipboardList size={16} /> });
-    if (user.rol !== 'profesor' && user.rol !== 'preceptor_ef') list.push({ id: 'materias', label: 'Materias', icon: <Book size={16} /> });
-    if (user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
+    
+    if ((user.rol !== 'profesor' && user.rol !== 'preceptor_ef') || isHybrid) {
+      list.push({ id: 'materias', label: 'Materias', icon: <Book size={16} /> });
+    }
+    
+    if ((user.rol !== 'profesor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') || isHybrid) {
       list.push({ id: 'students', label: 'Alumnos', icon: <Users size={16} /> });
     }
+    
     if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol)) {
       list.push({ id: 'pases', label: 'Pases', icon: <ArrowRightLeft size={16} /> });
     }
-    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector'].includes(user.rol)) {
+    
+    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector'].includes(user.rol) || isHybrid) {
       if (user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') list.push({ id: 'rac', label: 'RAC', icon: <FileText size={16} /> });
       list.push({ id: 'historial', label: 'Historial', icon: <History size={16} /> });
     }
+    
     if (['admin', 'secretaria_de_alumnos', 'director', 'vicedirector'].includes(user.rol)) {
       list.push({ id: 'anuncios', label: 'Anuncios', icon: <Megaphone size={16} /> });
       list.push({ id: 'settings', label: 'Ajustes', icon: <UserCog size={16} /> });
     }
-    if (!isMobile && user.rol !== 'profesor') list.push({ id: 'horarios', label: 'Horarios', icon: <Calendar size={16} /> });
+    
+    if (!isMobile && (user.rol !== 'profesor' || isHybrid)) list.push({ id: 'horarios', label: 'Horarios', icon: <Calendar size={16} /> });
     list.push({ id: 'planillas', label: 'Generar Planillas', icon: <Save size={16} /> });
+    
     return isMobile ? list.filter((tab) => tab.id !== 'rac') : list;
-  }, [isMobile, user.rol]);
+  }, [isMobile, user.rol, user.is_professor_hybrid]);
 
   React.useEffect(() => {
     if (isMobile && (page === 'rac' || page === 'horarios')) {

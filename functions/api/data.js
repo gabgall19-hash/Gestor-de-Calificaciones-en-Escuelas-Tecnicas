@@ -16,7 +16,8 @@ import {
   handleAnuncios, 
   handleEndCycle, 
   handleHistorialDelete,
-  handleSelfPasswordChange 
+  handleSelfPasswordChange,
+  handleAcknowledgeSecurity 
 } from "./handlers/admin.js";
 
 export async function onRequestGet({ env, request }) {
@@ -85,6 +86,7 @@ export async function onRequestPost({ env, request }) {
     if (type === 'asistencia') return await handleAttendanceSave(env, request, userId, body);
     if (type === 'student_images') return await handleStudentImages(env, request, userId, body);
     if (type === 'self_password') return await handleSelfPasswordChange(env, request, userId, body);
+    if (type === 'acknowledge_security') return await handleAcknowledgeSecurity(env, request, userId);
     
     return json({ error: 'Tipo no soportado' }, 400);
   } catch (err) {

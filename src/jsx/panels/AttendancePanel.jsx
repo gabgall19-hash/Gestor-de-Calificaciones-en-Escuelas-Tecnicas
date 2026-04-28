@@ -12,6 +12,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   const [selectedSector, setSelectedSector] = useState(() => {
     if (user.rol === 'preceptor_taller') return 'taller';
     if (user.rol === 'preceptor_ef') return 'ed_fisica';
+    if (user.rol === 'profesor' && !!user.is_professor_hybrid) return 'teoria'; // Default to theory for hybrid profs
     return 'teoria';
   });
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,8 +20,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   
   const canEdit = useMemo(() => {
     const editRoles = ['preceptor', 'admin', 'jefe_de_auxiliares'];
-    return editRoles.includes(user.rol);
-  }, [user.rol]);
+    return editRoles.includes(user.rol) || (user.rol === 'profesor' && !!user.is_professor_hybrid);
+  }, [user.rol, user.is_professor_hybrid]);
 
   // Generate months for selector (March to December 2026)
   const monthOptions = useMemo(() => {

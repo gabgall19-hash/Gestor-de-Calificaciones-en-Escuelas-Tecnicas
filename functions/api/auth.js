@@ -39,6 +39,8 @@ export async function onRequestPost({ request, env }) {
       preceptor_course_id: user.preceptor_course_id,
       professor_course_ids: user.professor_course_ids,
       professor_subject_ids: user.professor_subject_ids,
+      is_professor_hybrid: user.is_professor_hybrid,
+      security_acknowledged: user.security_acknowledged,
       token: await signJWT(
         { id: user.id, rol: user.rol, exp: Date.now() + 24 * 60 * 60 * 1000 },
         env.JWT_SECRET || "default_secret_for_dev_only"

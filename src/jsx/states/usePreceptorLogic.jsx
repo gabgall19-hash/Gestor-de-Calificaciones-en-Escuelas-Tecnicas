@@ -257,9 +257,9 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
   const gradeUnits = (data?.subjects || []).reduce((sum, subject) => sum + getSubjectUnits(subject), 0) || 1;
   const gradeWidth = `calc((100% - 148px) / ${gradeUnits})`;
   const canManageStudents = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol) ||
-    ((['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) &&
-      (Number(user.preceptor_course_id) === selectedCourseId || (user.professor_course_ids || '').split(',').map(Number).includes(selectedCourseId)));
-  const canTransfer = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol);
+    ((['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol) || (user.rol === 'profesor' && user.is_professor_hybrid)) &&
+      (Number(user.preceptor_course_id) === selectedCourseId));
+  const canTransfer = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol) || (user.rol === 'profesor' && user.is_professor_hybrid);
 
   const post = async (type, body) => apiRequest(type, body, user.id);
   const get = async (type, params) => apiService.get(type, { ...params, userId: user.id });

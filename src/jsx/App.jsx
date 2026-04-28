@@ -14,8 +14,8 @@ function App() {
     const storedUser = localStorage.getItem('currentUser');
     if (!storedUser) return false;
     const u = JSON.parse(storedUser);
-    // Solo mostrar si no ha sido aceptado en esta sesión de navegador
-    return !sessionStorage.getItem(`security_acknowledged_${u.id}`);
+    // Solo mostrar si no ha sido aceptado permanentemente en la base de datos
+    return u.security_acknowledged !== 1 && u.security_acknowledged !== true;
   });
   const [dniSearch, setDniSearch] = useState('');
   const [boletinPassword, setBoletinPassword] = useState('');
@@ -101,7 +101,10 @@ function App() {
       } else {
         setUser(data);
         localStorage.setItem('currentUser', JSON.stringify(data));
-        setShowSecurityModal(true); // Mostrar modal de bienvenida/seguridad
+        // Solo mostrar si no lo han aceptado antes en la base de datos
+        if (data.security_acknowledged !== 1 && data.security_acknowledged !== true) {
+          setShowSecurityModal(true);
+        }
         navigate('/dashboard');
         showToast('Te has conectado a tu sesión', 'success');
       }
@@ -124,7 +127,11 @@ function App() {
       const data = await resp.json();
       if (data.error) throw new Error(data.error);
       
-      if (user) sessionStorage.setItem(`security_acknowledged_${user.id}`, 'true');
+      if (user) {
+        const updatedUser = { ...user, security_acknowledged: 1 };
+        setUser(updatedUser);
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      }
       showToast('Contraseña actualizada correctamente', 'success');
       setShowSecurityModal(false);
     } catch (err) {
@@ -133,7 +140,6 @@ function App() {
   };
 
   const handleLogout = () => {
-    if (user) sessionStorage.removeItem(`security_acknowledged_${user.id}`);
     setUser(null);
     localStorage.removeItem('currentUser');
     navigate('/');
@@ -202,9 +208,24 @@ function App() {
         <WelcomeSecurityModal 
           user={user} 
           onConfirm={handleUpdateSelfPassword} 
-          onBypass={() => {
-            sessionStorage.setItem(`security_acknowledged_${user.id}`, 'true');
-            setShowSecurityModal(false);
+          onBypass={async () => {
+            try {
+              await fetch(`/api/data?type=acknowledge_security&userId=${user.id}`, {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${user.token}`
+                },
+                body: JSON.stringify({})
+              });
+              const updatedUser = { ...user, security_acknowledged: 1 };
+              setUser(updatedUser);
+              localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+              setShowSecurityModal(false);
+            } catch (err) {
+              console.error("Error acknowledging security:", err);
+              setShowSecurityModal(false);
+            }
           }} 
         />
       )}

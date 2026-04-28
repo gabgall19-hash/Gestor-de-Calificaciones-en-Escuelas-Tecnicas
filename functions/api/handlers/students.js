@@ -1,13 +1,13 @@
 import { toNumber, toTitleCase, validateUser, logHistory, json } from "../_helpers.js";
 
 export async function handleStudents(env, request, userId, body) {
-  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor');
+  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'profesor', 'preceptor_taller', 'preceptor_ef');
   const { action, nombre, apellido, dni, course_id, studentId } = body;
 
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
-  if (user.rol === 'preceptor') {
+  if (user.rol === 'preceptor' || user.rol === 'preceptor_taller' || user.rol === 'preceptor_ef' || (user.rol === 'profesor' && user.is_professor_hybrid)) {
     let courseToCheck = null;
     if (action === 'create') {
       courseToCheck = Number(course_id);
@@ -119,7 +119,7 @@ export async function handleStudents(env, request, userId, body) {
     const student = await env.DB.prepare('SELECT course_id FROM alumnos WHERE id = ?').bind(studentId).first();
     if (!student) throw new Error('Alumno no encontrado');
     if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector') {
-      if (Number(user.preceptor_course_id) !== student.course_id) {
+      if (Number(user.preceptor_course_id) !== student.course_id && !(user.rol === 'profesor' && user.is_professor_hybrid && Number(user.preceptor_course_id) === student.course_id)) {
         throw new Error('Permiso denegado: Solo puedes editar la ficha de alumnos de tu curso asignado.');
       }
     }
@@ -183,7 +183,7 @@ export async function handleStudents(env, request, userId, body) {
   }
 
   if (action === 'transfer') {
-    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'preceptor' && user.rol !== 'preceptor_taller' && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector') {
+    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && !user.rol.startsWith('preceptor') && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector' && !(user.rol === 'profesor' && user.is_professor_hybrid)) {
       throw new Error('No tienes permisos para realizar transferencias.');
     }
     const student = await env.DB.prepare(

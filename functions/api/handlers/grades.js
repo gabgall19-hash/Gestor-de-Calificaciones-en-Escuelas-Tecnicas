@@ -62,7 +62,7 @@ export async function handleGradeUpdates(env, request, userId, body) {
       const pair = `${student.course_id}-${u.materia_id}`;
       const isAssignedAsProfessor = p_subjects.includes(pair);
 
-      if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
+      if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol) || (user.rol === 'profesor' && user.is_professor_hybrid)) {
         if (!isAssignedAsProfessor) {
           if (!canEditRoleMode) {
             throw new Error(`Permiso denegado: el modo de edición para tu rol está deshabilitado.`);
@@ -158,7 +158,14 @@ export async function handleGradeUpdates(env, request, userId, body) {
 }
 
 export async function handlePrevias(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'jefe_de_auxiliares', 'director', 'vicedirector');
+  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'profesor', 'jefe_de_auxiliares', 'director', 'vicedirector');
+  
+  // Fetch up-to-date user record from DB
+  const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
+
+  if (user.rol === 'profesor' && !user.is_professor_hybrid) {
+     throw new Error('No tienes permiso para gestionar materias previas.');
+  }
   const { action, id, alumno_id, materia_id, materia_nombre_custom, curso_ano, libro, folio, calificacion, fecha, estado } = body;
   if (action === 'delete') {
     await env.DB.prepare('DELETE FROM previas WHERE id = ?').bind(id).run();

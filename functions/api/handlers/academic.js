@@ -258,7 +258,7 @@ export async function handleLocks(env, request, userId, body) {
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
-  if (user.rol === 'profesor') return json({ error: 'No autorizado' }, 403);
+  if (user.rol === 'profesor' && !user.is_professor_hybrid) return json({ error: 'No autorizado' }, 403);
   const { action, courseId, materiaId, periodoId, bloqueado, all = false } = body;
 
   // Security: Check if preceptor has access to this course

@@ -35,7 +35,6 @@ const getAuthToken = () => {
 const handleApiError = (error, status) => {
   const isAuthError = 
     status === 401 || 
-    status === 403 || 
     (error && (
       error.includes('Sesión inválida') || 
       error.includes('token') || 

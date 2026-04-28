@@ -54,7 +54,7 @@ export async function handleUsers(env, request, userId, body) {
   if (action === 'reset_password') {
     const { newPassword } = body;
     if (!newPassword) throw new Error('Nueva contraseña requerida');
-    await env.DB.prepare('UPDATE usuarios SET password = ? WHERE id = ?').bind(newPassword, targetUserId).run();
+    await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 0 WHERE id = ?').bind(newPassword, targetUserId).run();
     await logHistory(env, userId, null, 'gestion_usuarios', `Contraseña reseteada para usuario ID: ${targetUserId}`);
     return json({ success: true });
   }
@@ -163,9 +163,15 @@ export async function handleSelfPasswordChange(env, request, userId, body) {
     throw new Error('La nueva contraseña debe tener al menos 4 caracteres.');
   }
 
-  await env.DB.prepare('UPDATE usuarios SET password = ? WHERE id = ?').bind(newPassword, userId).run();
+  await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 1 WHERE id = ?').bind(newPassword, userId).run();
   
   await logHistory(env, userId, null, 'password_edit', `Cambio de contraseña por cuenta propia.`);
   
+  return json({ success: true });
+}
+
+export async function handleAcknowledgeSecurity(env, request, userId) {
+  await validateUser(env, request, userId);
+  await env.DB.prepare('UPDATE usuarios SET security_acknowledged = 1 WHERE id = ?').bind(userId).run();
   return json({ success: true });
 }
