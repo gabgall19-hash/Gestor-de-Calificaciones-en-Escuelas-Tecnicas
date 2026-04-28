@@ -22,6 +22,8 @@
 *   **⏳ Sesiones Deslizantes (Sliding Expiration)**:
     - **Expiración de 1 Hora**: Configuración de sesiones con vencimiento de una hora.
     - **Refresco Automático**: Implementación de un middleware en la API (`X-Refresh-Token`) y un interceptor global en el frontend que renuevan el token automáticamente ante la actividad del usuario, evitando cierres de sesión por inactividad.
+*   **🛠️ Robustez y Fixes**:
+    - *Patch Fix*: Resolución de `ReferenceError: setUserError is not defined` que impedía la apertura del modal de gestión de usuarios tras el último despliegue.
 
 ### 🚀 [3.5.4] - 2026-04-28 (Avisos de Seguridad Dinámicos)
 **"Mensajería Especial para Reseteos Administrativos"**
@@ -39,8 +41,8 @@
     *   **Interfaz Dinámica**: El panel del preceptor ahora detecta automáticamente si un profesor es híbrido, habilitando las pestañas de **Asistencia**, **Alumnos**, **Materias**, **RAC** e **Historial** que anteriormente estaban restringidas.
     *   **Modos de Vista**: Se habilitó el acceso a la vista "Todas las Materias" para profesores híbridos, permitiéndoles supervisar el curso completo como preceptores.
 *   **🔐 Estabilidad de Sesión y Navegación**:
-    *   **Anti-Logout Proactivo**: Eliminación del error 403 (Forbidden) como disparador de cierre de sesión automático. Los usuarios ya no son expulsados del sistema al intentar acceder a secciones sin permisos; en su lugar, reciben una notificación de aviso preservando su token.
-    *   **Persistencia de Status Híbrido**: Inclusión de la bandera `is_professor_hybrid` en el payload de autenticación para una configuración inmediata de la UI tras el login.
+      - **Anti-Logout Proactivo**: *Patch Fix* - Eliminación del error 403 (Forbidden) como disparador de cierre de sesión automático. Los usuarios ya no son expulsados del sistema al intentar acceder a secciones sin permisos; en su lugar, reciben una notificación de aviso preservando su token.
+    - **Persistencia de Status Híbrido**: *Patch Fix* - Inclusión de la bandera `is_professor_hybrid` en el payload de autenticación para una configuración inmediata de la UI tras el login.
 *   **🛠️ Refinamiento de UI/UX**:
     *   **Banderas de Permisos**: Actualización de la lógica en `usePreceptorLogic` para habilitar acciones de transferencia y gestión de alumnos basadas en la suma de privilegios del usuario.
     *   **Selector de Sector Inteligente**: El panel de asistencia ahora pre-selecciona el sector correcto para usuarios híbridos, optimizando el flujo de carga.
@@ -59,7 +61,7 @@
     *   **Persistencia Anti-Bypass**: Implementación de bloqueo mediante `sessionStorage`, garantizando que la ventana sea ineludible incluso ante recargas de página o manipulación de URL hasta que el usuario elija una opción.
     *   **Autogestión de Claves**: Desarrollo de un nuevo endpoint de backend y lógica de frontend que permite a cualquier usuario actualizar su propia contraseña de forma segura sin intervención administrativa.
 *   **🛠️ Robustez y Fixes**:
-    *   **Restauración de API**: Corrección de importaciones en `data.js` para asegurar la operatividad total de los handlers de gestión de usuarios y configuraciones.
+    - *Patch Fix*: Restauración de API - Corrección de importaciones en `data.js` para asegurar la operatividad total de los handlers de gestión de usuarios y configuraciones.
 
 ### 🚀 [3.5.1] - 2026-04-27 (Seguridad de Roles y Regente de Profesores)
 **"Blindaje de Permisos y Expansión Administrativa"**
