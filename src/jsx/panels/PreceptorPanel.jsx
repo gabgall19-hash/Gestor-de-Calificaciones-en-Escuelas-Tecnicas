@@ -184,7 +184,9 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     createUser,
     editUser,
     truncateSubject,
-    getHistorial
+    getHistorial,
+    userError,
+    setUserError
   } = logic;
 
   const tabs = useMemo(() => {
@@ -671,6 +673,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         setStudentForm={setStudentForm}
         handleSaveFicha={handleSaveFicha}
         getHistorial={getHistorial}
+        userError={userError}
+        setUserError={setUserError}
       />
     </div>
   );
