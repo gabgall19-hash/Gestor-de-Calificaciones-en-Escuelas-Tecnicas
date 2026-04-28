@@ -1,4 +1,27 @@
+import bcrypt from 'bcryptjs';
 const encoder = new TextEncoder();
+
+export function hashPassword(password) {
+  return bcrypt.hashSync(password, 10);
+}
+
+export function comparePassword(password, hash) {
+  if (!hash || !password) return false;
+  // Check if it's a bcrypt hash
+  if (!hash.startsWith('$2a$') && !hash.startsWith('$2b$') && !hash.startsWith('$2y$')) {
+    return password === hash;
+  }
+  try {
+    return bcrypt.compareSync(password, hash);
+  } catch (e) {
+    return false;
+  }
+}
+
+export function isBcryptHash(hash) {
+  return typeof hash === 'string' && (hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$'));
+}
+
 
 function base64UrlEncode(arrayBuffer) {
   const bytes = new Uint8Array(arrayBuffer);

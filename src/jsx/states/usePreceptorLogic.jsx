@@ -85,6 +85,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
   const [showPreviasModal, setShowPreviasModal] = useState(false);
   const [previasSearch, setPreviasSearch] = useState('');
   const [dniError, setDniError] = useState('');
+  const [userError, setUserError] = useState('');
   const [draggedMateriaIndex, setDraggedMateriaIndex] = useState(null);
   const [studentsSearch, setStudentsSearch] = useState('');
   const [racSearch, setRacSearch] = useState('');
@@ -342,7 +343,8 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     endCycleForm,
     setLoading,
     setSelectedStudentIds,
-    setShowEndCycleModal
+    setShowEndCycleModal,
+    setUserError
   });
 
   const {
@@ -390,7 +392,9 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     setEditingTecId,
     editingTecId,
     setStatus,
-    setLoading
+    setLoading,
+    userError,
+    setUserError
   });
 
   const {
@@ -434,7 +438,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     editingStudent, setEditingStudent, editingUserId, setEditingUserId, transferringAlumno, setTransferringAlumno, transferMotivo, setTransferMotivo,
     pasingStudent, setPasingStudent, paseForm, setPaseForm, pasesSearch, setPasesSearch, notesSearch, setNotesSearch, selectedSubjectId, setSelectedSubjectId,
     selectedGroup, setSelectedGroup, editingPase, setEditingPase, editingObsStudent, setEditingObsStudent, viewingProf, setViewingProf,
-    selectedRacStudent, setSelectedRacStudent, showPreviasModal, setShowPreviasModal, previasSearch, setPreviasSearch, dniError, setDniError,
+    selectedRacStudent, setSelectedRacStudent, showPreviasModal, setShowPreviasModal, previasSearch, setPreviasSearch, dniError, setDniError, userError, setUserError,
     draggedMateriaIndex, setDraggedMateriaIndex, studentsSearch, setStudentsSearch, racSearch, setRacSearch, materiasSearch, setMateriasSearch,
     viewingFichaStudent, setViewingFichaStudent, isEditingFicha, setIsEditingFicha, isMobile, setIsMobile, isSelectionMode, setIsSelectionMode,
     selectedStudentIds, setSelectedStudentIds, showEndCycleModal, setShowEndCycleModal, endCycleForm, setEndCycleForm,

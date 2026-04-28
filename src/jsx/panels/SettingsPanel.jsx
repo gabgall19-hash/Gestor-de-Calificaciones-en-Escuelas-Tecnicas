@@ -16,7 +16,8 @@ const SettingsPanel = ({
   handleUpdateMobileLogin,
   handleUpdateRACModular,
   handleUpdatePasswordMsg,
-  setYearAsCurrent, copyYearInfo
+  setYearAsCurrent, copyYearInfo,
+  setUserError
 }) => {
   const [userSearch, setUserSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -26,7 +27,7 @@ const SettingsPanel = ({
       <section className="management-card" style={{ display: 'flex', flexDirection: 'column' }}>
         <div className="section-title"><Users size={16} /><h2>Gestión de Usuarios</h2></div>
         <div className="section-toolbar-left" style={{ marginBottom: '1.2rem' }}>
-          <button className="btn btn-primary" type="button" onClick={() => { setEditingUserId('new'); setUserForm({ ...emptyUser, rol: 'profesor' }); }}>
+          <button className="btn btn-primary" type="button" onClick={() => { setUserError(''); setEditingUserId('new'); setUserForm({ ...emptyUser, rol: 'profesor' }); }}>
             <Plus size={16} /> Nuevo Usuario
           </button>
           {data.academicYears.length >= 2 && (
@@ -58,17 +59,41 @@ const SettingsPanel = ({
           <input
             type="text"
             className="input-field"
-            placeholder="Buscar usuario por nombre o ID..."
+            placeholder="Buscar por nombre, usuario, rol, curso o materia..." 
             value={userSearch}
             onChange={(e) => { setUserSearch(e.target.value); setCurrentPage(1); }}
           />
         </div>
         <div className="student-list" style={{ flex: 1, maxHeight: '450px', overflowY: 'auto' }}>
           {(() => {
-            const filtered = data.users.filter(u =>
-              u.nombre.toLowerCase().includes(userSearch.toLowerCase()) ||
-              u.username.toLowerCase().includes(userSearch.toLowerCase())
-            );
+            const filtered = data.users.filter(u => {
+              const lowerSearch = userSearch.toLowerCase();
+              
+              // 1. Nombre y Usuario
+              if (u.nombre.toLowerCase().includes(lowerSearch) || u.username.toLowerCase().includes(lowerSearch)) return true;
+              
+              // 2. Rol
+              if (u.rol.toLowerCase().replace(/_/g, ' ').includes(lowerSearch)) return true;
+              
+              // 3. Curso (Preceptores)
+              if (u.preceptor_course_id) {
+                const course = data.allCourses.find(c => c.id === Number(u.preceptor_course_id));
+                if (course && course.label.toLowerCase().includes(lowerSearch)) return true;
+              }
+              
+              // 4. Materias (Profesores)
+              if (u.professor_subject_ids) {
+                const pairs = (u.professor_subject_ids || '').split(',').filter(Boolean);
+                const hasMatch = pairs.some(pair => {
+                  const [, sid] = pair.split('-');
+                  const subject = data.allSubjects.find(s => String(s.id) === String(sid));
+                  return subject && subject.nombre.toLowerCase().includes(lowerSearch);
+                });
+                if (hasMatch) return true;
+              }
+              
+              return false;
+            });
             const totalPages = Math.ceil(filtered.length / usersPerPage);
             const paged = filtered.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
 

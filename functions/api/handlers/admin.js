@@ -1,4 +1,5 @@
 import { validateUser, json, logHistory, toNumber, SYSTEM_VERSION } from "../_helpers.js";
+import { hashPassword } from "../_utils.js";
 
 export async function handleUsers(env, request, userId, body) {
   await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector');
@@ -18,13 +19,14 @@ export async function handleUsers(env, request, userId, body) {
   const cleanIsHybrid = isHighLevel ? 0 : (is_professor_hybrid ? 1 : 0);
 
   if (action === 'update') {
+    const hashedPass = password ? hashPassword(password) : null;
     if (isHighLevel) {
       if (password) {
         await env.DB.prepare(
           `UPDATE usuarios SET nombre = ?, username = ?, password = ?, rol = ?, preceptor_course_id = ?, 
            professor_course_ids = ?, professor_subject_ids = ?, is_professor_hybrid = ?
            WHERE id = ?`
-        ).bind(nombre, username, password, rol, null, '', '', 0, targetUserId).run();
+        ).bind(nombre, username, hashedPass, rol, null, '', '', 0, targetUserId).run();
       } else {
         await env.DB.prepare(
           `UPDATE usuarios SET nombre = ?, username = ?, rol = ?, preceptor_course_id = ?, 
@@ -38,7 +40,7 @@ export async function handleUsers(env, request, userId, body) {
           `UPDATE usuarios SET nombre = ?, username = ?, password = ?, rol = ?, preceptor_course_id = ?, 
            professor_course_ids = ?, is_professor_hybrid = ?, reset_by_admin = 1
            WHERE id = ?`
-        ).bind(nombre, username, password, rol, cleanPreceptorCourseId, cleanProfessorCourseIds, cleanIsHybrid, targetUserId).run();
+        ).bind(nombre, username, hashedPass, rol, cleanPreceptorCourseId, cleanProfessorCourseIds, cleanIsHybrid, targetUserId).run();
       } else {
         await env.DB.prepare(
           `UPDATE usuarios SET nombre = ?, username = ?, rol = ?, preceptor_course_id = ?, 
@@ -54,15 +56,24 @@ export async function handleUsers(env, request, userId, body) {
   if (action === 'reset_password') {
     const { newPassword } = body;
     if (!newPassword) throw new Error('Nueva contraseña requerida');
-    await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 0, reset_by_admin = 1 WHERE id = ?').bind(newPassword, targetUserId).run();
+    const hashed = hashPassword(newPassword);
+    await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 0, reset_by_admin = 1 WHERE id = ?').bind(hashed, targetUserId).run();
     await logHistory(env, userId, null, 'gestion_usuarios', `Contraseña reseteada para usuario ID: ${targetUserId}`);
     return json({ success: true });
   }
 
+  if (action === 'create') {
+    const existing = await env.DB.prepare('SELECT id FROM usuarios WHERE username = ?').bind(username).first();
+    if (existing) {
+      throw new Error(`El usuario que esta intentando crear ya existe: ${username}`);
+    }
+  }
+
+  const hashedPass = hashPassword(password);
   await env.DB.prepare(
     `INSERT INTO usuarios (nombre, username, password, rol, preceptor_course_id, professor_course_ids, professor_subject_ids, is_professor_hybrid, reset_by_admin)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`
-  ).bind(nombre, username, password, rol, cleanPreceptorCourseId, cleanProfessorCourseIds, '', cleanIsHybrid).run();
+  ).bind(nombre, username, hashedPass, rol, cleanPreceptorCourseId, cleanProfessorCourseIds, '', cleanIsHybrid).run();
   await logHistory(env, userId, null, 'gestion_usuarios', `Usuario creado: ${nombre} (${username}) con rol ${rol}`);
   return json({ success: true });
 }
@@ -163,9 +174,10 @@ export async function handleSelfPasswordChange(env, request, userId, body) {
     throw new Error('La nueva contraseña debe tener al menos 4 caracteres.');
   }
 
-  await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 1, reset_by_admin = 0 WHERE id = ?').bind(newPassword, userId).run();
+  const hashed = hashPassword(newPassword);
+  await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 1, reset_by_admin = 0 WHERE id = ?').bind(hashed, userId).run();
   
-  await logHistory(env, userId, null, 'password_edit', `Cambio de contraseña por cuenta propia.`);
+  await logHistory(env, userId, null, 'gestion_usuarios', `Cambio de contraseña propio (usuario ID: ${userId})`);
   
   return json({ success: true });
 }

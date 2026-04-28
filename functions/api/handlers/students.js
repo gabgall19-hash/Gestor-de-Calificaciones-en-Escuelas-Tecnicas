@@ -1,4 +1,5 @@
 import { toNumber, toTitleCase, validateUser, logHistory, json } from "../_helpers.js";
+import { hashPassword } from "../_utils.js";
 
 export async function handleStudents(env, request, userId, body) {
   const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'profesor', 'preceptor_taller', 'preceptor_ef');
@@ -156,7 +157,8 @@ export async function handleStudents(env, request, userId, body) {
   if (action === 'update_password') {
     const { studentId, password: newPassword } = body;
     const student = await env.DB.prepare('SELECT apellido, nombre, course_id FROM alumnos WHERE id = ?').bind(studentId).first();
-    await env.DB.prepare('UPDATE alumnos SET password = ? WHERE id = ?').bind(newPassword || null, studentId).run();
+    const hashed = newPassword ? hashPassword(newPassword) : null;
+    await env.DB.prepare('UPDATE alumnos SET password = ? WHERE id = ?').bind(hashed, studentId).run();
     if (student) {
       await logHistory(env, userId, student.course_id, 'password_edit', `Cambio de contraseña para: ${student.apellido}, ${student.nombre}`, studentId);
     }

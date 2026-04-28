@@ -1,4 +1,4 @@
-import { verifyJWT } from "./_utils.js";
+import { verifyJWT, comparePassword, hashPassword, isBcryptHash } from "./_utils.js";
 
 export async function onRequestGet({ env, request }) {
   const url = new URL(request.url);
@@ -86,8 +86,14 @@ export async function onRequestGet({ env, request }) {
         }), { status: 403 });
       }
 
-      if (alumno.password !== providedPassword) {
+      if (!comparePassword(providedPassword, alumno.password)) {
         return new Response(JSON.stringify({ error: "Contraseña incorrecta." }), { status: 401 });
+      }
+
+      // Auto-migration for students
+      if (!isBcryptHash(alumno.password)) {
+        const hashed = hashPassword(providedPassword);
+        await env.DB.prepare("UPDATE alumnos SET password = ? WHERE id = ?").bind(hashed, alumno.id).run();
       }
     }
 

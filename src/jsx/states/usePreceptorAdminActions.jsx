@@ -66,7 +66,9 @@ export default function usePreceptorAdminActions(deps) {
     setEditingTecId,
     editingTecId,
     setStatus,
-    setLoading
+    setLoading,
+    userError,
+    setUserError
   } = deps;
 
   const prepareEditCourse = (course) => {
@@ -123,38 +125,49 @@ export default function usePreceptorAdminActions(deps) {
 
   const createUser = async (e) => {
     e.preventDefault();
-    const payload = {
-      ...userForm,
-      preceptor_course_id: ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userForm.rol) ? Number(userForm.preceptor_course_id) : null,
-      professor_course_ids: Array.isArray(userForm.professor_course_ids) ? userForm.professor_course_ids : [],
-      professor_subject_ids: Array.isArray(userForm.professor_subject_ids) ? userForm.professor_subject_ids : [],
-      is_professor_hybrid: !!userForm.is_professor_hybrid
-    };
-    await post('users', { action: 'create', ...payload });
-    setUserForm(emptyUser);
-    setEditingUserId(null);
-    showToast('Usuario agregado', 'success');
-    await loadData(selectedCourseId, selectedYearId);
+    setUserError('');
+    try {
+      const payload = {
+        ...userForm,
+        preceptor_course_id: ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userForm.rol) ? Number(userForm.preceptor_course_id) : null,
+        professor_course_ids: Array.isArray(userForm.professor_course_ids) ? userForm.professor_course_ids : [],
+        professor_subject_ids: Array.isArray(userForm.professor_subject_ids) ? userForm.professor_subject_ids : [],
+        is_professor_hybrid: !!userForm.is_professor_hybrid
+      };
+      await post('users', { action: 'create', ...payload });
+      setUserForm(emptyUser);
+      setEditingUserId(null);
+      showToast('Usuario agregado', 'success');
+      await loadData(selectedCourseId, selectedYearId);
+    } catch (err) {
+      setUserError(err.message);
+    }
   };
 
   const editUser = async (e) => {
     e.preventDefault();
-    const payload = {
-      ...userForm,
-      preceptor_course_id: ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userForm.rol) ? Number(userForm.preceptor_course_id) : null,
-      professor_course_ids: Array.isArray(userForm.professor_course_ids) ? userForm.professor_course_ids : [],
-      professor_subject_ids: Array.isArray(userForm.professor_subject_ids) ? userForm.professor_subject_ids : [],
-      is_professor_hybrid: !!userForm.is_professor_hybrid
-    };
-    await post('users', { action: 'update', targetUserId: editingUserId, ...payload });
-    setEditingUserId(null);
-    setUserForm(emptyUser);
-    setStatus('Usuario actualizado');
-    await loadData(selectedCourseId, selectedYearId);
+    setUserError('');
+    try {
+      const payload = {
+        ...userForm,
+        preceptor_course_id: ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userForm.rol) ? Number(userForm.preceptor_course_id) : null,
+        professor_course_ids: Array.isArray(userForm.professor_course_ids) ? userForm.professor_course_ids : [],
+        professor_subject_ids: Array.isArray(userForm.professor_subject_ids) ? userForm.professor_subject_ids : [],
+        is_professor_hybrid: !!userForm.is_professor_hybrid
+      };
+      await post('users', { action: 'update', targetUserId: editingUserId, ...payload });
+      setEditingUserId(null);
+      setUserForm(emptyUser);
+      setStatus('Usuario actualizado');
+      await loadData(selectedCourseId, selectedYearId);
+    } catch (err) {
+      setUserError(err.message);
+    }
   };
 
   const startEditUser = (userRow) => {
     setEditingUserId(userRow.id);
+    setUserError('');
     setUserForm({
       id: userRow.id,
       nombre: userRow.nombre,
@@ -209,6 +222,7 @@ export default function usePreceptorAdminActions(deps) {
   };
 
   const startCreateTec = () => {
+    setUserError('');
     setTecMode('create');
     setTecForm({ nombre: '', materias: [{ id: `draft-${Date.now()}`, nombre: '', tipo: 'comun' }] });
   };

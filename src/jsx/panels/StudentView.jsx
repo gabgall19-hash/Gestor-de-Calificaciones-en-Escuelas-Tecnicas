@@ -58,7 +58,20 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
     }
 
     fetch(`/api/student?dni=${cleanDNI}&password=${password || ''}`, { headers })
-      .then(res => res.json())
+      .then(res => {
+        const newToken = res.headers.get('X-Refresh-Token');
+        if (newToken) {
+          const stored = localStorage.getItem('currentUser');
+          if (stored) {
+            try {
+              const user = JSON.parse(stored);
+              user.token = newToken;
+              localStorage.setItem('currentUser', JSON.stringify(user));
+            } catch (e) {}
+          }
+        }
+        return res.json();
+      })
       .then(json => {
         if (json.error) {
           setError(json.error);

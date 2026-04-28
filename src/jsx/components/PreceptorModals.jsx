@@ -75,6 +75,8 @@ export default function PreceptorModals(props) {
     setUserForm,
     createUser,
     editUser,
+    userError,
+    setUserError,
     truncateSubject,
     viewingFichaStudent,
     setViewingFichaStudent,
@@ -392,6 +394,21 @@ export default function PreceptorModals(props) {
             )}
 
             <button className="btn btn-primary" type="submit"><Save size={16} /> {editingUserId === 'new' ? 'Crear Usuario' : 'Guardar Cambios'}</button>
+            {userError && (
+              <div style={{ 
+                marginTop: '1rem', 
+                padding: '0.75rem', 
+                borderRadius: '8px', 
+                background: 'rgba(239, 68, 68, 0.1)', 
+                border: '1px solid rgba(239, 68, 68, 0.3)', 
+                color: '#f87171', 
+                fontSize: '0.85rem', 
+                fontWeight: 'bold',
+                textAlign: 'center' 
+              }}>
+                {userError}
+              </div>
+            )}
           </form>
         </Modal>
       )}

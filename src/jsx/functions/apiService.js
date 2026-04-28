@@ -35,7 +35,7 @@ const getAuthToken = () => {
 const handleApiError = (error, status) => {
   const isAuthError = 
     status === 401 || 
-    (error && (
+    (error && typeof error === 'string' && (
       error.includes('Sesión inválida') || 
       error.includes('token') || 
       error.includes('seguridad') ||
@@ -45,8 +45,23 @@ const handleApiError = (error, status) => {
   if (isAuthError) {
     console.warn("Autenticación fallida o sesión expirada. Redirigiendo al login...");
     localStorage.removeItem('currentUser');
-    // Usamos replace para evitar que el usuario vuelva atrás a una página protegida
     window.location.replace(window.location.origin + window.location.pathname);
+  }
+};
+
+const checkRefreshToken = (response) => {
+  const newToken = response.headers.get('X-Refresh-Token');
+  if (newToken) {
+    const stored = localStorage.getItem('currentUser');
+    if (stored) {
+      try {
+        const user = JSON.parse(stored);
+        user.token = newToken;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+      } catch (e) {
+        console.error("Error updating token:", e);
+      }
+    }
   }
 };
 
@@ -74,6 +89,7 @@ export const apiRequest = async (type, body = {}, userId = null, method = 'POST'
 
   try {
     const response = await fetch(url.toString(), options);
+    checkRefreshToken(response);
     const data = await response.json();
 
     if (!response.ok) {
@@ -105,6 +121,7 @@ export const apiLoadData = async (userId, selectedYearId, selectedCourseId, incl
 
   try {
     const response = await fetch(url.toString(), options);
+    checkRefreshToken(response);
     const data = await response.json();
 
     if (!response.ok) {
@@ -137,6 +154,7 @@ const apiService = {
     };
 
     const response = await fetch(url.toString(), options);
+    checkRefreshToken(response);
     const data = await response.json();
     if (!response.ok) {
       handleApiError(data.error, response.status);

@@ -599,6 +599,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           setYearAsCurrent={setYearAsCurrent}
           copyYearInfo={copyYearInfo}
           startEndCycle={startEndCycle}
+          setUserError={setUserError}
         />
       )}
 

@@ -5,6 +5,26 @@ import PreceptorPanel from './panels/PreceptorPanel';
 import StudentView from './panels/StudentView';
 import WelcomeSecurityModal from './components/WelcomeSecurityModal';
 
+// Interceptor global para manejar la expiración por inactividad (Sliding Expiration)
+const originalFetch = window.fetch;
+window.fetch = async (...args) => {
+  const response = await originalFetch(...args);
+  const newToken = response.headers.get('X-Refresh-Token');
+  if (newToken) {
+    const stored = localStorage.getItem('currentUser');
+    if (stored) {
+      try {
+        const user = JSON.parse(stored);
+        user.token = newToken;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+      } catch (e) {
+        console.error("Error actualizando token de sesión:", e);
+      }
+    }
+  }
+  return response;
+};
+
 function App() {
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem('currentUser');

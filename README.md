@@ -6,6 +6,23 @@
 
 ## 📜 Registro de Cambios (Changelog)
  
+### 🚀 [3.5.5] - 2026-04-28 (Seguridad, Auditoría y Buscador Pro)
+**"Bcrypt, Categorización de Historial y Búsqueda Avanzada"**
+
+*   **🔐 Seguridad de Contraseñas (Bcrypt)**:
+    - **Hash Bcrypt**: Migración del almacenamiento de contraseñas de texto plano a hashes Bcrypt robustos.
+    - **Auto-migración Transparente**: Sistema de validación dual que hashea automáticamente las contraseñas antiguas tras el primer inicio de sesión exitoso.
+*   **🕵️ Auditoría y Validación Refinada**:
+    - **Detección de Duplicados**: Nuevo sistema de validación en la creación de usuarios que impide registros duplicados, mostrando una advertencia visual clara ("letras rojas claras") en el modal de administración.
+    - **Categorización Inteligente de Historial**: 
+        - Los cambios y reseteos de contraseña ahora se agrupan estrictamente en el apartado **Sistema** (Pink/Config) para mejor trazabilidad administrativa.
+        - Las actualizaciones de **Horarios** se han trasladado al apartado **Ediciones (Todos)** para que los preceptores tengan visibilidad directa de los cambios académicos.
+*   **🔍 Buscador Pro en Ajustes**:
+    - **Búsqueda Multi-Criterio**: El buscador de gestión de usuarios ahora permite filtrar por **Rol**, **Curso** (para preceptores) y **Materia** (para profesores), además del nombre e ID tradicional.
+*   **⏳ Sesiones Deslizantes (Sliding Expiration)**:
+    - **Expiración de 1 Hora**: Configuración de sesiones con vencimiento de una hora.
+    - **Refresco Automático**: Implementación de un middleware en la API (`X-Refresh-Token`) y un interceptor global en el frontend que renuevan el token automáticamente ante la actividad del usuario, evitando cierres de sesión por inactividad.
+
 ### 🚀 [3.5.4] - 2026-04-28 (Avisos de Seguridad Dinámicos)
 **"Mensajería Especial para Reseteos Administrativos"**
 

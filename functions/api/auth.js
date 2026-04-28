@@ -1,4 +1,4 @@
-import { signJWT } from "./_utils.js";
+import { signJWT, comparePassword, hashPassword, isBcryptHash } from "./_utils.js";
 
 export async function onRequestPost({ request, env }) {
   try {
@@ -8,14 +8,20 @@ export async function onRequestPost({ request, env }) {
 
     // 1. Check if user exists
     const user = await env.DB.prepare(
-      "SELECT * FROM usuarios WHERE username = ? AND password = ?"
-    ).bind(username, password).first();
+      "SELECT * FROM usuarios WHERE username = ?"
+    ).bind(username).first();
 
-    if (!user) {
+    if (!user || !comparePassword(password, user.password)) {
       return new Response(JSON.stringify({ error: "Credenciales inválidas" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    // Auto-migration: if password was plain text, update to hash
+    if (!isBcryptHash(user.password)) {
+      const hashed = hashPassword(password);
+      await env.DB.prepare("UPDATE usuarios SET password = ? WHERE id = ?").bind(hashed, user.id).run();
     }
 
     // 2. Security Check: Mobile Access
@@ -43,7 +49,7 @@ export async function onRequestPost({ request, env }) {
       reset_by_admin: user.reset_by_admin,
       security_acknowledged: user.security_acknowledged,
       token: await signJWT(
-        { id: user.id, rol: user.rol, exp: Date.now() + 24 * 60 * 60 * 1000 },
+        { id: user.id, rol: user.rol, exp: Date.now() + 1 * 60 * 60 * 1000 },
         env.JWT_SECRET || "default_secret_for_dev_only"
       )
     }), {

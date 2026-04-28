@@ -44,7 +44,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
     const detail = log.detalle || '';
     
     // Prioridad para logs de sistema (Config) con colores específicos
-    if (tipo.includes('gestion') || tipo.includes('horarios') || tipo.includes('historial')) {
+    if (tipo.includes('gestion') || tipo.includes('historial') || tipo === 'password_edit' || tipo === 'acknowledge_security') {
       let color = '#ec4899';
       if (detail.includes('Usuario creado')) color = '#10b981'; // Verde
       if (detail.includes('Usuario actualizado')) color = '#f59e0b'; // Amarillo/Naranja
@@ -52,7 +52,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
     }
 
     if (tipo === 'notas_add' || detail.includes('Carga')) return { type: 'add', color: '#10b981', icon: <Plus size={12} /> };
-    if (tipo === 'notas_edit' || detail.includes('Modificación') || detail.includes('Edición')) return { type: 'edit', color: '#f59e0b', icon: <Pencil size={11} /> };
+    if (tipo === 'notas_edit' || tipo.includes('horarios') || detail.includes('Modificación') || detail.includes('Edición')) return { type: 'edit', color: '#f59e0b', icon: <Pencil size={11} /> };
     if (tipo === 'notas_delete' || detail.includes('Eliminación')) return { type: 'delete', color: '#ef4444', icon: <MinusCircle size={12} /> };
     if (tipo.includes('alumno') || tipo === 'pase_alumno' || tipo.includes('transferencia') || tipo === 'ficha_edit' || tipo === 'password_edit' || tipo === 'observacion' || tipo === 'pase_undo') return { type: 'students', color: '#06b6d4', icon: <Info size={12} /> };
     if (tipo.includes('asistencia')) return { type: 'attendance', color: '#8b5cf6', icon: <Info size={12} /> };
