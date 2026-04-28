@@ -5,6 +5,21 @@
 ---
 
 ## 📜 Registro de Cambios (Changelog)
+ 
+### 🚀 [3.5.3] - 2026-04-28 (Permisos Híbridos y Estabilidad de Sesión)
+**"Soporte Integral para Profesores/Preceptores y Robustez en Sesiones"**
+
+*   **🎭 Soporte para Usuarios Híbridos (Profesor + Preceptor)**:
+    *   **Permisos Granulares**: Refactorización completa de los handlers de la API (**Asistencia**, **Alumnos**, **Calificaciones** y **Bloqueos**) para reconocer y agregar permisos de usuarios híbridos. Ahora los profesores con funciones de preceptoría pueden gestionar sus cursos asignados sin conflictos de rol.
+    *   **Interfaz Dinámica**: El panel del preceptor ahora detecta automáticamente si un profesor es híbrido, habilitando las pestañas de **Asistencia**, **Alumnos**, **Materias**, **RAC** e **Historial** que anteriormente estaban restringidas.
+    *   **Modos de Vista**: Se habilitó el acceso a la vista "Todas las Materias" para profesores híbridos, permitiéndoles supervisar el curso completo como preceptores.
+*   **🔐 Estabilidad de Sesión y Navegación**:
+    *   **Anti-Logout Proactivo**: Eliminación del error 403 (Forbidden) como disparador de cierre de sesión automático. Los usuarios ya no son expulsados del sistema al intentar acceder a secciones sin permisos; en su lugar, reciben una notificación de aviso preservando su token.
+    *   **Persistencia de Status Híbrido**: Inclusión de la bandera `is_professor_hybrid` en el payload de autenticación para una configuración inmediata de la UI tras el login.
+*   **🛠️ Refinamiento de UI/UX**:
+    *   **Banderas de Permisos**: Actualización de la lógica en `usePreceptorLogic` para habilitar acciones de transferencia y gestión de alumnos basadas en la suma de privilegios del usuario.
+    *   **Selector de Sector Inteligente**: El panel de asistencia ahora pre-selecciona el sector correcto para usuarios híbridos, optimizando el flujo de carga.
+
 
 ### 🚀 [3.5.2] - 2026-04-27 (Auditoría Refinada y Seguridad de Ingreso)
 **"Privacidad de Logs y Protocolo de Bienvenida Obligatorio"**
