@@ -6,8 +6,13 @@
 
 ## 📜 Registro de Cambios (Changelog)
  
-### 🚀 [3.5.3] - 2026-04-28 (Permisos Híbridos y Estabilidad de Sesión)
-**"Soporte Integral para Profesores/Preceptores y Robustez en Sesiones"**
+### 🚀 [3.5.4] - 2026-04-28 (Avisos de Seguridad Dinámicos)
+**"Mensajería Especial para Reseteos Administrativos"**
+
+*   **🛡️ Protocolo de Reseteo Mejorado**:
+    *   **Identificación de Origen**: Implementación de la bandera `reset_by_admin` en la base de datos y API para diferenciar entre el primer ingreso general y un reseteo forzado por administración.
+    *   **Cartel Especial de Seguridad**: El modal de bienvenida ahora detecta si la clave fue puesta por un administrador, mostrando un mensaje de advertencia específico ("Acción de Seguridad") con iconografía de alerta para incentivar el cambio de clave inmediata.
+    *   **Sincronización de Estado**: Limpieza automática de la marca de reseteo una vez que el usuario establece su propia contraseña o reconoce la actual.
 
 *   **🎭 Soporte para Usuarios Híbridos (Profesor + Preceptor)**:
     *   **Permisos Granulares**: Refactorización completa de los handlers de la API (**Asistencia**, **Alumnos**, **Calificaciones** y **Bloqueos**) para reconocer y agregar permisos de usuarios híbridos. Ahora los profesores con funciones de preceptoría pueden gestionar sus cursos asignados sin conflictos de rol.

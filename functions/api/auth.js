@@ -40,6 +40,7 @@ export async function onRequestPost({ request, env }) {
       professor_course_ids: user.professor_course_ids,
       professor_subject_ids: user.professor_subject_ids,
       is_professor_hybrid: user.is_professor_hybrid,
+      reset_by_admin: user.reset_by_admin,
       security_acknowledged: user.security_acknowledged,
       token: await signJWT(
         { id: user.id, rol: user.rol, exp: Date.now() + 24 * 60 * 60 * 1000 },

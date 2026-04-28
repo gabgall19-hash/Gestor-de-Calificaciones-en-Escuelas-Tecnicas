@@ -11,14 +11,26 @@ const WelcomeSecurityModal = ({ user, onConfirm, onBypass }) => {
     return (
       <div className="modal-overlay" style={{ zIndex: 11000, backdropFilter: 'blur(10px)' }}>
         <div className="glass-card" style={{ maxWidth: '450px', padding: '2rem', textAlign: 'center', animation: 'modalIn 0.4s ease-out' }}>
-          <div style={{ background: 'var(--primary)', width: '60px', height: '60px', borderRadius: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-            <Lock size={30} color="white" />
+          <div style={{ 
+            background: user.reset_by_admin ? 'rgba(245, 158, 11, 0.2)' : 'var(--primary)', 
+            width: '60px', 
+            height: '60px', 
+            borderRadius: '15px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            margin: '0 auto 1.5rem',
+            border: user.reset_by_admin ? '1px solid rgba(245, 158, 11, 0.4)' : 'none'
+          }}>
+            {user.reset_by_admin ? <ShieldAlert size={30} color="#f59e0b" /> : <Lock size={30} color="white" />}
           </div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: '900', marginBottom: '1rem', color: 'white' }}>
-            ¡Bienvenido {user.nombre}!
+            {user.reset_by_admin ? 'Acción de Seguridad' : `¡Bienvenido ${user.nombre}!`}
           </h2>
           <p style={{ fontSize: '0.95rem', lineHeight: '1.6', opacity: 0.9, marginBottom: '2rem', color: 'rgba(255,255,255,0.8)' }}>
-            Como medida de seguridad, solicitamos a todo personal a cambiar su contraseña una vez haya ingresado:
+            {user.reset_by_admin 
+              ? 'Tu contraseña ha sido restablecida por la administración. Por seguridad institucional, debes configurar una nueva clave personal para continuar.'
+              : 'Como medida de seguridad, solicitamos a todo personal a cambiar su contraseña una vez haya ingresado:'}
           </p>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

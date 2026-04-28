@@ -36,7 +36,7 @@ export async function handleUsers(env, request, userId, body) {
       if (password) {
         await env.DB.prepare(
           `UPDATE usuarios SET nombre = ?, username = ?, password = ?, rol = ?, preceptor_course_id = ?, 
-           professor_course_ids = ?, is_professor_hybrid = ?
+           professor_course_ids = ?, is_professor_hybrid = ?, reset_by_admin = 1
            WHERE id = ?`
         ).bind(nombre, username, password, rol, cleanPreceptorCourseId, cleanProfessorCourseIds, cleanIsHybrid, targetUserId).run();
       } else {
@@ -54,14 +54,14 @@ export async function handleUsers(env, request, userId, body) {
   if (action === 'reset_password') {
     const { newPassword } = body;
     if (!newPassword) throw new Error('Nueva contraseña requerida');
-    await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 0 WHERE id = ?').bind(newPassword, targetUserId).run();
+    await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 0, reset_by_admin = 1 WHERE id = ?').bind(newPassword, targetUserId).run();
     await logHistory(env, userId, null, 'gestion_usuarios', `Contraseña reseteada para usuario ID: ${targetUserId}`);
     return json({ success: true });
   }
 
   await env.DB.prepare(
-    `INSERT INTO usuarios (nombre, username, password, rol, preceptor_course_id, professor_course_ids, professor_subject_ids, is_professor_hybrid)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO usuarios (nombre, username, password, rol, preceptor_course_id, professor_course_ids, professor_subject_ids, is_professor_hybrid, reset_by_admin)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`
   ).bind(nombre, username, password, rol, cleanPreceptorCourseId, cleanProfessorCourseIds, '', cleanIsHybrid).run();
   await logHistory(env, userId, null, 'gestion_usuarios', `Usuario creado: ${nombre} (${username}) con rol ${rol}`);
   return json({ success: true });
@@ -163,7 +163,7 @@ export async function handleSelfPasswordChange(env, request, userId, body) {
     throw new Error('La nueva contraseña debe tener al menos 4 caracteres.');
   }
 
-  await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 1 WHERE id = ?').bind(newPassword, userId).run();
+  await env.DB.prepare('UPDATE usuarios SET password = ?, security_acknowledged = 1, reset_by_admin = 0 WHERE id = ?').bind(newPassword, userId).run();
   
   await logHistory(env, userId, null, 'password_edit', `Cambio de contraseña por cuenta propia.`);
   
@@ -172,6 +172,6 @@ export async function handleSelfPasswordChange(env, request, userId, body) {
 
 export async function handleAcknowledgeSecurity(env, request, userId) {
   await validateUser(env, request, userId);
-  await env.DB.prepare('UPDATE usuarios SET security_acknowledged = 1 WHERE id = ?').bind(userId).run();
+  await env.DB.prepare('UPDATE usuarios SET security_acknowledged = 1, reset_by_admin = 0 WHERE id = ?').bind(userId).run();
   return json({ success: true });
 }
