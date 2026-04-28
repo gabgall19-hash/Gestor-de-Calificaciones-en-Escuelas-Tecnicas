@@ -14,6 +14,9 @@
     *   **Cartel Especial de Seguridad**: El modal de bienvenida ahora detecta si la clave fue puesta por un administrador, mostrando un mensaje de advertencia específico ("Acción de Seguridad") con iconografía de alerta para incentivar el cambio de clave inmediata.
     *   **Sincronización de Estado**: Limpieza automática de la marca de reseteo una vez que el usuario establece su propia contraseña o reconoce la actual.
 
+### 🚀 [3.5.3] - 2026-04-28 (Permisos Híbridos y Estabilidad de Sesión)
+**"Soporte Integral para Profesores/Preceptores y Robustez en Sesiones"**
+
 *   **🎭 Soporte para Usuarios Híbridos (Profesor + Preceptor)**:
     *   **Permisos Granulares**: Refactorización completa de los handlers de la API (**Asistencia**, **Alumnos**, **Calificaciones** y **Bloqueos**) para reconocer y agregar permisos de usuarios híbridos. Ahora los profesores con funciones de preceptoría pueden gestionar sus cursos asignados sin conflictos de rol.
     *   **Interfaz Dinámica**: El panel del preceptor ahora detecta automáticamente si un profesor es híbrido, habilitando las pestañas de **Asistencia**, **Alumnos**, **Materias**, **RAC** e **Historial** que anteriormente estaban restringidas.
