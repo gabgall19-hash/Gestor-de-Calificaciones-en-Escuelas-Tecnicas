@@ -9,43 +9,48 @@
 ### 🚀 [3.5.5] - 2026-04-28 (Seguridad, Auditoría y Buscador Pro)
 **"Bcrypt, Categorización de Historial y Búsqueda Avanzada"**
 
+#### ✨ Nuevas Implementaciones y Mejoras
 *   **🔐 Seguridad de Contraseñas (Bcrypt)**:
     - **Hash Bcrypt**: Migración del almacenamiento de contraseñas de texto plano a hashes Bcrypt robustos.
     - **Auto-migración Transparente**: Sistema de validación dual que hashea automáticamente las contraseñas antiguas tras el primer inicio de sesión exitoso.
 *   **🕵️ Auditoría y Validación Refinada**:
-    - **Detección de Duplicados**: Nuevo sistema de validación en la creación de usuarios que impide registros duplicados, mostrando una advertencia visual clara ("letras rojas claras") en el modal de administración.
+    - **Detección de Duplicados**: Nuevo sistema de validación en la creación de usuarios que impide registros duplicados, mostrando una advertencia visual clara en el modal de administración.
     - **Categorización Inteligente de Historial**: 
-        - Los cambios y reseteos de contraseña ahora se agrupan estrictamente en el apartado **Sistema** (Pink/Config) para mejor trazabilidad administrativa.
-        - Las actualizaciones de **Horarios** se han trasladado al apartado **Ediciones (Todos)** para que los preceptores tengan visibilidad directa de los cambios académicos.
+        - Los cambios y reseteos de contraseña ahora se agrupan estrictamente en el apartado **Sistema** para mejor trazabilidad.
+        - Las actualizaciones de **Horarios** se han trasladado al apartado **Ediciones (Todos)**.
 *   **🔍 Buscador Pro en Ajustes**:
-    - **Búsqueda Multi-Criterio**: El buscador de gestión de usuarios ahora permite filtrar por **Rol**, **Curso** (para preceptores) y **Materia** (para profesores), además del nombre e ID tradicional.
+    - **Búsqueda Multi-Criterio**: El buscador de gestión de usuarios ahora permite filtrar por **Rol**, **Curso** y **Materia**.
 *   **⏳ Sesiones Deslizantes (Sliding Expiration)**:
     - **Expiración de 1 Hora**: Configuración de sesiones con vencimiento de una hora.
-    - **Refresco Automático**: Implementación de un middleware en la API (`X-Refresh-Token`) y un interceptor global en el frontend que renuevan el token automáticamente ante la actividad del usuario, evitando cierres de sesión por inactividad.
-*   **🛠️ Robustez y Fixes**:
-    - *Patch Fix*: Resolución de `ReferenceError: setUserError is not defined` que impedía la apertura del modal de gestión de usuarios tras el último despliegue.
+    - **Refresco Automático**: Implementación de middleware (`X-Refresh-Token`) e interceptor global.
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   *Patch Fix*: Resolución de `ReferenceError: setUserError is not defined` en el panel de administración.
 
 ### 🚀 [3.5.4] - 2026-04-28 (Avisos de Seguridad Dinámicos)
 **"Mensajería Especial para Reseteos Administrativos"**
 
+#### ✨ Nuevas Implementaciones y Mejoras
 *   **🛡️ Protocolo de Reseteo Mejorado**:
-    *   **Identificación de Origen**: Implementación de la bandera `reset_by_admin` en la base de datos y API para diferenciar entre el primer ingreso general y un reseteo forzado por administración.
-    *   **Cartel Especial de Seguridad**: El modal de bienvenida ahora detecta si la clave fue puesta por un administrador, mostrando un mensaje de advertencia específico ("Acción de Seguridad") con iconografía de alerta para incentivar el cambio de clave inmediata.
-    *   **Sincronización de Estado**: Limpieza automática de la marca de reseteo una vez que el usuario establece su propia contraseña o reconoce la actual.
+    - **Identificación de Origen**: Nueva bandera `reset_by_admin` para diferenciar el origen de las claves.
+    - **Aviso Especial de Seguridad**: Cartel de bienvenida con iconografía de alerta para reseteos forzados.
+    - **Sincronización de Estado**: Limpieza automática de la marca de reseteo tras el cambio de clave.
 
 ### 🚀 [3.5.3] - 2026-04-28 (Permisos Híbridos y Estabilidad de Sesión)
 **"Soporte Integral para Profesores/Preceptores y Robustez en Sesiones"**
 
+#### ✨ Nuevas Implementaciones y Mejoras
 *   **🎭 Soporte para Usuarios Híbridos (Profesor + Preceptor)**:
-    *   **Permisos Granulares**: Refactorización completa de los handlers de la API (**Asistencia**, **Alumnos**, **Calificaciones** y **Bloqueos**) para reconocer y agregar permisos de usuarios híbridos. Ahora los profesores con funciones de preceptoría pueden gestionar sus cursos asignados sin conflictos de rol.
-    *   **Interfaz Dinámica**: El panel del preceptor ahora detecta automáticamente si un profesor es híbrido, habilitando las pestañas de **Asistencia**, **Alumnos**, **Materias**, **RAC** e **Historial** que anteriormente estaban restringidas.
-    *   **Modos de Vista**: Se habilitó el acceso a la vista "Todas las Materias" para profesores híbridos, permitiéndoles supervisar el curso completo como preceptores.
-*   **🔐 Estabilidad de Sesión y Navegación**:
-      - **Anti-Logout Proactivo**: *Patch Fix* - Eliminación del error 403 (Forbidden) como disparador de cierre de sesión automático. Los usuarios ya no son expulsados del sistema al intentar acceder a secciones sin permisos; en su lugar, reciben una notificación de aviso preservando su token.
-    - **Persistencia de Status Híbrido**: *Patch Fix* - Inclusión de la bandera `is_professor_hybrid` en el payload de autenticación para una configuración inmediata de la UI tras el login.
+    - **Permisos Granulares**: Refactorización de handlers para reconocer permisos híbridos.
+    - **Interfaz Dinámica**: Habilitación automática de pestañas restringidas para profesores híbridos.
+    - **Modos de Vista**: Supervisión completa del curso para preceptores híbridos.
 *   **🛠️ Refinamiento de UI/UX**:
-    *   **Banderas de Permisos**: Actualización de la lógica en `usePreceptorLogic` para habilitar acciones de transferencia y gestión de alumnos basadas en la suma de privilegios del usuario.
-    *   **Selector de Sector Inteligente**: El panel de asistencia ahora pre-selecciona el sector correcto para usuarios híbridos, optimizando el flujo de carga.
+    - **Banderas de Permisos**: Lógica de gestión de alumnos basada en privilegios sumados.
+    - **Selector de Sector Inteligente**: Pre-selección de sector (Teoría/Taller/EF) optimizada.
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   *Patch Fix*: **Anti-Logout Proactivo** - Prevención de cierre de sesión ante errores 403.
+*   *Patch Fix*: **Persistencia de Status Híbrido** - Inclusión de metadatos en el token de autenticación.
 
 
 ### 🚀 [3.5.2] - 2026-04-27 (Auditoría Refinada y Seguridad de Ingreso)
