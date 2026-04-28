@@ -140,7 +140,7 @@ export async function handleGradeUpdates(env, request, userId, body) {
 
   const firstMateria = materiaMap[updates[0].materia_id];
   const auditoriaStudent = studentMap[updates[0].alumno_id];
-  let actionLabel = (hasDelete && !hasAdd && !hasEdit) ? 'Eliminación' : ((hasAdd && !hasEdit && !hasDelete) ? 'Carga' : 'Modificación');
+  let actionLabel = (hasDelete && !hasAdd && !hasEdit) ? 'Eliminación' : ((hasAdd && !hasEdit && !hasDelete) ? 'Carga de Nota' : 'Edición');
   if (updates.length > 1) actionLabel += ' Masiva';
   const eventType = (hasDelete && !hasAdd && !hasEdit) ? 'notas_delete' : ((hasAdd && !hasEdit && !hasDelete) ? 'notas_add' : 'notas_edit');
   const list = Object.keys(updatesByStudent).map(sId => {

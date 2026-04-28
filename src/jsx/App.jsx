@@ -3,11 +3,19 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-
 import { LogIn, ClipboardList, Eye, Megaphone } from 'lucide-react';
 import PreceptorPanel from './panels/PreceptorPanel';
 import StudentView from './panels/StudentView';
+import WelcomeSecurityModal from './components/WelcomeSecurityModal';
 
 function App() {
   const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem('currentUser');
     return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [showSecurityModal, setShowSecurityModal] = useState(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (!storedUser) return false;
+    const u = JSON.parse(storedUser);
+    // Solo mostrar si no ha sido aceptado en esta sesión de navegador
+    return !sessionStorage.getItem(`security_acknowledged_${u.id}`);
   });
   const [dniSearch, setDniSearch] = useState('');
   const [boletinPassword, setBoletinPassword] = useState('');
@@ -58,7 +66,6 @@ function App() {
     fetch(`/api/settings?t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
-        // Ensure boolean conversion if it comes as string
         const isEnabled = data.mobile_login_enabled === true || data.mobile_login_enabled === 'true';
         setMobileLoginEnabled(isEnabled);
         checkVersion(data.version);
@@ -94,6 +101,7 @@ function App() {
       } else {
         setUser(data);
         localStorage.setItem('currentUser', JSON.stringify(data));
+        setShowSecurityModal(true); // Mostrar modal de bienvenida/seguridad
         navigate('/dashboard');
         showToast('Te has conectado a tu sesión', 'success');
       }
@@ -102,7 +110,30 @@ function App() {
     }
   };
 
+  const handleUpdateSelfPassword = async (newPassword) => {
+    if (!user) return;
+    try {
+      const resp = await fetch(`/api/data?type=self_password&userId=${user.id}`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ newPassword })
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      
+      if (user) sessionStorage.setItem(`security_acknowledged_${user.id}`, 'true');
+      showToast('Contraseña actualizada correctamente', 'success');
+      setShowSecurityModal(false);
+    } catch (err) {
+      alert("Error al actualizar contraseña: " + err.message);
+    }
+  };
+
   const handleLogout = () => {
+    if (user) sessionStorage.removeItem(`security_acknowledged_${user.id}`);
     setUser(null);
     localStorage.removeItem('currentUser');
     navigate('/');
@@ -164,6 +195,17 @@ function App() {
           message={toast.message} 
           type={toast.type} 
           onExited={() => setToast(null)} 
+        />
+      )}
+
+      {showSecurityModal && user && (
+        <WelcomeSecurityModal 
+          user={user} 
+          onConfirm={handleUpdateSelfPassword} 
+          onBypass={() => {
+            sessionStorage.setItem(`security_acknowledged_${user.id}`, 'true');
+            setShowSecurityModal(false);
+          }} 
         />
       )}
 

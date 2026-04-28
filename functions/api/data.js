@@ -15,7 +15,8 @@ import {
   handleConfig, 
   handleAnuncios, 
   handleEndCycle, 
-  handleHistorialDelete 
+  handleHistorialDelete,
+  handleSelfPasswordChange 
 } from "./handlers/admin.js";
 
 export async function onRequestGet({ env, request }) {
@@ -83,6 +84,7 @@ export async function onRequestPost({ env, request }) {
     if (type === 'horarios') return await handleSchedules(env, request, userId, body);
     if (type === 'asistencia') return await handleAttendanceSave(env, request, userId, body);
     if (type === 'student_images') return await handleStudentImages(env, request, userId, body);
+    if (type === 'self_password') return await handleSelfPasswordChange(env, request, userId, body);
     
     return json({ error: 'Tipo no soportado' }, 400);
   } catch (err) {

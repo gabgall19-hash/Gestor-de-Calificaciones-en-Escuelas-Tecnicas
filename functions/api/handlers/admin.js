@@ -153,3 +153,19 @@ export async function handleEndCycle(env, request, userId, body) {
   if (statements.length) await env.DB.batch(statements);
   return json({ success: true });
 }
+
+export async function handleSelfPasswordChange(env, request, userId, body) {
+  // Solo validamos que el usuario esté autenticado y que sea su propio ID
+  const payload = await validateUser(env, request, userId);
+  const { newPassword } = body;
+  
+  if (!newPassword || newPassword.length < 4) {
+    throw new Error('La nueva contraseña debe tener al menos 4 caracteres.');
+  }
+
+  await env.DB.prepare('UPDATE usuarios SET password = ? WHERE id = ?').bind(newPassword, userId).run();
+  
+  await logHistory(env, userId, null, 'password_edit', `Cambio de contraseña por cuenta propia.`);
+  
+  return json({ success: true });
+}

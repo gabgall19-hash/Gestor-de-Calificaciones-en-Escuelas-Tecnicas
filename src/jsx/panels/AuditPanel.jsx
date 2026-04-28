@@ -42,20 +42,48 @@ const AuditPanel = ({ data, user, onDelete }) => {
   const getActionInfo = (log) => {
     const tipo = log.tipo_evento || '';
     const detail = log.detalle || '';
+    
+    // Prioridad para logs de sistema (Config) con colores específicos
+    if (tipo.includes('gestion') || tipo.includes('horarios') || tipo.includes('historial')) {
+      let color = '#ec4899';
+      if (detail.includes('Usuario creado')) color = '#10b981'; // Verde
+      if (detail.includes('Usuario actualizado')) color = '#f59e0b'; // Amarillo/Naranja
+      return { type: 'config', color, icon: <Info size={12} /> };
+    }
+
     if (tipo === 'notas_add' || detail.includes('Carga')) return { type: 'add', color: '#10b981', icon: <Plus size={12} /> };
-    if (tipo === 'notas_edit' || detail.includes('Modificación')) return { type: 'edit', color: '#f59e0b', icon: <Pencil size={11} /> };
+    if (tipo === 'notas_edit' || detail.includes('Modificación') || detail.includes('Edición')) return { type: 'edit', color: '#f59e0b', icon: <Pencil size={11} /> };
     if (tipo === 'notas_delete' || detail.includes('Eliminación')) return { type: 'delete', color: '#ef4444', icon: <MinusCircle size={12} /> };
     if (tipo.includes('alumno') || tipo === 'pase_alumno' || tipo.includes('transferencia') || tipo === 'ficha_edit' || tipo === 'password_edit' || tipo === 'observacion' || tipo === 'pase_undo') return { type: 'students', color: '#06b6d4', icon: <Info size={12} /> };
     if (tipo.includes('asistencia')) return { type: 'attendance', color: '#8b5cf6', icon: <Info size={12} /> };
-    if (tipo.includes('gestion') || tipo.includes('horarios') || tipo.includes('historial')) return { type: 'config', color: '#ec4899', icon: <Info size={12} /> };
+    
     return { type: 'other', color: 'var(--primary)', icon: <Info size={12} /> };
   };
 
   const filteredHistorial = useMemo(() => {
     let logs = data.historial || [];
+    const isAdminOrJefe = user.rol === 'admin' || user.rol === 'jefe_de_auxiliares';
     
     // Filtro por tipo de pestaña
-    if (filterType !== 'all') {
+    if (filterType === 'all') {
+      // En "Todos" mostramos Cargas, Ediciones y Eliminaciones para todos.
+      // Si es Admin/Jefe, también mostramos Alumnos y Asistencia.
+      // NUNCA mostramos Sistema (config) en "Todos".
+      const allowedTypes = ['add', 'edit', 'delete'];
+      if (isAdminOrJefe) {
+        allowedTypes.push('students', 'attendance');
+      }
+      
+      logs = logs.filter(h => {
+        const info = getActionInfo(h);
+        return allowedTypes.includes(info.type);
+      });
+    } else {
+      // Si no es Admin/Jefe, bloqueamos el acceso a pestañas restringidas
+      if (!isAdminOrJefe && ['students', 'attendance', 'config'].includes(filterType)) {
+        return [];
+      }
+
       logs = logs.filter(h => {
         const info = getActionInfo(h);
         return info.type === filterType;
@@ -70,7 +98,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
       (h.alumno_apellido || '').toLowerCase().includes(lower) ||
       (h.alumno_nombre || '').toLowerCase().includes(lower)
     );
-  }, [data.historial, searchTerm, filterType]);
+  }, [data.historial, searchTerm, filterType, user.rol]);
 
   const paginatedHistorial = useMemo(() => {
     return filteredHistorial.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -94,6 +122,8 @@ const AuditPanel = ({ data, user, onDelete }) => {
     }
   };
 
+  const isAdminOrJefe = user.rol === 'admin' || user.rol === 'jefe_de_auxiliares';
+
   return (
     <section className="page-section">
       <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -101,7 +131,7 @@ const AuditPanel = ({ data, user, onDelete }) => {
           <History size={16} />
           <h2>Historial de Actividad</h2>
         </div>
-        {(user.rol === 'admin' || user.rol === 'jefe_de_auxiliares') && (
+        {isAdminOrJefe && (
           <button 
             className="btn btn-danger" 
             style={{ padding: '4px 12px', fontSize: '0.75rem', height: 'auto' }}
@@ -115,14 +145,14 @@ const AuditPanel = ({ data, user, onDelete }) => {
       <div className="glass-card" style={{ marginTop: '1rem', padding: '0.8rem' }}>
         <div style={{ display: 'flex', gap: '8px', marginBottom: '1rem', flexWrap: 'wrap' }}>
           {[
-            { id: 'all', label: 'Todos', color: 'var(--primary)' },
-            { id: 'add', label: 'Cargas', color: '#10b981' },
-            { id: 'edit', label: 'Ediciones', color: '#f59e0b' },
-            { id: 'delete', label: 'Eliminaciones', color: '#ef4444' },
-            { id: 'students', label: 'Alumnos', color: '#06b6d4' },
-            { id: 'attendance', label: 'Asistencia', color: '#8b5cf6' },
-            { id: 'config', label: 'Sistema', color: '#ec4899' }
-          ].map(tab => (
+            { id: 'all', label: 'Todos', color: 'var(--primary)', visible: true },
+            { id: 'add', label: 'Cargas', color: '#10b981', visible: true },
+            { id: 'edit', label: 'Ediciones', color: '#f59e0b', visible: true },
+            { id: 'delete', label: 'Eliminaciones', color: '#ef4444', visible: true },
+            { id: 'students', label: 'Alumnos', color: '#06b6d4', visible: isAdminOrJefe },
+            { id: 'attendance', label: 'Asistencia', color: '#8b5cf6', visible: isAdminOrJefe },
+            { id: 'config', label: 'Sistema', color: '#ec4899', visible: isAdminOrJefe }
+          ].filter(tab => tab.visible).map(tab => (
             <button
               key={tab.id}
               onClick={() => setFilterType(tab.id)}

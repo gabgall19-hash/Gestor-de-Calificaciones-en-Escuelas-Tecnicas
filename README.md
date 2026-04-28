@@ -6,6 +6,21 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.5.2] - 2026-04-27 (Auditoría Refinada y Seguridad de Ingreso)
+**"Privacidad de Logs y Protocolo de Bienvenida Obligatorio"**
+
+*   **🕵️ Refactorización del Sistema de Auditoría**:
+    *   **Privacidad Granular**: Restricción de visibilidad de los logs de **Alumnos**, **Asistencia** y **Sistema** exclusivamente para los roles de **Administrador** y **Jefe de Auxiliares**, protegiendo la trazabilidad operativa.
+    *   **Visualización por Colores**: Implementación de indicadores visuales (borde izquierdo) para logs de sistema: **Verde** para creación de usuarios y **Amarillo/Naranja** para actualizaciones.
+    *   **Optimización de Pestañas**: Los logs de **Sistema** ahora están confinados a su propia pestaña (oculta para roles no autorizados) y excluidos de la vista general "Todos" para reducir el ruido visual.
+    *   **Nomenclatura Oficial**: Actualización de etiquetas de historial de calificaciones a **"Carga de Nota"** y **"Edición"**, con lógica de reseteo automático tras eliminaciones.
+*   **🛡️ Bienvenida y Seguridad Obligatoria**:
+    *   **Protocolo de Ingreso**: Nueva ventana obligatoria al iniciar sesión que solicita el cambio de contraseña como medida de seguridad institucional.
+    *   **Persistencia Anti-Bypass**: Implementación de bloqueo mediante `sessionStorage`, garantizando que la ventana sea ineludible incluso ante recargas de página o manipulación de URL hasta que el usuario elija una opción.
+    *   **Autogestión de Claves**: Desarrollo de un nuevo endpoint de backend y lógica de frontend que permite a cualquier usuario actualizar su propia contraseña de forma segura sin intervención administrativa.
+*   **🛠️ Robustez y Fixes**:
+    *   **Restauración de API**: Corrección de importaciones en `data.js` para asegurar la operatividad total de los handlers de gestión de usuarios y configuraciones.
+
 ### 🚀 [3.5.1] - 2026-04-27 (Seguridad de Roles y Regente de Profesores)
 **"Blindaje de Permisos y Expansión Administrativa"**
 
