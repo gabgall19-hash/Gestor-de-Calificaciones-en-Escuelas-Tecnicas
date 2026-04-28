@@ -1,5 +1,5 @@
 import { emptyStudent } from '../functions/PreceptorHelpers';
-import { apiRequest } from '../functions/apiService';
+import { apiRequest, default as apiService } from '../functions/apiService';
 
 export default function usePreceptorStudentActions(deps) {
   const {
@@ -242,7 +242,7 @@ export default function usePreceptorStudentActions(deps) {
   };
 
   const getHistorial = async (studentId) => {
-    return await apiRequest(`historial_escolar&studentId=${studentId}`);
+    return await apiService.get('historial_escolar', { studentId });
   };
 
   return {

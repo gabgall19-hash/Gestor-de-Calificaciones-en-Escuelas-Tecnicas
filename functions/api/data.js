@@ -32,8 +32,8 @@ export async function onRequestGet({ env, request }) {
     }
     
     if (type === 'historial_escolar') {
-      const studentId = url.searchParams.get('studentId');
-      const res = await env.DB.prepare('SELECT * FROM historial_escolar WHERE alumno_id = ? ORDER BY id DESC').bind(studentId).all();
+      const studentId = url.searchParams.get('studentId') || url.searchParams.get('student_id');
+      const res = await env.DB.prepare('SELECT * FROM historial_escolar WHERE alumno_id = ? ORDER BY id DESC').bind(Number(studentId)).all();
       return json(res.results);
     }
     
@@ -47,6 +47,42 @@ export async function onRequestGet({ env, request }) {
       return json(results);
     }
     
+    if (type === 'year_summary') {
+      const yearId = url.searchParams.get('yearId');
+      
+      // Totales generales del año
+      const totals = await env.DB.prepare(`
+        SELECT 
+          (SELECT COUNT(*) FROM alumnos WHERE estado = 1 AND course_id IN (SELECT id FROM cursos WHERE year_id = ?)) as active,
+          (SELECT COUNT(*) FROM pases WHERE course_id_origen IN (SELECT id FROM cursos WHERE year_id = ?)) as pases
+      `).bind(yearId, yearId).first();
+
+      // Detalles por curso
+      const courses = await env.DB.prepare(`
+        SELECT 
+          c.id,
+          (c.ano || '° ' || c.division || ' ' || c.turno) as label,
+          t.nombre as tecnicatura,
+          COUNT(CASE WHEN a.genero = 'Masculino' AND a.estado = 1 THEN 1 END) as males,
+          COUNT(CASE WHEN a.genero = 'Femenino' AND a.estado = 1 THEN 1 END) as females,
+          (
+            SELECT COUNT(DISTINCT h.alumno_id) 
+            FROM historial_escolar h 
+            JOIN alumnos al ON h.alumno_id = al.id
+            WHERE al.course_id = c.id
+            AND h.ciclo_lectivo_nombre LIKE '%repitente%'
+          ) as repeaters
+        FROM cursos c
+        JOIN tecnicaturas t ON c.tecnicatura_id = t.id
+        LEFT JOIN alumnos a ON c.id = a.course_id
+        WHERE c.year_id = ?
+        GROUP BY c.id, c.ano, c.division, c.turno, t.nombre
+        ORDER BY c.ano, c.division
+      `).bind(yearId).all();
+
+      return json({ totals, courses: courses.results });
+    }
+
     if (type === 'asistencia') return await handleAttendanceLoad(env, request, url);
     
     if (type === 'student_images') {

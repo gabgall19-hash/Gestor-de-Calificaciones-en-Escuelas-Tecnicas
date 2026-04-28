@@ -6,6 +6,26 @@
 
 ## 📜 Registro de Cambios (Changelog)
  
+### 🚀 [3.5.6] - 2026-04-28 (Reportes de Año Lectivo y Estabilidad de Datos)
+**"Resumen Académico, Fix de Historial y Optimización D1"**
+
+#### ✨ Nuevas Implementaciones y Mejoras
+*   **📊 Módulo de Resumen del Año Lectivo**:
+    *   **Dashboard de Estadísticas**: Nueva función "Ver Detalles" en Ajustes que ofrece un desglose instantáneo del año escolar seleccionado.
+    *   **Métricas de Población**: Cálculo en tiempo real de alumnos activos y alumnos dados de pase en todo el ciclo.
+    *   **Desglose por Curso**: Reporte detallado de cada división que incluye:
+        - Distribución por Género (Varones/Mujeres).
+        - Conteo de Repitentes (basado en el historial académico registrado).
+*   **🕵️ Refactorización de Conteo de Repitentes**:
+    *   **Lógica basada en Historial**: El sistema ahora escanea la tabla de antecedentes (`historial_escolar`) buscando marcas de repitencia para garantizar que los reportes reflejen la realidad académica de los alumnos matriculados.
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   **🩹 Fix de Visualización de Antecedentes**: Resolución de la inconsistencia que impedía ver el historial académico en ciertos perfiles de alumnos tras la última migración.
+*   **⚙️ Estabilidad de API (D1 SQL)**: 
+    *   Corrección de errores de binding de parámetros en Cloudflare D1 que causaban el fallo del módulo de resumen.
+    *   Sincronización de esquema: Actualización de nombres de tablas y columnas en las consultas SQL para coincidir estrictamente con el esquema de producción (`años_lectivos`, `ano`, `division`, `turno`).
+*   **🛠️ Corrección de Importaciones**: Resolución de `ReferenceError: apiService is not defined` en el hook de acciones administrativas.
+
 ### 🚀 [3.5.5] - 2026-04-28 (Seguridad, Auditoría y Buscador Pro)
 **"Bcrypt, Categorización de Historial y Búsqueda Avanzada"**
 

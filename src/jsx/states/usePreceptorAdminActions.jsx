@@ -1,4 +1,5 @@
 import { draftTec, emptyUser, findDuplicateSubjectNames } from '../functions/PreceptorHelpers';
+import apiService from '../functions/apiService';
 
 function normalizeTecMaterias(materias) {
   return materias.filter((materia) => materia.nombre.trim()).map((materia) => {
@@ -68,7 +69,9 @@ export default function usePreceptorAdminActions(deps) {
     setStatus,
     setLoading,
     userError,
-    setUserError
+    setUserError,
+    academicYearSummary,
+    setAcademicYearSummary
   } = deps;
 
   const prepareEditCourse = (course) => {
@@ -281,6 +284,18 @@ export default function usePreceptorAdminActions(deps) {
     showToast('Tecnicatura duplicada', 'success');
     await loadData(selectedCourseId, selectedYearId);
   };
+  
+  const getYearSummary = async (yearId) => {
+    try {
+      setLoading(true);
+      const res = await apiService.get('year_summary', { yearId });
+      setAcademicYearSummary(res);
+    } catch (err) {
+      showToast('Error al cargar el resumen del año', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     prepareEditCourse,
@@ -302,6 +317,7 @@ export default function usePreceptorAdminActions(deps) {
     addTec,
     editTec,
     removeTec,
-    duplicateTec
+    duplicateTec,
+    getYearSummary
   };
 }

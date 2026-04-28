@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRightLeft, GraduationCap, GripVertical, Plus, Save, Trash2, AlertTriangle } from 'lucide-react';
+import { ArrowRightLeft, GraduationCap, GripVertical, Plus, Save, Trash2, AlertTriangle, BookOpen } from 'lucide-react';
 import {
   divisionOptions,
   emptyUser,
@@ -85,7 +85,9 @@ export default function PreceptorModals(props) {
     studentForm,
     setStudentForm,
     handleSaveFicha,
-    getHistorial
+    getHistorial,
+    academicYearSummary,
+    setAcademicYearSummary
   } = props;
 
   const duplicateSubjectNames = tecMode !== 'list' ? findDuplicateSubjectNames(tecForm.materias) : [];
@@ -424,6 +426,53 @@ export default function PreceptorModals(props) {
           setStudentForm={setStudentForm}
           getHistorial={getHistorial}
         />
+      )}
+      {academicYearSummary && (
+        <Modal title="Resumen del Año Lectivo" onClose={() => setAcademicYearSummary(null)}>
+          <div className="ficha-alumno">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '2rem' }}>
+              <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Alumnos Activos</div>
+                <div style={{ fontSize: '2rem', fontWeight: '900', color: '#10b981' }}>{academicYearSummary.totals.active}</div>
+              </div>
+              <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.2)', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Dados de Pase</div>
+                <div style={{ fontSize: '2rem', fontWeight: '900', color: '#ef4444' }}>{academicYearSummary.totals.pases}</div>
+              </div>
+            </div>
+
+            <div className="section-title"><BookOpen size={20} /><h2>Detalle por Cursos</h2></div>
+            <div className="custom-scroll" style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
+              {academicYearSummary.courses.map((c) => (
+                <div key={c.id} style={{ 
+                  background: 'rgba(255,255,255,0.03)', 
+                  padding: '12px 18px', 
+                  borderRadius: '12px', 
+                  marginBottom: '10px',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div>
+                    <strong style={{ fontSize: '1rem', color: 'var(--primary)' }}>{c.label}</strong>
+                    <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{c.tecnicatura}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: '700' }}>
+                      (V: <span style={{ color: '#3498db' }}>{c.males}</span> / M: <span style={{ color: '#e84393' }}>{c.females}</span>)
+                    </div>
+                    <div style={{ fontSize: '0.75rem', marginTop: '4px', opacity: 0.8 }}>
+                      Repitentes: <span style={{ color: '#f39c12', fontWeight: 'bold' }}>{c.repeaters}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem' }} onClick={() => setAcademicYearSummary(null)}>Cerrar Resumen</button>
+          </div>
+        </Modal>
       )}
     </>
   );

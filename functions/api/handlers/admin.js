@@ -1,8 +1,10 @@
-import { validateUser, json, logHistory, toNumber, SYSTEM_VERSION } from "../_helpers.js";
+import { validateUser, json, logHistory, toNumber, SYSTEM_VERSION, HIGH_ROLES } from "../_helpers.js";
+
 import { hashPassword } from "../_utils.js";
 
 export async function handleUsers(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector');
+  await validateUser(env, request, userId, ...HIGH_ROLES);
+
   const { action, targetUserId, nombre, username, password, rol, preceptor_course_id, professor_course_ids = [], is_professor_hybrid = 0 } = body;
 
   if (action === 'delete') {
@@ -12,8 +14,8 @@ export async function handleUsers(env, request, userId, body) {
     return json({ success: true });
   }
 
-  const highLevelRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
-  const isHighLevel = highLevelRoles.includes(rol);
+  const isHighLevel = HIGH_ROLES.includes(rol);
+
   const cleanPreceptorCourseId = isHighLevel ? null : (preceptor_course_id || null);
   const cleanProfessorCourseIds = isHighLevel ? '' : (Array.isArray(professor_course_ids) ? professor_course_ids.join(',') : professor_course_ids || '');
   const cleanIsHybrid = isHighLevel ? 0 : (is_professor_hybrid ? 1 : 0);
@@ -79,7 +81,8 @@ export async function handleUsers(env, request, userId, body) {
 }
 
 export async function handleConfig(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'director', 'vicedirector', 'regente_profesores');
+  await validateUser(env, request, userId, ...HIGH_ROLES);
+
   const { action, valor, periodos = [] } = body;
 
   const updateAjuste = async (clave, v) => {
@@ -104,7 +107,8 @@ export async function handleConfig(env, request, userId, body) {
 }
 
 export async function handleAnuncios(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'director', 'vicedirector');
+  await validateUser(env, request, userId, ...HIGH_ROLES);
+
   const { action, id, titulo, contenido, tipo, activo } = body;
   if (action === 'create') {
     await env.DB.prepare('INSERT INTO anuncios (titulo, contenido, tipo, activo) VALUES (?, ?, ?, ?)')
@@ -120,6 +124,7 @@ export async function handleAnuncios(env, request, userId, body) {
 
 export async function handleHistorialDelete(env, request, userId, body) {
   await validateUser(env, request, userId, 'admin', 'jefe_de_auxiliares');
+
   const { action, logId, courseId } = body;
   if (action === 'delete_all') {
     await env.DB.prepare('DELETE FROM historial WHERE course_id = ?').bind(courseId).run();
@@ -135,6 +140,7 @@ export async function handleHistorialDelete(env, request, userId, body) {
 
 export async function handleEndCycle(env, request, userId, body) {
   const user = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares');
+
   const { students = [], isRepeater, targetCourseId, cycleName } = body;
   const sIds = students.map(s => s.id);
   if (sIds.length === 0) return json({ success: true });
@@ -152,12 +158,15 @@ export async function handleEndCycle(env, request, userId, body) {
     const data = dataMap[s.id];
     if (!data) continue;
     const grades = gradesByStudent[s.id] || [];
-    statements.push(env.DB.prepare('INSERT INTO historial_escolar (alumno_id, curso_label, tecnicatura_nombre, ciclo_lectivo_nombre, boletin_data) VALUES (?, ?, ?, ?, ?)').bind(s.id, `${data.ano} ${data.division}`, data.tec_nombre, cycleName, JSON.stringify(grades)));
+    const SABANA_STRING = "Alumno repitente de Ciclo Lectivo 2025 - Importado de la Lista Sabana 2026";
+    const historyLabel = (isRepeater && cycleName === "2025") ? SABANA_STRING : cycleName;
+    statements.push(env.DB.prepare('INSERT INTO historial_escolar (alumno_id, curso_label, tecnicatura_nombre, ciclo_lectivo_nombre, boletin_data) VALUES (?, ?, ?, ?, ?)').bind(s.id, `${data.ano} ${data.division}`, data.tec_nombre, historyLabel, JSON.stringify(grades)));
     for (const g of grades) {
       const val = g.definitiva ? Number(String(g.definitiva).replace(',', '.')) : 0;
       if (val < 7) statements.push(env.DB.prepare('INSERT INTO previas (alumno_id, materia_id, materia_nombre_custom, curso_ano, estado) VALUES (?, ?, ?, ?, "pendiente")').bind(s.id, g.materia_id, null, `${data.ano} ${data.division} (${cycleName})`));
     }
-    const obs = (data.observaciones ? data.observaciones + "\n" : "") + (isRepeater ? `REPITENTE ${cycleName}` : `PASO DE AÑO ${cycleName}`) + ` del curso ${data.ano} ${data.division}`;
+    const obsLabel = (isRepeater && cycleName === "2025") ? SABANA_STRING : ((isRepeater ? `REPITENTE ${cycleName}` : `PASO DE AÑO ${cycleName}`) + ` del curso ${data.ano} ${data.division}`);
+    const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
     statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = ? WHERE id = ?').bind(obs, targetCourseId, s.id));
     statements.push(env.DB.prepare('DELETE FROM calificaciones WHERE alumno_id = ?').bind(s.id));
   }

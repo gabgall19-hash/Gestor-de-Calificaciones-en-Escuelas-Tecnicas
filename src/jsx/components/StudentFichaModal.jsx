@@ -89,7 +89,7 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
     setLoadingHistorial(true);
     try {
       const res = await getHistorial(student.id);
-      setHistorial(res || []);
+      setHistorial(res?.results || res || []);
     } catch (err) {
       console.error("Error loading history:", err);
     } finally {
@@ -226,7 +226,9 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
           )}
           <div>
             <h2 style={{ margin: 0, fontSize: fullPage ? '2.4rem' : '1.5rem', fontWeight: '900', letterSpacing: '-0.5px' }}>Ficha del Alumno</h2>
-            <p style={{ margin: 0, fontSize: '1.1rem', opacity: 0.7, fontWeight: '500' }}>{student.apellido}, {student.nombre} · DNI: {formatDNI(student.dni)}</p>
+            <p style={{ margin: 0, fontSize: '1.1rem', opacity: 0.7, fontWeight: '500' }}>
+              {student.apellido}, {student.nombre} · DNI: {formatDNI(student.dni)} 
+            </p>
           </div>
         </div>
         {!fullPage && <button className="icon-btn" onClick={onClose}><X size={20} /></button>}

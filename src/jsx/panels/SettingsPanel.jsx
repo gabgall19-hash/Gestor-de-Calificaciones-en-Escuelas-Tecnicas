@@ -17,7 +17,8 @@ const SettingsPanel = ({
   handleUpdateRACModular,
   handleUpdatePasswordMsg,
   setYearAsCurrent, copyYearInfo,
-  setUserError
+  setUserError,
+  getYearSummary, academicYearSummary, setAcademicYearSummary
 }) => {
   const [userSearch, setUserSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -233,6 +234,15 @@ const SettingsPanel = ({
                       </button>
                       <button
                         className="icon-btn"
+                        style={{ width: '28px', height: '28px', color: '#f39c12' }}
+                        type="button"
+                        onClick={() => getYearSummary(year.id)}
+                        title="Ver Detalles"
+                      >
+                        <Eye size={14} />
+                      </button>
+                      <button
+                        className="icon-btn"
                         style={{ width: '28px', height: '28px', color: '#3498db' }}
                         type="button"
                         onClick={() => {
@@ -253,6 +263,7 @@ const SettingsPanel = ({
           </div>
         </div>
       </section>
+
 
       <section className="management-card" style={{ gridColumn: isMobile ? 'auto' : 'span 2' }}>
         <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

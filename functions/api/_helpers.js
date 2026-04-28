@@ -1,6 +1,9 @@
 import { verifyJWT } from "./_utils.js";
 
-export const SYSTEM_VERSION = '2.9.8';
+export const SYSTEM_VERSION = '3.5.6';
+
+export const HIGH_ROLES = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores'];
+
 
 export function json(body, status = 200) {
   return new Response(JSON.stringify(body), {

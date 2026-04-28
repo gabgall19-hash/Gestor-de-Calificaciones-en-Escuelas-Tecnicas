@@ -144,6 +144,7 @@ const apiService = {
   get: async (type, params = {}) => {
     const url = getApiUrl();
     url.searchParams.set('type', type);
+    url.searchParams.set('v', Date.now());
     Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
 
     const options = {

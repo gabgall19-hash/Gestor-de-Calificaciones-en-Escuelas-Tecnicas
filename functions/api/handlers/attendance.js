@@ -1,4 +1,5 @@
-import { toNumber, validateUser, logHistory, json } from "../_helpers.js";
+import { toNumber, validateUser, logHistory, json, HIGH_ROLES } from "../_helpers.js";
+
 
 export async function handleAttendanceLoad(env, request, url) {
   const currentUser = await validateUser(env, request);
@@ -12,8 +13,8 @@ export async function handleAttendanceLoad(env, request, url) {
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(currentUser.id).first()) || currentUser;
 
   // Security: Check if user has access to this course
-  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
-  if (!highRoles.includes(user.rol)) {
+  if (!HIGH_ROLES.includes(user.rol)) {
+
     const accessibleIds = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
     if (user.preceptor_course_id) accessibleIds.push(Number(user.preceptor_course_id));
     if (user.professor_subject_ids) {
@@ -64,8 +65,8 @@ export async function handleAttendanceSave(env, request, userId, body) {
   }
 
   // Security: Check course assignment
-  const highRoles = ['admin', 'jefe_de_auxiliares'];
-  if (!highRoles.includes(user.rol)) {
+  if (!HIGH_ROLES.includes(user.rol) && user.rol !== 'preceptor' && user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') {
+
     // Get courseId from the first student in updates
     const firstStudent = await env.DB.prepare('SELECT course_id FROM alumnos WHERE id = ?').bind(updates[0].alumno_id).first();
     if (firstStudent) {

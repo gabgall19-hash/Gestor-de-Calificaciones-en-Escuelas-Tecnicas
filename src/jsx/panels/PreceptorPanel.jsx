@@ -186,7 +186,10 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     truncateSubject,
     getHistorial,
     userError,
-    setUserError
+    setUserError,
+    getYearSummary,
+    academicYearSummary,
+    setAcademicYearSummary
   } = logic;
 
   const tabs = useMemo(() => {
@@ -245,6 +248,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
             studentForm={studentForm}
             setStudentForm={setStudentForm}
             fullPage={true}
+            getHistorial={getHistorial}
           />
         </div>
       </div>
@@ -602,6 +606,9 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           copyYearInfo={copyYearInfo}
           startEndCycle={startEndCycle}
           setUserError={setUserError}
+          getYearSummary={getYearSummary}
+          academicYearSummary={academicYearSummary}
+          setAcademicYearSummary={setAcademicYearSummary}
         />
       )}
 
@@ -675,6 +682,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         getHistorial={getHistorial}
         userError={userError}
         setUserError={setUserError}
+        academicYearSummary={academicYearSummary}
+        setAcademicYearSummary={setAcademicYearSummary}
       />
     </div>
   );

@@ -1,4 +1,5 @@
-import { validateUser, logHistory, json } from "../_helpers.js";
+import { validateUser, logHistory, json, HIGH_ROLES } from "../_helpers.js";
+
 
 export async function handleGradeUpdates(env, request, userId, body) {
   const currentUser = await validateUser(env, request, userId);
@@ -27,9 +28,8 @@ export async function handleGradeUpdates(env, request, userId, body) {
   const p_subjects = (user.professor_subject_ids ?? '').split(',');
 
   let canEditRoleMode = false;
-  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
-  
   if (['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(user.rol)) {
+
     const ajustes = await env.DB.prepare('SELECT valor FROM ajustes WHERE clave = ?').bind(`${user.rol}_mode`).first();
     canEditRoleMode = ajustes ? ajustes.valor === 'edit' : false;
   }
@@ -43,7 +43,8 @@ export async function handleGradeUpdates(env, request, userId, body) {
       WHERE c.id = ?
     `).bind(firstStudent.course_id).first();
     
-    if (yearRes && !yearRes.es_actual && !['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(user.rol)) {
+    if (yearRes && !yearRes.es_actual && !HIGH_ROLES.includes(user.rol)) {
+
       throw new Error('No se pueden editar calificaciones de un ciclo lectivo que no es el actual.');
     }
   }
@@ -58,7 +59,8 @@ export async function handleGradeUpdates(env, request, userId, body) {
       throw new Error('No tienes permiso para modificar calificaciones (Acceso de solo lectura).');
     }
 
-    if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector') {
+    if (!HIGH_ROLES.includes(user.rol)) {
+
       const pair = `${student.course_id}-${u.materia_id}`;
       const isAssignedAsProfessor = p_subjects.includes(pair);
 
@@ -158,7 +160,8 @@ export async function handleGradeUpdates(env, request, userId, body) {
 }
 
 export async function handlePrevias(env, request, userId, body) {
-  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'profesor', 'jefe_de_auxiliares', 'director', 'vicedirector');
+  const currentUser = await validateUser(env, request, userId, ...HIGH_ROLES, 'preceptor', 'preceptor_taller', 'preceptor_ef', 'profesor');
+
   
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;

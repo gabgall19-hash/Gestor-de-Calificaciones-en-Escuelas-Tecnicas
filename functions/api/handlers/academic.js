@@ -5,8 +5,10 @@ import {
   toNumber, 
   sanitizeTecMaterias, 
   getDuplicateCurricularNames, 
-  normalizeCurricularName 
+  normalizeCurricularName,
+  HIGH_ROLES
 } from "../_helpers.js";
+
 
 // ─── Academic Internal Helpers ───────────────────────────────────────────────
 
@@ -82,7 +84,8 @@ async function syncProfessorAssignmentsForCourse(env, courseId, gridData) {
   const teacherIds = Object.keys(newAssignmentsByTeacher).map(Number);
   const [validSubjects, professorsRes] = await Promise.all([
     env.DB.prepare('SELECT id FROM materias WHERE tecnicatura_id = (SELECT tecnicatura_id FROM cursos WHERE id = ?)').bind(courseId).all(),
-    env.DB.prepare(`SELECT id, rol, professor_subject_ids, is_professor_hybrid FROM usuarios WHERE (rol = 'profesor' OR rol = 'preceptor' OR rol = 'preceptor_taller' OR rol = 'preceptor_ef' OR is_professor_hybrid = 1) AND (id IN (${teacherIds.length ? teacherIds.map(() => '?').join(',') : 'NULL'}) OR professor_subject_ids LIKE ?)`).bind(...(teacherIds.length ? teacherIds : []), `%${courseId}-%`).all()
+    env.DB.prepare(`SELECT id, rol, professor_subject_ids, is_professor_hybrid FROM usuarios WHERE (rol = 'profesor' OR rol = 'preceptor' OR rol = 'preceptor_taller' OR rol = 'preceptor_ef' OR is_professor_hybrid = 1) AND (id IN (${teacherIds.length ? teacherIds.map(() => '?').join(',') : 'NULL'}) OR (',' || professor_subject_ids || ',') LIKE ?)`).bind(...(teacherIds.length ? teacherIds : []), `%,${courseId}-%`).all()
+
   ]);
   const validSubjectIds = new Set(validSubjects.results.map((subject) => subject.id));
   const verifiedAssignmentsByTeacher = {};
@@ -111,7 +114,8 @@ async function syncProfessorAssignmentsForCourse(env, courseId, gridData) {
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
 export async function handleCourses(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores');
+  await validateUser(env, request, userId, ...HIGH_ROLES);
+
   const { action, ano, division, turno, tecnicatura_id, year_id } = body;
   if (action === 'create') {
     const r = await env.DB.prepare('INSERT INTO cursos (ano, division, turno, tecnicatura_id, year_id, detalle) VALUES (?, ?, ?, ?, ?, ?) RETURNING *').bind(ano, division, turno, tecnicatura_id, year_id, body.detalle || '').first();
@@ -138,7 +142,8 @@ export async function handleCourses(env, request, userId, body) {
 }
 
 export async function handleYears(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores');
+  await validateUser(env, request, userId, ...HIGH_ROLES);
+
   const { action, nombre, yearId } = body;
   if (action === 'delete') {
     await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares');
@@ -178,12 +183,13 @@ export async function handleYears(env, request, userId, body) {
     if (statements.length) await env.DB.batch(statements);
     return json({ success: true });
   }
-  const r = await env.DB.prepare('INSERT INTO años_lectivos (nombre, es_actual) VALUES (?, 0) RETURNING *').bind(nombre || body).first(); 
+  const r = await env.DB.prepare('INSERT INTO años_lectivos (nombre, es_actual) VALUES (?, 0) RETURNING *').bind(nombre || body).first();
   return json({ success: true, year: r });
 }
 
 export async function handleTecnicaturas(env, request, userId, body) {
-  await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores');
+  await validateUser(env, request, userId, ...HIGH_ROLES);
+
   const { action, nombre, materias = [], tecnicaturaId } = body;
   const sanitizedNombre = String(nombre || '').trim();
   const sanitizedMaterias = sanitizeTecMaterias(materias);
@@ -254,7 +260,7 @@ export async function handleTecnicaturas(env, request, userId, body) {
 
 export async function handleLocks(env, request, userId, body) {
   const currentUser = await validateUser(env, request, userId);
-  
+
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
@@ -262,8 +268,8 @@ export async function handleLocks(env, request, userId, body) {
   const { action, courseId, materiaId, periodoId, bloqueado, all = false } = body;
 
   // Security: Check if preceptor has access to this course
-  const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores'];
-  if (!highRoles.includes(user.rol)) {
+  if (!HIGH_ROLES.includes(user.rol)) {
+
     const ids = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
     if (user.preceptor_course_id) ids.push(Number(user.preceptor_course_id));
     if (!ids.includes(Number(courseId))) {
@@ -329,8 +335,9 @@ export async function handleLocks(env, request, userId, body) {
 
 export async function handleSchedules(env, request, userId, body) {
   const { action, course_id, grid_data } = body;
-  const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'preceptor', 'jefe_de_auxiliares', 'director', 'vicedirector', 'preceptor_ef', 'preceptor_taller', 'regente_profesores');
-  
+  const currentUser = await validateUser(env, request, userId, ...HIGH_ROLES, 'preceptor', 'preceptor_ef', 'preceptor_taller');
+
+
   // Fetch up-to-date user record from DB
   const user = (await env.DB.prepare('SELECT * FROM usuarios WHERE id = ?').bind(userId).first()) || currentUser;
 
@@ -345,8 +352,8 @@ export async function handleSchedules(env, request, userId, body) {
     if (!course_id) throw new Error('ID de curso requerido');
 
     // Security check for preceptors
-    const highRoles = ['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'];
-    if (!highRoles.includes(user.rol)) {
+    if (!HIGH_ROLES.includes(user.rol)) {
+
       const ids = (user.professor_course_ids ?? '').split(',').map(Number).filter(Boolean);
       if (user.preceptor_course_id) ids.push(Number(user.preceptor_course_id));
       if (!ids.includes(Number(course_id))) {

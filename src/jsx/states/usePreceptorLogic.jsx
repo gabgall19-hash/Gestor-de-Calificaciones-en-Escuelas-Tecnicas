@@ -92,6 +92,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
   const [materiasSearch, setMateriasSearch] = useState('');
   const [viewingFichaStudent, setViewingFichaStudent] = useState(null);
   const [isEditingFicha, setIsEditingFicha] = useState(false);
+  const [academicYearSummary, setAcademicYearSummary] = useState(null);
   const checkIsMobile = () => {
     const ua = navigator.userAgent;
     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
@@ -367,7 +368,8 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     addTec,
     editTec,
     removeTec,
-    duplicateTec
+    duplicateTec,
+    getYearSummary
   } = usePreceptorAdminActions({
     data,
     post,
@@ -394,7 +396,9 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     setStatus,
     setLoading,
     userError,
-    setUserError
+    setUserError,
+    academicYearSummary,
+    setAcademicYearSummary
   });
 
   const {
@@ -451,6 +455,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     handleUpdateLocks, handleUpdateSystemMode, handleUpdateMobileLogin, handleUpdateRACModular, handleUpdatePreceptorMode,
     handleUpdatePasswordMsg,
     duplicateTec, savePrevia, deletePrevia, page, setPage, handleUpdatePeriods,
-    onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC_Student, onPrintRAC_AllStudents, onPrintParteDiario, onPrintParteDiarioGlobal, onPrintParteConInformacion
+    onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC_Student, onPrintRAC_AllStudents, onPrintParteDiario, onPrintParteDiarioGlobal, onPrintParteConInformacion,
+    academicYearSummary, setAcademicYearSummary, getYearSummary
   };
 }
