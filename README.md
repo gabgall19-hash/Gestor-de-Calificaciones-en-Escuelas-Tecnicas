@@ -6,6 +6,13 @@
 
 ## 📜 Registro de Cambios (Changelog)
  
+### 🚀 [3.5.7] - 2026-04-28 (Fix de Transferencias)
+**"Acceso Global a Destinos de Transferencia para Preceptores"**
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   **🔄 Fix de Transferencia de Alumnos**: Resolución del error que mostraba una lista vacía de cursos destino para los auxiliares/preceptores.
+*   **⚙️ Optimización de Visibilidad de Cursos**: Se independizó el listado institucional de cursos (`allCourses`) de las restricciones de navegación personal, garantizando que todas las operaciones administrativas de traslado cuenten con la información completa de la institución.
+
 ### 🚀 [3.5.6] - 2026-04-28 (Reportes de Año Lectivo y Estabilidad de Datos)
 **"Resumen Académico, Fix de Historial y Optimización D1"**
 

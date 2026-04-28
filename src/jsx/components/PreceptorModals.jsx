@@ -443,31 +443,47 @@ export default function PreceptorModals(props) {
 
             <div className="section-title"><BookOpen size={20} /><h2>Detalle por Cursos</h2></div>
             <div className="custom-scroll" style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: '10px' }}>
-              {academicYearSummary.courses.map((c) => (
-                <div key={c.id} style={{ 
-                  background: 'rgba(255,255,255,0.03)', 
-                  padding: '12px 18px', 
-                  borderRadius: '12px', 
-                  marginBottom: '10px',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
-                  <div>
-                    <strong style={{ fontSize: '1rem', color: 'var(--primary)' }}>{c.label}</strong>
-                    <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{c.tecnicatura}</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: '700' }}>
-                      (V: <span style={{ color: '#3498db' }}>{c.males}</span> / M: <span style={{ color: '#e84393' }}>{c.females}</span>)
+              {academicYearSummary.courses.map((c) => {
+                const yearNum = parseInt(c.label.charAt(0));
+                const getYearStyles = (num) => {
+                  const colors = {
+                    1: { bg: 'rgba(52, 152, 219, 0.08)', border: 'rgba(52, 152, 219, 0.2)', text: '#3498db' },
+                    2: { bg: 'rgba(46, 204, 113, 0.08)', border: 'rgba(46, 204, 113, 0.2)', text: '#2ecc71' },
+                    3: { bg: 'rgba(155, 89, 182, 0.08)', border: 'rgba(155, 89, 182, 0.2)', text: '#9b59b6' },
+                    4: { bg: 'rgba(241, 196, 15, 0.08)', border: 'rgba(241, 196, 15, 0.2)', text: '#f1c40f' },
+                    5: { bg: 'rgba(230, 126, 34, 0.08)', border: 'rgba(230, 126, 34, 0.2)', text: '#e67e22' },
+                    6: { bg: 'rgba(231, 76, 60, 0.08)', border: 'rgba(231, 76, 60, 0.2)', text: '#e74c3c' }
+                  };
+                  return colors[num] || { bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.05)', text: 'var(--primary)' };
+                };
+                const styles = getYearStyles(yearNum);
+
+                return (
+                  <div key={c.id} style={{ 
+                    background: styles.bg, 
+                    padding: '12px 18px', 
+                    borderRadius: '12px', 
+                    marginBottom: '10px',
+                    border: `1px solid ${styles.border}`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <div>
+                      <strong style={{ fontSize: '1rem', color: styles.text }}>{c.label}</strong>
+                      <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{c.tecnicatura}</div>
                     </div>
-                    <div style={{ fontSize: '0.75rem', marginTop: '4px', opacity: 0.8 }}>
-                      Repitentes: <span style={{ color: '#f39c12', fontWeight: 'bold' }}>{c.repeaters}</span>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: '700' }}>
+                        (V: <span style={{ color: '#3498db' }}>{c.males}</span> / M: <span style={{ color: '#e84393' }}>{c.females}</span>)
+                      </div>
+                      <div style={{ fontSize: '0.75rem', marginTop: '4px', opacity: 0.8 }}>
+                        Repitentes: <span style={{ color: '#f39c12', fontWeight: 'bold' }}>{c.repeaters}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             
             <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem' }} onClick={() => setAcademicYearSummary(null)}>Cerrar Resumen</button>

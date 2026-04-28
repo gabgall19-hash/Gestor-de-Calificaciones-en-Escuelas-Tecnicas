@@ -146,7 +146,7 @@ export async function handleGrid(env, request, url) {
   return json({
     academicYears: years,
     tecnicaturas: tecs,
-    allCourses: accessibleCourses,
+    allCourses: allCoursesForYear,
     courses: accessibleCourses,
     students: courseStudents,
     allStudents: idx.allStudents !== -1 ? results[idx.allStudents].results : [],

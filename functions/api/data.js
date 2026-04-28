@@ -61,7 +61,7 @@ export async function onRequestGet({ env, request }) {
       const courses = await env.DB.prepare(`
         SELECT 
           c.id,
-          (c.ano || '° ' || c.division || ' ' || c.turno) as label,
+          (c.ano || ' ' || c.division || ' ' || c.turno) as label,
           t.nombre as tecnicatura,
           COUNT(CASE WHEN a.genero = 'Masculino' AND a.estado = 1 THEN 1 END) as males,
           COUNT(CASE WHEN a.genero = 'Femenino' AND a.estado = 1 THEN 1 END) as females,
