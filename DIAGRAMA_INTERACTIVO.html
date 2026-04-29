@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor Interactivo - Colegio Industrial Nº6</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: white; }
+        #header { position: absolute; top: 0; left: 0; right: 0; padding: 20px; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+        #container { width: 100vw; height: 100vh; cursor: grab; }
+        #container:active { cursor: grabbing; }
+        .controls { position: absolute; bottom: 20px; right: 20px; background: #1e293b; padding: 10px; border-radius: 8px; display: flex; gap: 10px; z-index: 100; border: 1px solid rgba(255,255,255,0.1); }
+        button { background: #334155; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #475569; }
+        .hint { font-size: 0.8rem; opacity: 0.7; }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <div>
+            <h1 style="margin:0; font-size: 1.2rem;">🗺️ Mapa Maestro del Sistema</h1>
+            <span class="hint">Usa la rueda del mouse para Zoom • Arrastra para mover</span>
+        </div>
+        <button onclick="resetZoom()">Restablecer Vista</button>
+    </div>
+
+    <div id="container">
+        <div class="mermaid" id="diagram">
+graph TD
+    %% Estilos de Nodos
+    classDef security fill:#f43f5e,stroke:#fff,stroke-width:2px,color:#fff
+    classDef admin fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff
+    classDef preceptor fill:#0ea5e9,stroke:#fff,stroke-width:2px,color:#fff
+    classDef professor fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
+    classDef closing fill:#f59e0b,stroke:#fff,stroke-width:2px,color:#fff
+
+    %% Inicio y Seguridad
+    START((INICIO)) --> LOGIN[Login con Bcrypt]
+    LOGIN --> AUTH_CHECK{¿Autenticado?}
+    AUTH_CHECK -- No --> LOGIN
+    AUTH_CHECK -- Sí --> WELCOME{¿Clave Admin?}
+    WELCOME -- Sí --> SEC_MODAL[Modal de Cambio de Clave Obligatorio]
+    SEC_MODAL --> DASH[Dashboard / Panel Principal]
+    WELCOME -- No --> DASH
+
+    %% Segmentación por Roles
+    DASH --> ROLE_DIV{Acceso por Rol}
+
+    %% Rama Administrativa
+    ROLE_DIV -- Admin/Sec/Jefe --> ADM[Panel de Administración]:::admin
+    ADM --> ADM_U[Gestión de Usuarios]
+    ADM --> ADM_A[Ajustes Académicos]
+    ADM --> ADM_P[Módulo de Pases]
+    ADM --> ADM_E[Registro Global de Egresados]
+    ADM --> ADM_AUD[Historial de Auditoría]
+
+    %% Rama Regente
+    ROLE_DIV -- Regente --> REG[Panel de Regencia]:::admin
+    REG --> REG_H[Gestión de Horarios]
+    REG --> REG_M[Configuración Curricular]
+
+    %% Rama Preceptoría
+    ROLE_DIV -- Preceptor/Híbrido --> PRE[Panel de Preceptoría]:::preceptor
+    PRE --> PRE_AS[Registro de Asistencia]
+    PRE --> PRE_ST[Legajo del Alumno]
+    PRE --> PRE_GR[Calificaciones Trimestrales]
+    PRE --> PRE_RAC[Módulo RAC]
+
+    %% Rama Profesor
+    ROLE_DIV -- Profesor --> PROF[Panel de Profesor]:::professor
+    PROF --> PROF_GR[Carga de Notas]
+    PROF --> PROF_REP[Reportes PDF]
+
+    %% Flujo de Cierre
+    PRE_RAC --> END_CYCLE{¿Cierre de Ciclo?}
+    END_CYCLE -- Sí --> CYCLE_PROC[Proceso de Cierre de Año]:::closing
+    CYCLE_PROC --> HIST[Snapshot: Historial Escolar]
+    CYCLE_PROC --> PREVIAS[Carga de Materias Pendientes]
+    
+    %% Ramificación Final
+    CYCLE_PROC --> GRAD_CHECK{¿Es 6to Año?}
+    GRAD_CHECK -- No --> PROM[Cálculo de Promoción]
+    PROM --> NEW_COURSE[Nuevo Curso]
+    
+    GRAD_CHECK -- Sí --> GRAD_DEST[Módulo de Egresados]
+    GRAD_DEST --> GRAD_TYPE[Recibido / Egresado]
+    GRAD_TYPE --> GRAD_LIST[Padrón de Graduados]
+
+    %% Aplicación de clases
+    class LOGIN,SEC_MODAL,AUTH_CHECK security
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+
+        let panZoom;
+        
+        // Esperamos a que Mermaid renderice el SVG
+        const checkExist = setInterval(function() {
+           const svg = document.querySelector('#container svg');
+           if (svg) {
+              svg.setAttribute('style', 'width: 100%; height: 100%;');
+              panZoom = svgPanZoom(svg, {
+                zoomEnabled: true,
+                controlIconsEnabled: false,
+                fit: true,
+                center: true,
+                minZoom: 0.1,
+                maxZoom: 10
+              });
+              clearInterval(checkExist);
+           }
+        }, 100);
+
+        function resetZoom() {
+            if(panZoom) {
+                panZoom.resetZoom();
+                panZoom.center();
+            }
+        }
+    </script>
+</body>
+</html>
