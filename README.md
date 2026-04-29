@@ -6,6 +6,28 @@
 
 ## 📜 Registro de Cambios (Changelog)
  
+### 🚀 [3.5.8] - 2026-04-29 (Sistema Global de Egresados y Refinamiento Académico)
+**"Registro Histórico Global, Egreso Diferenciado y Auditoría de Promoción"**
+
+#### ✨ Nuevas Implementaciones y Mejoras
+*   **🎓 Registro Global de Egresados**:
+    - **Panel Centralizado**: Nueva pestaña "Egresados" restringida a roles administrativos (`admin`, `secretaria_de_alumnos`).
+    - **Listado Histórico**: Repositorio global de todos los alumnos que finalizaron 6to año, con búsqueda y filtrado por estado de egreso.
+    - **Ficha Técnica**: Acceso directo al legajo y antecedentes académicos de los graduados desde el listado global.
+*   **🔄 Refactorización de Terminación de Ciclo (6to Año)**:
+    - **Egreso Diferenciado**: Nueva lógica para alumnos de último año que permite clasificarlos como **Recibido** (sin deudas) o **Egresado** (con materias pendientes).
+    - **Cierre Automático**: Al graduarse, el sistema desvincula al alumno del curso activo, registra su ciclo de egreso y actualiza su estado a "Graduado" (`estado = 2`).
+*   **📝 Auditoría Automática de Promoción**:
+    - **Etiquetado Inteligente**: El sistema ahora analiza automáticamente el total de previas y materias del año para registrar en la ficha del alumno:
+        - *Promovido*: Sin materias adeudadas o previas.
+        - *Promocionado*: Con materias adeudadas o previas.
+        - *Repitente*: Con indicación del ciclo lectivo a recursar.
+    - **Observaciones Pedagógicas**: Nueva sección en la Ficha del Alumno que consolida el historial de promociones y notas administrativas.
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   **🩹 Fix de Referencia (FileText)**: Corrección de error `ReferenceError` en el componente de Ficha de Alumno tras la actualización de iconos.
+*   **🗄️ Sincronización DB**: Actualización del esquema de producción para soportar metadatos de egreso (`egresado_tipo`, `ciclo_egreso`).
+
 ### 🚀 [3.5.7] - 2026-04-28 (Fix de Transferencias)
 **"Acceso Global a Destinos de Transferencia para Preceptores"**
 

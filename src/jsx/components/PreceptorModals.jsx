@@ -87,7 +87,8 @@ export default function PreceptorModals(props) {
     handleSaveFicha,
     getHistorial,
     academicYearSummary,
-    setAcademicYearSummary
+    setAcademicYearSummary,
+    selectedCourseId
   } = props;
 
   const duplicateSubjectNames = tecMode !== 'list' ? findDuplicateSubjectNames(tecForm.materias) : [];
@@ -129,31 +130,60 @@ export default function PreceptorModals(props) {
               Estás por procesar a <strong>{selectedStudentIds.length}</strong> alumnos seleccionados.
             </p>
             <div className="stack-form">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '10px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={endCycleForm.isRepeater}
-                  onChange={(e) => setEndCycleForm((prev) => ({ ...prev, isRepeater: e.target.checked }))}
-                  style={{ width: '20px', height: '20px' }}
-                />
-                <span style={{ fontWeight: 'bold' }}>¿Son alumnos REPITENTES?</span>
-              </label>
-
-              {!endCycleForm.isRepeater ? (
-                <div style={{ marginTop: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', opacity: 0.7 }}>Curso Destino</label>
-                  <select className="input-field" value={endCycleForm.targetCourseId || ''} onChange={(e) => setEndCycleForm((prev) => ({ ...prev, targetCourseId: e.target.value }))}>
-                    <option value="">-- Seleccionar curso destino --</option>
-                    {(data.allCourses ?? []).map((course) => (
-                      <option key={course.id} value={course.id}>{course.year_nombre} · {course.label} · {course.tecnicatura_nombre}</option>
-                    ))}
+              {(data.allCourses.find(c => c.id === selectedCourseId)?.ano === '6°') ? (
+                <div style={{ marginTop: '0.5rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', opacity: 0.7, fontWeight: 'bold' }}>Resultado de Egreso</label>
+                  <select 
+                    className="input-field" 
+                    value={endCycleForm.egresadoTipo || ''} 
+                    onChange={(e) => setEndCycleForm((prev) => ({ ...prev, egresadoTipo: e.target.value }))}
+                  >
+                    <option value="">-- Seleccionar resultado --</option>
+                    <option value="Recibido">Recibido (Sin materias pendientes)</option>
+                    <option value="Egresado">Egresado (Con materias pendientes)</option>
                   </select>
+                  <p style={{ fontSize: '0.75rem', marginTop: '10px', opacity: 0.6, fontStyle: 'italic', lineHeight: '1.4' }}>
+                    Al confirmar, estos alumnos serán movidos al listado global de Egresados y se cerrará su ciclo lectivo actual.
+                  </p>
                 </div>
-              ) : null}
+              ) : (
+                <>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '10px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={endCycleForm.isRepeater}
+                      onChange={(e) => setEndCycleForm((prev) => ({ ...prev, isRepeater: e.target.checked }))}
+                      style={{ width: '20px', height: '20px' }}
+                    />
+                    <span style={{ fontWeight: 'bold' }}>¿Son alumnos REPITENTES?</span>
+                  </label>
+
+                  {!endCycleForm.isRepeater ? (
+                    <div style={{ marginTop: '1rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', opacity: 0.7 }}>Curso Destino</label>
+                      <select className="input-field" value={endCycleForm.targetCourseId || ''} onChange={(e) => setEndCycleForm((prev) => ({ ...prev, targetCourseId: e.target.value }))}>
+                        <option value="">-- Seleccionar curso destino --</option>
+                        {(data.allCourses ?? []).map((course) => (
+                          <option key={course.id} value={course.id}>{course.year_nombre} · {course.label} · {course.tecnicatura_nombre}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : null}
+                </>
+              )}
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
                 <button className="btn" style={{ flex: 1 }} onClick={() => setShowEndCycleModal(false)}>Cancelar</button>
-                <button className="btn btn-primary" style={{ flex: 1 }} disabled={!endCycleForm.isRepeater && !endCycleForm.targetCourseId} onClick={handleEndCycleConfirm}>
+                <button 
+                  className="btn btn-primary" 
+                  style={{ flex: 1 }} 
+                  disabled={
+                    (data.allCourses.find(c => c.id === selectedCourseId)?.ano === '6°') 
+                      ? !endCycleForm.egresadoTipo 
+                      : (!endCycleForm.isRepeater && !endCycleForm.targetCourseId)
+                  } 
+                  onClick={handleEndCycleConfirm}
+                >
                   Confirmar Transición
                 </button>
               </div>

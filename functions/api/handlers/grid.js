@@ -95,7 +95,7 @@ export async function handleGrid(env, request, url) {
   const idx = {
     tecs: 0, subjects: 1, periods: 2, config: 3, anuncios: 4,
     pases: -1, users: -1, reportUsers: -1, students: -1, allStudents: -1, 
-    locks: -1, grades: -1, previas: -1, historial: -1
+    locks: -1, grades: -1, previas: -1, historial: -1, graduates: -1
   };
 
   if (HIGH_ROLES.includes(userRecord.rol)) {
@@ -106,6 +106,11 @@ export async function handleGrid(env, request, url) {
     if (includeAllStudents) {
       idx.allStudents = statements.length;
       statements.push(env.DB.prepare(`SELECT a.id, a.nombre, a.apellido, a.dni, a.course_id, a.observaciones, a.estado, a.genero, a.password, COALESCE(c.ano || ' ' || c.division || ' · ' || c.turno, 'Sin Curso') as course_label FROM alumnos a LEFT JOIN cursos c ON a.course_id = c.id ORDER BY a.apellido, a.nombre`));
+    }
+    // Fetch graduates for high roles
+    if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(userRecord.rol)) {
+      idx.graduates = statements.length;
+      statements.push(env.DB.prepare(`SELECT id, nombre, apellido, dni, estado, egresado_tipo, ciclo_egreso, observaciones FROM alumnos WHERE estado = 2 ORDER BY ciclo_egreso DESC, apellido, nombre`));
     }
   } else {
     idx.reportUsers = statements.length;
@@ -161,6 +166,7 @@ export async function handleGrid(env, request, url) {
     locks,
     pases,
     anuncios,
+    graduates: idx.graduates !== -1 ? results[idx.graduates].results : [],
     selectedYearId: finalYearId,
     selectedCourseId: finalCourseId,
     selectedTecnicaturaId: selectedTecnicaturaId,

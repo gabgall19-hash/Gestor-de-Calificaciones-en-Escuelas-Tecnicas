@@ -221,7 +221,8 @@ export default function usePreceptorStudentActions(deps) {
         students: selectedStudents,
         isRepeater: endCycleForm.isRepeater,
         targetCourseId: targetId,
-        cycleName: currentYear?.nombre || 'Desconocido'
+        cycleName: currentYear?.nombre || 'Desconocido',
+        egresadoTipo: endCycleForm.egresadoTipo
       });
       showToast('Proceso de fin de ciclo completado', 'success');
       setIsSelectionMode(false);

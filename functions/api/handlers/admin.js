@@ -141,33 +141,65 @@ export async function handleHistorialDelete(env, request, userId, body) {
 export async function handleEndCycle(env, request, userId, body) {
   const user = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares');
 
-  const { students = [], isRepeater, targetCourseId, cycleName } = body;
+  const { students = [], isRepeater, targetCourseId, cycleName, egresadoTipo } = body;
   const sIds = students.map(s => s.id);
   if (sIds.length === 0) return json({ success: true });
 
-  const [allDataRes, allGradesRes] = await Promise.all([
+  const [allDataRes, allGradesRes, allPreviasRes] = await Promise.all([
     env.DB.prepare(`SELECT a.*, c.ano, c.division, c.turno, t.nombre as tec_nombre FROM alumnos a JOIN cursos c ON c.id = a.course_id JOIN tecnicaturas t ON t.id = c.tecnicatura_id WHERE a.id IN (${sIds.map(() => '?').join(',')})`).bind(...sIds).all(),
-    env.DB.prepare(`SELECT g.alumno_id, m.id as materia_id, m.nombre as materia, g.valor_t as definitiva FROM calificaciones g JOIN materias m ON m.id = g.materia_id WHERE g.alumno_id IN (${sIds.map(() => '?').join(',')}) AND g.periodo_id = 10`).bind(...sIds).all()
+    env.DB.prepare(`SELECT g.alumno_id, m.id as materia_id, m.nombre as materia, g.valor_t as definitiva FROM calificaciones g JOIN materias m ON m.id = g.materia_id WHERE g.alumno_id IN (${sIds.map(() => '?').join(',')}) AND g.periodo_id = 10`).bind(...sIds).all(),
+    env.DB.prepare(`SELECT alumno_id, COUNT(*) as count FROM previas WHERE alumno_id IN (${sIds.map(() => '?').join(',')}) AND estado = 'pendiente' GROUP BY alumno_id`).bind(...sIds).all()
   ]);
 
   const dataMap = allDataRes.results.reduce((acc, d) => ({ ...acc, [d.id]: d }), {});
   const gradesByStudent = allGradesRes.results.reduce((acc, g) => { if (!acc[g.alumno_id]) acc[g.alumno_id] = []; acc[g.alumno_id].push(g); return acc; }, {});
+  const previasCountMap = allPreviasRes.results.reduce((acc, p) => ({ ...acc, [p.alumno_id]: p.count }), {});
 
   const statements = [];
   for (const s of students) {
     const data = dataMap[s.id];
     if (!data) continue;
     const grades = gradesByStudent[s.id] || [];
+    
+    // Logic for 6th year graduation
+    const isGraduation = data.ano === '6°' && egresadoTipo;
+    
     const SABANA_STRING = "Alumno repitente de Ciclo Lectivo 2025 - Importado de la Lista Sabana 2026";
     const historyLabel = (isRepeater && cycleName === "2025") ? SABANA_STRING : cycleName;
+    
     statements.push(env.DB.prepare('INSERT INTO historial_escolar (alumno_id, curso_label, tecnicatura_nombre, ciclo_lectivo_nombre, boletin_data) VALUES (?, ?, ?, ?, ?)').bind(s.id, `${data.ano} ${data.division}`, data.tec_nombre, historyLabel, JSON.stringify(grades)));
+    
+    let currentYearPending = 0;
     for (const g of grades) {
       const val = g.definitiva ? Number(String(g.definitiva).replace(',', '.')) : 0;
-      if (val < 7) statements.push(env.DB.prepare('INSERT INTO previas (alumno_id, materia_id, materia_nombre_custom, curso_ano, estado) VALUES (?, ?, ?, ?, "pendiente")').bind(s.id, g.materia_id, null, `${data.ano} ${data.division} (${cycleName})`));
+      if (val < 7) {
+        currentYearPending++;
+        statements.push(env.DB.prepare('INSERT INTO previas (alumno_id, materia_id, materia_nombre_custom, curso_ano, estado) VALUES (?, ?, ?, ?, "pendiente")').bind(s.id, g.materia_id, null, `${data.ano} ${data.division} (${cycleName})`));
+      }
     }
-    const obsLabel = (isRepeater && cycleName === "2025") ? SABANA_STRING : ((isRepeater ? `REPITENTE ${cycleName}` : `PASO DE AÑO ${cycleName}`) + ` del curso ${data.ano} ${data.division}`);
-    const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
-    statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = ? WHERE id = ?').bind(obs, targetCourseId, s.id));
+    
+    const totalPending = currentYearPending + (previasCountMap[s.id] || 0);
+
+    if (isGraduation) {
+      const obsLabel = `EGRESADO (${egresadoTipo}) - Ciclo ${cycleName}. Alumno de 6to año ${data.division}.`;
+      const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
+      statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = NULL, estado = 2, egresado_tipo = ?, ciclo_egreso = ? WHERE id = ?').bind(obs, egresadoTipo, cycleName, s.id));
+    } else {
+      let obsLabel = "";
+      if (isRepeater) {
+        obsLabel = (cycleName === "2025") ? SABANA_STRING : `Alumno repitente de Ciclo Lectivo ${cycleName} (Queda en el mismo curso del año que viene)`;
+      } else {
+        if (totalPending === 0) {
+          obsLabel = `Alumno pasa de Curso Promovido (Sin materias adeudadas o previas) del curso ${data.ano} ${data.division} (${cycleName})`;
+        } else {
+          obsLabel = `Alumno pasa de Curso Promocionado (Con materias adeudadas o previas) del curso ${data.ano} ${data.division} (${cycleName})`;
+        }
+      }
+      
+      const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
+      statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = ? WHERE id = ?').bind(obs, targetCourseId, s.id));
+    }
+    
     statements.push(env.DB.prepare('DELETE FROM calificaciones WHERE alumno_id = ?').bind(s.id));
   }
   if (statements.length) await env.DB.batch(statements);

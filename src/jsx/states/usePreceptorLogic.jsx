@@ -104,7 +104,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [showEndCycleModal, setShowEndCycleModal] = useState(false);
-  const [endCycleForm, setEndCycleForm] = useState({ isRepeater: false, targetCourseId: null });
+  const [endCycleForm, setEndCycleForm] = useState({ isRepeater: false, targetCourseId: null, egresadoTipo: '' });
 
   const truncateSubject = (name) => {
     if (!name) return '';

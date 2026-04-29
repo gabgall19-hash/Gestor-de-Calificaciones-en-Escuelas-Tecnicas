@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Shield, Home, Phone, Mail, Calendar, BookOpen, Save, X, ArrowLeft, History, Image as ImageIcon, Plus, Trash2, Eye, Maximize2 } from 'lucide-react';
+import { User, Shield, Home, Phone, Mail, Calendar, BookOpen, Save, X, ArrowLeft, History, Image as ImageIcon, Plus, Trash2, Eye, Maximize2, FileText } from 'lucide-react';
 import Modal from '../UI/Modal';
 import { formatDNI } from '../functions/PreceptorHelpers';
 
@@ -201,6 +201,14 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
         { label: 'Folio (F°)', key: 'folio', type: 'text' },
         { label: 'Legajo N°', key: 'legajo', type: 'text' },
       ]
+    },
+    {
+      title: 'Observaciones Pedagógicas',
+      icon: <FileText size={18} />,
+      isFullRow: true,
+      fields: [
+        { label: 'Historial de Observaciones', key: 'observaciones', type: 'textarea' },
+      ]
     }
   ];
 
@@ -242,9 +250,9 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
               <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>{sec.title}</h3>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: fullPage ? 'repeat(auto-fit, minmax(280px, 1fr))' : 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: sec.isFullRow ? '1fr' : (fullPage ? 'repeat(auto-fit, minmax(280px, 1fr))' : 'repeat(auto-fit, minmax(200px, 1fr))'), gap: '1.5rem' }}>
               {sec.fields.map(f => (
-                <div key={f.key} style={f.fullWidth ? { gridColumn: '1 / -1' } : {}}>
+                <div key={f.key} style={f.fullWidth || sec.isFullRow ? { gridColumn: '1 / -1' } : {}}>
                   <label style={{ display: 'block', fontSize: '0.8rem', opacity: 0.5, marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase' }}>{f.label}</label>
                   {isEditing ? (
                     f.type === 'select' ? (
@@ -255,6 +263,13 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
                       >
                         {f.options.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
+                    ) : f.type === 'textarea' ? (
+                      <textarea
+                        className="input-field"
+                        style={{ minHeight: '120px', resize: 'vertical' }}
+                        value={studentForm[f.key] || ''}
+                        onChange={(e) => handleChange(f.key, e.target.value)}
+                      />
                     ) : (
                       <div style={{ position: 'relative' }}>
                         {f.icon && <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>{f.icon}</span>}
@@ -275,10 +290,11 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
                       borderRadius: '10px', 
                       fontSize: '1.05rem',
                       border: '1px solid rgba(255,255,255,0.05)',
-                      minHeight: '48px',
+                      minHeight: f.type === 'textarea' ? '80px' : '48px',
                       display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px'
+                      alignItems: f.type === 'textarea' ? 'flex-start' : 'center',
+                      gap: '10px',
+                      whiteSpace: f.type === 'textarea' ? 'pre-wrap' : 'normal'
                     }}>
                       {f.icon && <span style={{ opacity: 0.4 }}>{f.icon}</span>}
                       <span style={{ fontWeight: '500' }}>

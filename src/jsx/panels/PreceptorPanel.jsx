@@ -15,7 +15,8 @@ import {
   Users,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  GraduationCap
 } from 'lucide-react';
 import { emptyUser, simplifyTecName } from '../functions/PreceptorHelpers';
 import usePreceptorLogic from '../states/usePreceptorLogic';
@@ -32,6 +33,7 @@ import PasesPanel from './PasesPanel';
 import AnunciosPanel from './AnunciosPanel';
 import HorariosPanel from './HorariosPanel';
 import AttendancePanel from './AttendancePanel';
+import EgresadosPanel from './EgresadosPanel';
 
 export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showToast }) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -214,6 +216,10 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'preceptor_taller', 'preceptor_ef', 'director', 'vicedirector'].includes(user.rol) || isHybrid) {
       if (user.rol !== 'preceptor_taller' && user.rol !== 'preceptor_ef') list.push({ id: 'rac', label: 'RAC', icon: <FileText size={16} /> });
       list.push({ id: 'historial', label: 'Historial', icon: <History size={16} /> });
+    }
+    
+    if (['admin', 'secretaria_de_alumnos'].includes(user.rol)) {
+      list.push({ id: 'egresados', label: 'Egresados', icon: <GraduationCap size={16} /> });
     }
     
     if (['admin', 'secretaria_de_alumnos', 'director', 'vicedirector'].includes(user.rol)) {
@@ -569,6 +575,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       {page === 'materias' && <AcademicManager isMobile={isMobile} user={user} data={data} selectedCourseId={selectedCourseId} materiasSearch={materiasSearch} setMateriasSearch={setMateriasSearch} handleUpdateLocks={handleUpdateLocks} />}
       {page === 'pases' && <PasesPanel isMobile={isMobile} user={user} data={data} pasesSearch={pasesSearch} setPasesSearch={setPasesSearch} setEditingPase={setEditingPase} undoPase={undoPase} onPreviewStudent={onPreviewStudent} onViewFicha={handleViewFicha} />}
       {page === 'anuncios' && <AnunciosPanel isMobile={isMobile} data={data} post={post} loadData={loadData} />}
+      {page === 'egresados' && <EgresadosPanel data={data} onViewFicha={handleViewFicha} />}
 
       {page === 'settings' && (
         <SettingsPanel
@@ -684,6 +691,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         setUserError={setUserError}
         academicYearSummary={academicYearSummary}
         setAcademicYearSummary={setAcademicYearSummary}
+        selectedCourseId={selectedCourseId}
       />
     </div>
   );
