@@ -36,58 +36,78 @@ graph TD
     classDef preceptor fill:#0ea5e9,stroke:#fff,stroke-width:2px,color:#fff
     classDef professor fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
     classDef closing fill:#f59e0b,stroke:#fff,stroke-width:2px,color:#fff
+    classDef infrastructure fill:#475569,stroke:#fff,stroke-width:2px,color:#fff
 
     %% Inicio y Seguridad
     START((INICIO)) --> LOGIN[Login con Bcrypt]
-    LOGIN --> AUTH_CHECK{¿Autenticado?}
-    AUTH_CHECK -- No --> LOGIN
-    AUTH_CHECK -- Sí --> WELCOME{¿Clave Admin?}
-    WELCOME -- Sí --> SEC_MODAL[Modal de Cambio de Clave Obligatorio]
-    SEC_MODAL --> DASH[Dashboard / Panel Principal]
-    WELCOME -- No --> DASH
+    LOGIN --> ROLE_DIV{Acceso por Rol}
 
-    %% Segmentación por Roles
-    DASH --> ROLE_DIV{Acceso por Rol}
+    %% BLOQUE DIRECTIVO Y ADMINISTRATIVO
+    subgraph "Nivel Directivo y Administrativo"
+        ROLE_DIV -- Admin/Sec/Dir --> ADM_PANEL[Panel de Administración]:::admin
+        ADM_PANEL --> ADM_U[Gestión de Usuarios]
+        ADM_PANEL --> ADM_A[Ajustes y Config. Curricular]
+        ADM_PANEL --> ADM_P[Módulo de Pases e Incorporaciones]
+        ADM_PANEL --> ADM_E[Registro Global de Egresados]
+        ADM_PANEL --> ADM_AN[Gestión de Anuncios]
+        
+        ROLE_DIV -- Dir/Vicedir --> DIR[Supervisión Directiva]:::admin
+        DIR --> AUDIT[Historial de Auditoría / Logs]
+    end
 
-    %% Rama Administrativa
-    ROLE_DIV -- Admin/Sec/Jefe --> ADM[Panel de Administración]:::admin
-    ADM --> ADM_U[Gestión de Usuarios]
-    ADM --> ADM_A[Ajustes Académicos]
-    ADM --> ADM_P[Módulo de Pases]
-    ADM --> ADM_E[Registro Global de Egresados]
-    ADM --> ADM_AUD[Historial de Auditoría]
+    %% BLOQUE REGENCIA
+    subgraph "Nivel Regencia"
+        ROLE_DIV -- Regente --> REG[Panel de Regencia]:::admin
+        REG --> REG_H[Gestión Maestra de Horarios]
+        REG --> REG_M[Gestión de Materias/Carreras]
+    end
 
-    %% Rama Regente
-    ROLE_DIV -- Regente --> REG[Panel de Regencia]:::admin
-    REG --> REG_H[Gestión de Horarios]
-    REG --> REG_M[Configuración Curricular]
+    %% BLOQUE JEFATURA (Preceptor Global)
+    subgraph "Jefatura de Auxiliares"
+        ROLE_DIV -- Jefe Aux --> JEFE[Supervisión Global de Preceptores]:::preceptor
+        JEFE --> JEFE_ST[Supervisión de Asistencia/Notas de Todos los Cursos]
+        JEFE --> JEFE_P[Gestión de Pases y RAC]
+    end
 
-    %% Rama Preceptoría
-    ROLE_DIV -- Preceptor/Híbrido --> PRE[Panel de Preceptoría]:::preceptor
-    PRE --> PRE_AS[Registro de Asistencia]
-    PRE --> PRE_ST[Legajo del Alumno]
-    PRE --> PRE_GR[Calificaciones Trimestrales]
-    PRE --> PRE_RAC[Módulo RAC]
+    %% BLOQUE OPERATIVO (Preceptores y Profesores)
+    subgraph "Gestión Diaria (Operativo)"
+        ROLE_DIV -- Preceptor/Híbrido --> PRE[Panel de Preceptoría]:::preceptor
+        ROLE_DIV -- Profesor --> PROF[Panel de Profesor]:::professor
+        
+        PRE --> PRE_AS[Registro de Asistencia: Teoría/Taller/EF]
+        PRE --> PRE_ST[Ficha y Legajo del Alumno]
+        PRE --> PRE_RAC[Módulo RAC: Seguimiento Académico]
+        
+        PROF --> PROF_GR[Carga de Notas]
+    end
 
-    %% Rama Profesor
-    ROLE_DIV -- Profesor --> PROF[Panel de Profesor]:::professor
-    PROF --> PROF_GR[Carga de Notas]
-    PROF --> PROF_REP[Reportes PDF]
+    %% INTERDEPENDENCIAS CRÍTICAS (Impacto)
+    ADM_U -.-> |Crea/Resetea| PRE & PROF
+    ADM_P -.-> |Extrae Alumno| PRE_AS & PRE_ST
+    REG_H -.-> |Dicta agenda| PROF
+    ADM_A -.-> |Modifica| REG_M
+    ADM_PANEL -.-> |Injerencia en| REG_H & REG_M & PRE_ST
 
-    %% Flujo de Cierre
+    %% FLUJO DE DATOS ACADÉMICOS
+    PRE_GR[Carga de Calificaciones Preceptor/Prof]
+    PROF_GR --> DB_GRADES[(Base de Datos de Notas)]:::infrastructure
+    PRE_GR --> DB_GRADES
+    
+    DB_GRADES --> PROF_REP[Generación de Planillas PDF]
+    DB_GRADES --> PRE_RAC
+
+    %% FLUJO DE CIERRE
     PRE_RAC --> END_CYCLE{¿Cierre de Ciclo?}
     END_CYCLE -- Sí --> CYCLE_PROC[Proceso de Cierre de Año]:::closing
     CYCLE_PROC --> HIST[Snapshot: Historial Escolar]
     CYCLE_PROC --> PREVIAS[Carga de Materias Pendientes]
     
-    %% Ramificación Final
     CYCLE_PROC --> GRAD_CHECK{¿Es 6to Año?}
     GRAD_CHECK -- No --> PROM[Cálculo de Promoción]
-    PROM --> NEW_COURSE[Nuevo Curso]
+    PROM --> NEW_COURSE[Transferencia a Nuevo Curso]
     
     GRAD_CHECK -- Sí --> GRAD_DEST[Módulo de Egresados]
-    GRAD_DEST --> GRAD_TYPE[Recibido / Egresado]
-    GRAD_TYPE --> GRAD_LIST[Padrón de Graduados]
+    GRAD_DEST --> GRAD_LIST[Padrón Histórico de Graduados]
 
     %% Aplicación de clases
     class LOGIN,SEC_MODAL,AUTH_CHECK security
@@ -95,57 +115,55 @@ graph TD
     </div>
 
     <script>
-        // Configuración de Mermaid
+        // Configuración básica
         mermaid.initialize({ 
             startOnLoad: true, 
             theme: 'dark',
-            securityLevel: 'loose',
+            themeVariables: {
+                clusterBkg: 'none',
+                clusterBorder: 'none',
+                lineColor: '#64748b'
+            },
             flowchart: { useMaxWidth: false, htmlLabels: true }
         });
 
-        // Función para inicializar el Pan & Zoom una vez que el SVG existe
-        function initPanZoom() {
+        // Función de inicialización
+        function startInteractiveDiagram() {
             const container = document.getElementById('container');
             const svg = container.querySelector('svg');
             
-            if (svg) {
-                // Forzamos el SVG a ocupar el contenedor
-                svg.style.width = '100%';
-                svg.style.height = '100%';
-                svg.style.maxWidth = 'none';
-
-                const pz = svgPanZoom(svg, {
-                    zoomEnabled: true,
-                    controlIconsEnabled: true, // Habilitamos iconos de control por si falla el mouse
-                    fit: true,
-                    center: true,
-                    minZoom: 0.01,
-                    maxZoom: 20,
-                    mouseWheelZoomEnabled: true
-                });
-
-                window.panZoom = pz;
-                
-                // Forzar un re-ajuste después de un pequeño delay por seguridad
-                setTimeout(() => {
-                    pz.resize();
-                    pz.fit();
-                    pz.center();
-                }, 100);
-
-                return true;
+            if (!svg) {
+                // Si aún no está el SVG, reintentamos en 100ms
+                setTimeout(startInteractiveDiagram, 100);
+                return;
             }
-            return false;
+
+            // Si llegamos aquí, el SVG existe
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            svg.style.maxWidth = 'none';
+
+            const pz = svgPanZoom(svg, {
+                zoomEnabled: true,
+                controlIconsEnabled: true,
+                fit: true,
+                center: true,
+                minZoom: 0.01,
+                maxZoom: 20
+            });
+
+            window.panZoom = pz;
+            
+            // Ajuste final
+            setTimeout(() => {
+                pz.resize();
+                pz.fit();
+                pz.center();
+            }, 200);
         }
 
-        // Observador para detectar cuándo Mermaid inserta el SVG
-        const observer = new MutationObserver((mutations) => {
-            if (initPanZoom()) {
-                observer.disconnect();
-            }
-        });
-
-        observer.observe(document.getElementById('container'), { childList: true });
+        // Iniciar el proceso
+        window.addEventListener('load', startInteractiveDiagram);
 
         function resetZoom() {
             if(window.panZoom) {
@@ -155,7 +173,6 @@ graph TD
             }
         }
 
-        // Manejar cambio de tamaño de ventana
         window.addEventListener('resize', () => {
             if(window.panZoom) window.panZoom.resize();
         });

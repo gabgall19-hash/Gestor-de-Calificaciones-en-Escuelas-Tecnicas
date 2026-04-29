@@ -10,65 +10,84 @@ Este documento contiene la arquitectura lógica y el flujo de datos del sistema.
 
 ```mermaid
 graph TD
+    %% Estilos de Nodos
+    classDef security fill:#f43f5e,stroke:#fff,stroke-width:2px,color:#fff
+    classDef admin fill:#8b5cf6,stroke:#fff,stroke-width:2px,color:#fff
+    classDef preceptor fill:#0ea5e9,stroke:#fff,stroke-width:2px,color:#fff
+    classDef professor fill:#10b981,stroke:#fff,stroke-width:2px,color:#fff
+    classDef closing fill:#f59e0b,stroke:#fff,stroke-width:2px,color:#fff
+    classDef infrastructure fill:#475569,stroke:#fff,stroke-width:2px,color:#fff
+
     %% Inicio y Seguridad
     START((INICIO)) --> LOGIN[Login con Bcrypt]
-    LOGIN --> AUTH_CHECK{¿Autenticado?}
-    AUTH_CHECK -- No --> LOGIN
-    AUTH_CHECK -- Sí --> WELCOME{¿Clave Admin?}
-    WELCOME -- Sí --> SEC_MODAL[Modal de Cambio de Clave Obligatorio]
-    SEC_MODAL --> DASH[Dashboard / Panel Principal]
-    WELCOME -- No --> DASH
+    LOGIN --> ROLE_DIV{Acceso por Rol}
 
-    %% Segmentación por Roles
-    DASH --> ROLE_DIV{Acceso por Rol}
+    %% BLOQUE DIRECTIVO Y ADMINISTRATIVO
+    subgraph "Nivel Directivo y Administrativo"
+        ROLE_DIV -- Admin/Sec/Dir --> ADM_PANEL[Panel de Administración]:::admin
+        ADM_PANEL --> ADM_U[Gestión de Usuarios]
+        ADM_PANEL --> ADM_A[Ajustes y Config. Curricular]
+        ADM_PANEL --> ADM_P[Módulo de Pases e Incorporaciones]
+        ADM_PANEL --> ADM_E[Registro Global de Egresados]
+        ADM_PANEL --> ADM_AN[Gestión de Anuncios]
+        
+        ROLE_DIV -- Dir/Vicedir --> DIR[Supervisión Directiva]:::admin
+        DIR --> AUDIT[Historial de Auditoría / Logs]
+    end
 
-    %% Rama Administrativa (Admin/Secretaría/Jefe)
-    ROLE_DIV -- Admin/Sec/Jefe --> ADM[Panel de Administración]
-    ADM --> ADM_U[Gestión de Usuarios]
-    ADM --> ADM_A[Ajustes Académicos: Carreras/Materias]
-    ADM --> ADM_P[Módulo de Pases e Incorporaciones]
-    ADM --> ADM_E[Registro Global de Egresados]
-    ADM --> ADM_AUD[Historial de Auditoría / Logs]
+    %% BLOQUE REGENCIA
+    subgraph "Nivel Regencia"
+        ROLE_DIV -- Regente --> REG[Panel de Regencia]:::admin
+        REG --> REG_H[Gestión Maestra de Horarios]
+        REG --> REG_M[Gestión de Materias/Carreras]
+    end
 
-    %% Rama Regente
-    ROLE_DIV -- Regente --> REG[Panel de Regencia]
-    REG --> REG_H[Gestión Maestra de Horarios]
-    REG --> REG_M[Configuración Curricular]
+    %% BLOQUE JEFATURA (Preceptor Global)
+    subgraph "Jefatura de Auxiliares"
+        ROLE_DIV -- Jefe Aux --> JEFE[Supervisión Global de Preceptores]:::preceptor
+        JEFE --> JEFE_ST[Supervisión de Asistencia/Notas de Todos los Cursos]
+        JEFE --> JEFE_P[Gestión de Pases y RAC]
+    end
 
-    %% Rama Preceptoría
-    ROLE_DIV -- Preceptor/Híbrido --> PRE[Panel de Preceptoría]
-    PRE --> PRE_AS[Registro de Asistencia: Teoría/Taller/EF]
-    PRE --> PRE_ST[Gestión de Legajo / Ficha del Alumno]
-    PRE --> PRE_GR[Carga de Calificaciones Trimestrales]
-    PRE --> PRE_RAC[Módulo RAC: Seguimiento y Cierre]
+    %% BLOQUE OPERATIVO (Preceptores y Profesores)
+    subgraph "Gestión Diaria (Operativo)"
+        ROLE_DIV -- Preceptor/Híbrido --> PRE[Panel de Preceptoría]:::preceptor
+        ROLE_DIV -- Profesor --> PROF[Panel de Profesor]:::professor
+        
+        PRE --> PRE_AS[Registro de Asistencia: Teoría/Taller/EF]
+        PRE --> PRE_ST[Ficha y Legajo del Alumno]
+        PRE --> PRE_RAC[Módulo RAC: Seguimiento Académico]
+        
+        PROF --> PROF_GR[Carga de Notas]
+    end
 
-    %% Rama Profesor
-    ROLE_DIV -- Profesor --> PROF[Panel de Profesor]
-    PROF --> PROF_GR[Carga de Notas de Materias Asignadas]
-    PROF --> PROF_REP[Generación de Planillas PDF]
+    %% INTERDEPENDENCIAS CRÍTICAS (Impacto)
+    ADM_U -.-> |Crea/Resetea| PRE & PROF
+    ADM_P -.-> |Extrae Alumno| PRE_AS & PRE_ST
+    REG_H -.-> |Dicta agenda| PROF
+    ADM_A -.-> |Modifica| REG_M
+    ADM_PANEL -.-> |Injerencia en| REG_H & REG_M & PRE_ST
 
-    %% Flujo Académico Central y Cierre
-    PRE_GR & PROF_GR --> ACAD_STATE[Estado Académico del Alumno]
-    ACAD_STATE --> PRE_RAC
-    PRE_RAC --> END_CYCLE{¿Terminación de Ciclo?}
+    %% FLUJO DE DATOS ACADÉMICOS
+    PRE_GR[Carga de Calificaciones Preceptor/Prof]
+    PROF_GR --> DB_GRADES[(Base de Datos de Notas)]:::infrastructure
+    PRE_GR --> DB_GRADES
     
-    END_CYCLE -- Sí --> CYCLE_PROC[Proceso de Cierre de Año]
-    CYCLE_PROC --> HIST[Snapshot: Guardado en Historial Escolar]
-    CYCLE_PROC --> PREVIAS[Detección y Carga de Materias Pendientes]
+    DB_GRADES --> PROF_REP[Generación de Planillas PDF]
+    DB_GRADES --> PRE_RAC
+
+    %% FLUJO DE CIERRE
+    PRE_RAC --> END_CYCLE{¿Cierre de Ciclo?}
+    END_CYCLE -- Sí --> CYCLE_PROC[Proceso de Cierre de Año]:::closing
+    CYCLE_PROC --> HIST[Snapshot: Historial Escolar]
+    CYCLE_PROC --> PREVIAS[Carga de Materias Pendientes]
     
-    %% Ramificación Final
     CYCLE_PROC --> GRAD_CHECK{¿Es 6to Año?}
-    GRAD_CHECK -- No --> PROM[Cálculo de Promoción / Repitencia]
+    GRAD_CHECK -- No --> PROM[Cálculo de Promoción]
     PROM --> NEW_COURSE[Transferencia a Nuevo Curso]
     
     GRAD_CHECK -- Sí --> GRAD_DEST[Módulo de Egresados]
-    GRAD_DEST --> GRAD_TYPE[Clasificación: Recibido / Egresado]
-    GRAD_TYPE --> GRAD_LIST[Inclusión en Padrón Histórico de Graduados]
-
-    %% Infraestructura
-    NEW_COURSE & GRAD_LIST --> DB[(Cloudflare D1 SQL)]
-    ADM_AUD --> DB
-    HIST --> DB
+    GRAD_DEST --> GRAD_LIST[Padrón Histórico de Graduados]
 ```
 
 ---
