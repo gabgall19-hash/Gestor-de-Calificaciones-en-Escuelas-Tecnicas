@@ -5,7 +5,7 @@
 ---
 
 > [!NOTE]
-> **Respaldo Automático**: Este repositorio cuenta con un sistema de backup automatizado hacia Google Drive mediante GitHub Actions.
+> **Respaldo Automático**: Este repositorio cuenta con un sistema de backup automatizado hacia Google Drive mediante GitHub Actions (**Totalmente Operacional**).
 
 ## 📜 Registro de Cambios (Changelog)
  
