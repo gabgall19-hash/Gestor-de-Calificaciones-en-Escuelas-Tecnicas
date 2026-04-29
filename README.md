@@ -4,9 +4,6 @@
 
 ---
 
-> [!NOTE]
-> **Respaldo Automático**: Este repositorio cuenta con un sistema de backup automatizado hacia Google Drive mediante GitHub Actions (**Totalmente Operacional**).
-
 ## 📜 Registro de Cambios (Changelog)
  
 ### 🚀 [3.5.8] - 2026-04-29 (Sistema Global de Egresados y Refinamiento Académico)

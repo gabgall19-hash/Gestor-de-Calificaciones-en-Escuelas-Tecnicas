@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "pages:dev": "wrangler pages dev --compatibility-date=2024-09-23 -- vite",
-    "deploy": "vite build && wrangler pages deploy dist --project-name industrialn6"
+    "deploy": "vite build && wrangler pages deploy dist --project-name industrialn6",
+    "backup": "powershell -ExecutionPolicy Bypass -File ./backup.ps1"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
