@@ -18,7 +18,7 @@ jobs:
           zip -r backup.zip . -x "node_modules/*" ".git/*" ".wrangler/*" "dist/*" ".gemini/*" "voice-project-*.json"
 
       - name: Upload to Google Drive
-        uses: adityak74/google-drive-upload-git-action@v2.2.3
+        uses: adityak74/google-drive-upload-git-action@v2
         with:
           credentials: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_JSON }}
           filename: backup.zip
