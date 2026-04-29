@@ -1,7 +1,6 @@
-# Script de Respaldo Local para Google Drive (Disco G:)
+# Script de Respaldo Local para Google Drive (Disco G:) - Versión de Sobrescritura
 
-$timestamp = Get-Date -Format "yyyyMMdd_HHmm"
-$zipName = "Respaldo_Colegio_$timestamp.zip"
+$zipName = "Respaldo_Colegio.zip"
 $destinationPath = "G:\Mi unidad\Escuela"
 $tempZip = ".\$zipName"
 
@@ -10,17 +9,17 @@ if (!(Test-Path $destinationPath)) {
     New-Item -ItemType Directory -Path $destinationPath -Force
 }
 
-Write-Host "Iniciando respaldo en: $zipName..." -ForegroundColor Cyan
+Write-Host "Iniciando empaquetado del proyecto: $zipName..." -ForegroundColor Cyan
 
-# Comprimir excluyendo node_modules, .git, etc.
-# Usamos un filtro para excluir
-Get-ChildItem -Path . -Exclude "node_modules", ".git", ".wrangler", "dist", ".gemini", "voice-project-*.json" | 
+# Comprimir el proyecto actual excluyendo carpetas pesadas
+# Usamos un filtro para excluir lo innecesario
+Get-ChildItem -Path . -Exclude "node_modules", ".git", ".wrangler", "dist", ".gemini" | 
     Compress-Archive -DestinationPath $tempZip -Force
 
-Write-Host "Copiando a Google Drive ($destinationPath)..." -ForegroundColor Yellow
+Write-Host "Sincronizando con Google Drive ($destinationPath)..." -ForegroundColor Yellow
 
-# Mover el ZIP a Google Drive
+# Mover el ZIP a Google Drive (Sobrescribe el anterior)
 Move-Item -Path $tempZip -Destination "$destinationPath\$zipName" -Force
 
-Write-Host "¡Respaldo completado con éxito!" -ForegroundColor Green
-Write-Host "Archivo guardado en: $destinationPath\$zipName"
+Write-Host "¡Sincronización con Drive completada con éxito!" -ForegroundColor Green
+Write-Host "Archivo actualizado en: $destinationPath\$zipName"
