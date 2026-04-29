@@ -95,33 +95,70 @@ graph TD
     </div>
 
     <script>
-        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+        // Configuración de Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'dark',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: false, htmlLabels: true }
+        });
 
-        let panZoom;
-        
-        // Esperamos a que Mermaid renderice el SVG
-        const checkExist = setInterval(function() {
-           const svg = document.querySelector('#container svg');
-           if (svg) {
-              svg.setAttribute('style', 'width: 100%; height: 100%;');
-              panZoom = svgPanZoom(svg, {
-                zoomEnabled: true,
-                controlIconsEnabled: false,
-                fit: true,
-                center: true,
-                minZoom: 0.1,
-                maxZoom: 10
-              });
-              clearInterval(checkExist);
-           }
-        }, 100);
+        // Función para inicializar el Pan & Zoom una vez que el SVG existe
+        function initPanZoom() {
+            const container = document.getElementById('container');
+            const svg = container.querySelector('svg');
+            
+            if (svg) {
+                // Forzamos el SVG a ocupar el contenedor
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.style.maxWidth = 'none';
+
+                const pz = svgPanZoom(svg, {
+                    zoomEnabled: true,
+                    controlIconsEnabled: true, // Habilitamos iconos de control por si falla el mouse
+                    fit: true,
+                    center: true,
+                    minZoom: 0.01,
+                    maxZoom: 20,
+                    mouseWheelZoomEnabled: true
+                });
+
+                window.panZoom = pz;
+                
+                // Forzar un re-ajuste después de un pequeño delay por seguridad
+                setTimeout(() => {
+                    pz.resize();
+                    pz.fit();
+                    pz.center();
+                }, 100);
+
+                return true;
+            }
+            return false;
+        }
+
+        // Observador para detectar cuándo Mermaid inserta el SVG
+        const observer = new MutationObserver((mutations) => {
+            if (initPanZoom()) {
+                observer.disconnect();
+            }
+        });
+
+        observer.observe(document.getElementById('container'), { childList: true });
 
         function resetZoom() {
-            if(panZoom) {
-                panZoom.resetZoom();
-                panZoom.center();
+            if(window.panZoom) {
+                window.panZoom.resetZoom();
+                window.panZoom.fit();
+                window.panZoom.center();
             }
         }
+
+        // Manejar cambio de tamaño de ventana
+        window.addEventListener('resize', () => {
+            if(window.panZoom) window.panZoom.resize();
+        });
     </script>
 </body>
 </html>
