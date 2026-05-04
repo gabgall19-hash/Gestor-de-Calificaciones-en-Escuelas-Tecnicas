@@ -4,7 +4,7 @@ export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, sele
   const win = window.open('', '_blank');
   
   const [year, month] = selectedMonth.split('-').map(Number);
-  const studentsSource = data.allStudents || data.students || [];
+  const studentsSource = (data.allStudents && data.allStudents.length > 0) ? data.allStudents : (data.students || []);
   const students = studentsSource
     .filter(s => s.course_id === course.id)
     .sort((a, b) => a.apellido.localeCompare(b.apellido));

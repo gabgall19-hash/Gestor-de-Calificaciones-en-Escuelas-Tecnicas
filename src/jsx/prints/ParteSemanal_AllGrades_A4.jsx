@@ -6,7 +6,7 @@ export const handlePrintParteSemanal_AllGrades = (data, allSchedules) => {
   const currentMonth = monthNames[new Date().getMonth()];
 
   const coursesHTML = data.allCourses.map(course => {
-    const studentsSource = data.allStudents || data.students || [];
+    const studentsSource = (data.allStudents && data.allStudents.length > 0) ? data.allStudents : (data.students || []);
     const students = studentsSource
       .filter(s => s.course_id === course.id)
       .sort((a, b) => a.apellido.localeCompare(b.apellido));
