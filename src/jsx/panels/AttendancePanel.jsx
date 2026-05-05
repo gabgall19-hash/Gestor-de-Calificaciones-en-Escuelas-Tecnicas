@@ -193,6 +193,13 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
   const handleParoToggle = (day, checked) => {
     if (!canEdit) return;
+    
+    if (checked) {
+      if (!window.confirm("Estas a punto de sobreescribir la columna en Paro Docente ¿Esta seguro?")) {
+        return;
+      }
+    }
+
     const date = `${selectedMonth}-${String(day).padStart(2, '0')}`;
     const nextVal = checked ? 'PD' : '';
     const newPending = { ...pending };
