@@ -144,7 +144,6 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     if (!canEdit) return;
     const val = value.toUpperCase().trim();
     
-    // Validation logic: Allow empty, "P", "A", or "AJ"
     if (val !== '') {
       if (val === 'AJ') {
         // Full AJ is allowed
@@ -152,6 +151,10 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
         // A is allowed (could be partial AJ or just A)
       } else if (val === 'P') {
         // P is allowed
+      } else if (val === 'PD') {
+        // PD is allowed (Paro Docente)
+      } else if (val === '-') {
+        // - is allowed (Blocked/Not enrolled)
       } else {
         // Any other character is blocked
         return;
@@ -168,6 +171,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     if (!isMobile || !canEdit) return;
     
     const currentVal = getCellValue(alumnoId, day);
+    if (currentVal === '-' || currentVal === 'PD') return; // Do not cycle these states via click
+    
     let nextVal = '';
     
     if (currentVal === '') nextVal = 'P';
@@ -178,6 +183,26 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     const date = `${selectedMonth}-${String(day).padStart(2, '0')}`;
     const key = `${alumnoId}|${date}`;
     setPending(prev => ({ ...prev, [key]: nextVal }));
+  };
+
+  const isDayParo = (day) => {
+    const activeStudents = filteredStudents.filter(s => getCellValue(s.id, day) !== '-');
+    if (activeStudents.length === 0) return false;
+    return activeStudents.every(s => getCellValue(s.id, day) === 'PD');
+  };
+
+  const handleParoToggle = (day, checked) => {
+    if (!canEdit) return;
+    const date = `${selectedMonth}-${String(day).padStart(2, '0')}`;
+    const nextVal = checked ? 'PD' : '';
+    const newPending = { ...pending };
+    filteredStudents.forEach(s => {
+      // Do not overwrite blocked past attendance
+      if (getCellValue(s.id, day) !== '-') {
+        newPending[`${s.id}|${date}`] = nextVal;
+      }
+    });
+    setPending(newPending);
   };
 
   const getCellValue = (alumnoId, day) => {
@@ -192,6 +217,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     if (v === 'p') return 'attendance-input val-p';
     if (v === 'a') return 'attendance-input val-a';
     if (v === 'aj') return 'attendance-input val-aj';
+    if (v === 'pd') return 'attendance-input val-pd';
+    if (v === '-') return 'attendance-input val-blocked';
     return 'attendance-input';
   };
 
@@ -240,7 +267,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
       </div>
 
       <div className="attendance-legend-top glass-card">
-        <div className="legend-item">
+        <div class="legend-item">
           <div className="legend-badge badge-p">P</div>
           <span>Presente</span>
         </div>
@@ -251,6 +278,14 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
         <div className="legend-item">
           <div className="legend-badge badge-aj">AJ</div>
           <span>Ausente Justificado</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-badge badge-pd">PD</div>
+          <span>Paro Docente</span>
+        </div>
+        <div className="legend-item">
+          <div className="legend-badge badge-blocked">-</div>
+          <span>Inactivo / No Cursa</span>
         </div>
       </div>
 
@@ -350,6 +385,18 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
                     <th key={i} className={`day-cell ${d.day ? (d.weekIndex % 2 === 0 ? '' : 'week-alt') : 'day-empty'} ${isToday(d.day) ? 'day-active' : ''}`}>
                       <div className="day-label">{d.label}</div>
                       <div className="day-num">{d.day || ''}</div>
+                      {d.day && (
+                        <div className="paro-checkbox-wrapper" style={{ marginTop: '4px' }}>
+                          <input 
+                            type="checkbox" 
+                            title="¿Paro Docente?"
+                            checked={isDayParo(d.day)}
+                            onChange={(e) => handleParoToggle(d.day, e.target.checked)}
+                            disabled={!canEdit}
+                            style={{ transform: 'scale(0.8)', cursor: canEdit ? 'pointer' : 'default' }}
+                          />
+                        </div>
+                      )}
                     </th>
                   ))}
                 </tr>
@@ -365,22 +412,23 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
                     {visibleDays.map((d, i) => {
                       if (!d.day) return <td key={i} className="day-cell day-empty"></td>;
                       const val = getCellValue(student.id, d.day);
+                      const isBlocked = val === '-' || isDayParo(d.day);
                       return (
                         <td 
                           key={i} 
                           className={`day-cell ${d.weekIndex % 2 === 0 ? '' : 'week-alt'} ${isToday(d.day) ? 'day-active' : ''}`}
                           onClick={() => handleCellClick(student.id, d.day)}
-                          style={isMobile ? { cursor: 'pointer' } : {}}
+                          style={isMobile && !isBlocked ? { cursor: 'pointer' } : {}}
                         >
                           <input 
                             type="text"
                             className={getInputClass(val)}
                             value={val}
                             onChange={(e) => handleCellChange(student.id, d.day, e.target.value)}
-                            readOnly={isMobile || !canEdit}
+                            readOnly={isMobile || !canEdit || isBlocked}
                             maxLength={2}
                             autoComplete="off"
-                            style={(isMobile || !canEdit) ? { pointerEvents: 'none' } : {}}
+                            style={(isMobile || !canEdit || isBlocked) ? { pointerEvents: 'none' } : {}}
                           />
                         </td>
                       );

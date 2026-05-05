@@ -192,6 +192,8 @@
 .attendance-input.val-p { color: #10b981; } /* Green for Present */
 .attendance-input.val-a { color: #ef4444; } /* Red for Absent */
 .attendance-input.val-aj { color: #f59e0b; } /* Orange for Justified */
+.attendance-input.val-pd { color: #ef4444; text-decoration: line-through; } /* Paro Docente */
+.attendance-input.val-blocked { color: #64748b; background: rgba(0,0,0,0.2) !important; cursor: not-allowed; } /* Blocked */
 
 .week-alt {
   background: rgba(255, 255, 255, 0.04) !important;
@@ -274,6 +276,8 @@
 .badge-p { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
 .badge-a { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 .badge-aj { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-pd { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); text-decoration: line-through; }
+.badge-blocked { background: rgba(100, 116, 139, 0.15); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.3); }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

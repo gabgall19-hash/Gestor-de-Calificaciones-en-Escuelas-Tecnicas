@@ -86,7 +86,8 @@ export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, sele
               ${week.map(d => {
                 const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 const val = s ? (attendanceMap[`${s.id}|${dateKey}`] || '') : '';
-                return `<td>${val}</td>`;
+                const displayVal = val === 'PD' ? '<div style="width: 2px; height: 100%; min-height: 14px; background-color: #ef4444; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact;"></div>' : val;
+                return `<td style="${val === 'PD' ? 'padding: 0;' : ''}">${displayVal}</td>`;
               }).join('')}
             </tr>
           `;

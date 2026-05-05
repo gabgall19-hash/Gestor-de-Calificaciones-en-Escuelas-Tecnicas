@@ -1,6 +1,27 @@
 import { toNumber, toTitleCase, validateUser, logHistory, json } from "../_helpers.js";
 import { hashPassword } from "../_utils.js";
 
+const blockPastAttendance = async (env, sId) => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const start = new Date(year, 2, 1); // March 1st
+  const end = new Date();
+  end.setHours(0, 0, 0, 0);
+
+  const statements = [];
+  for (let d = new Date(start); d < end; d.setDate(d.getDate() + 1)) {
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    statements.push(env.DB.prepare("INSERT INTO asistencia (alumno_id, fecha, valor, sector) VALUES (?, ?, '-', 'teoria') ON CONFLICT(alumno_id, fecha, sector) DO UPDATE SET valor = '-'").bind(sId, dateStr));
+    statements.push(env.DB.prepare("INSERT INTO asistencia (alumno_id, fecha, valor, sector) VALUES (?, ?, '-', 'taller') ON CONFLICT(alumno_id, fecha, sector) DO UPDATE SET valor = '-'").bind(sId, dateStr));
+    statements.push(env.DB.prepare("INSERT INTO asistencia (alumno_id, fecha, valor, sector) VALUES (?, ?, '-', 'ed_fisica') ON CONFLICT(alumno_id, fecha, sector) DO UPDATE SET valor = '-'").bind(sId, dateStr));
+  }
+  
+  for (let i = 0; i < statements.length; i += 90) {
+    const batch = statements.slice(i, i + 90);
+    if (batch.length) await env.DB.batch(batch);
+  }
+};
+
 export async function handleStudents(env, request, userId, body) {
   const currentUser = await validateUser(env, request, userId, 'admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'profesor', 'preceptor_taller', 'preceptor_ef');
   const { action, nombre, apellido, dni, course_id, studentId } = body;
@@ -56,6 +77,7 @@ export async function handleStudents(env, request, userId, body) {
           'UPDATE alumnos SET nombre = ?, apellido = ?, course_id = ?, estado = 1, genero = ?, observaciones = ? WHERE id = ?'
         ).bind(finalNombre, finalApellido, course_id, body.genero, newObs, existing.id).run();
         
+        await blockPastAttendance(env, existing.id);
         await logHistory(env, userId, course_id, 'alta_alumno', `Re-incorporación de alumno: ${finalApellido}, ${finalNombre}`, existing.id);
         return json({ success: true, reincorporated: true });
       }
@@ -65,7 +87,7 @@ export async function handleStudents(env, request, userId, body) {
     const finalApellido = toTitleCase(apellido);
     const { cuil, fecha_nacimiento, edad, tutor_nombre, tutor_parentesco, tutor_dni, tutor_contacto, tutor_mail, domicilio, libro, folio, legajo, matricula, observaciones } = body;
 
-    await env.DB.prepare(
+    const insertResult = await env.DB.prepare(
       `INSERT INTO alumnos (
         nombre, apellido, dni, course_id, estado, genero, 
         cuil, fecha_nacimiento, edad, tutor_nombre, tutor_parentesco, 
@@ -78,6 +100,11 @@ export async function handleStudents(env, request, userId, body) {
       tutor_dni || null, tutor_contacto || null, tutor_mail || null, domicilio || null,
       libro || null, folio || null, legajo || null, matricula || null, observaciones || ''
     ).run();
+
+    const newStudentId = insertResult.meta.last_row_id;
+    if (newStudentId) {
+      await blockPastAttendance(env, newStudentId);
+    }
 
     await logHistory(env, userId, course_id, 'alta_alumno', `Alta de nuevo alumno: ${finalApellido}, ${finalNombre}`);
     return json({ success: true });
@@ -198,6 +225,7 @@ export async function handleStudents(env, request, userId, body) {
     if (!student || !targetCourse) throw new Error('Datos de transferencia invalidos');
     await env.DB.prepare('DELETE FROM calificaciones WHERE alumno_id = ?').bind(studentId).run();
     await env.DB.prepare('UPDATE alumnos SET course_id = ? WHERE id = ?').bind(body.course_id, studentId).run();
+    await blockPastAttendance(env, studentId);
     const finalMotivo = body.motivo?.trim() || '...';
     const log = `Alumno transferido de (${student.old_course_label}) a (${targetCourse.new_course_label}) debido a: ${finalMotivo}`;
     const newObs = (student.observaciones ? student.observaciones + "\n" : "") + log;
