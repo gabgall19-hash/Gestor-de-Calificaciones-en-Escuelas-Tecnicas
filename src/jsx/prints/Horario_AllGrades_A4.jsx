@@ -85,7 +85,7 @@ export const handlePrintHorario_AllGrades = (allCourses, allSchedules) => {
             <tr>
               <td>${course.preceptor_nombre || '---'}</td>
               <td>${course.ano}</td>
-              <td>${course.ano <= 2 ? 'BÁSICO' : 'SUPERIOR'}</td>
+              <td>${course.ano <= 3 ? 'BÁSICO' : 'SUPERIOR'}</td>
               <td>${course.division || '---'}</td>
               <td>${course.turno || '---'}</td>
             </tr>

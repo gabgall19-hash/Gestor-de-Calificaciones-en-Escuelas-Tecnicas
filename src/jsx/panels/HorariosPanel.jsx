@@ -45,7 +45,7 @@ const HORARIOS_TEMPLATES = {
       { type: 'break', label: 'Recreo', time: '' },
       { type: 'slot', time: '10:50 a 11:30 hrs' },
       { type: 'slot', time: '11:30 a 12:10 hrs' },
-      { type: 'slot', time: '12:10 a 12:50 hrs' },
+      { type: 'slot', time: '12:10 a 13:00 hrs' },
     ]
   },
   'Tarde': {
@@ -60,7 +60,7 @@ const HORARIOS_TEMPLATES = {
       { type: 'slot', time: '17:00 a 17:40 hrs' },
       { type: 'break', label: 'Recreo', time: '' },
       { type: 'slot', time: '17:50 a 18:30 hrs' },
-      { type: 'slot', time: '18:30 a 19:10 hrs' },
+      { type: 'slot', time: '18:30 a 19:00 hrs' },
     ],
     'Superior': [
       { type: 'slot', time: '13:20 a 14:00 hrs' },
@@ -68,11 +68,11 @@ const HORARIOS_TEMPLATES = {
       { type: 'slot', time: '14:40 a 15:20 hrs' },
       { type: 'break', label: 'Recreo', time: '' },
       { type: 'slot', time: '15:30 a 16:10 hrs' },
-      { type: 'slot', time: '16:10 a 16:50 hrs' },
+      { type: 'slot', time: '16:20 a 17:00 hrs' },
       { type: 'break', label: 'Recreo', time: '' },
-      { type: 'slot', time: '17:00 a 17:40 hrs' },
-      { type: 'slot', time: '17:40 a 18:20 hrs' },
-      { type: 'slot', time: '18:20 a 19:00 hrs' },
+      { type: 'slot', time: '17:10 a 17:50 hrs' },
+      { type: 'slot', time: '17:50 a 18:40 hrs' },
+      { type: 'slot', time: '18:40 a 19:00 hrs' },
     ]
   }
 };
@@ -218,7 +218,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
       const syncWithTemplate = (currentGrid) => {
         const turno = currentCourse?.turno;
         const ano = Number(currentCourse?.ano);
-        const ciclo = (ano && ano <= 2) ? 'Básico' : 'Superior';
+        const ciclo = (ano && ano <= 3) ? 'Básico' : 'Superior';
         const template = HORARIOS_TEMPLATES[turno]?.[ciclo];
         
         if (!template) return currentGrid;
@@ -716,7 +716,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   const getCiclo = (courseArg) => {
     const course = courseArg || selectedCourse;
     const ano = Number(course?.ano);
-    if (ano <= 2) return 'Básico';
+    if (ano <= 3) return 'Básico';
     return 'Superior';
   };
 
