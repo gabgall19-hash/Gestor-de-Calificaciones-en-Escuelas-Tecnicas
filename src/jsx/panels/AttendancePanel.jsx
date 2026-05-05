@@ -17,7 +17,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileDayIndex, setMobileDayIndex] = useState(-1);
-  
+
   const canEdit = useMemo(() => {
     const editRoles = ['preceptor', 'admin', 'jefe_de_auxiliares'];
     return editRoles.includes(user.rol) || (user.rol === 'profesor' && !!user.is_professor_hybrid);
@@ -50,13 +50,13 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     const date = new Date(year, month - 1, 1);
     const days = [];
     const dayLabels = ['DOM', 'LU', 'MA', 'MIE', 'JUE', 'VIE', 'SAB'];
-    
+
     let currentWeek = 0;
     while (date.getMonth() === month - 1) {
       const dayOfWeek = date.getDay();
       // Start a new week on Mondays (day 1)
       if (dayOfWeek === 1 && days.length > 0) currentWeek++;
-      
+
       if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude Sunday (0) and Saturday (6)
         days.push({
           day: date.getDate(),
@@ -98,7 +98,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
   const visibleDays = useMemo(() => {
     if (!isMobile) return monthDays;
-    
+
     const idx = resolvedIndex;
     if (monthDays.length === 0) return [];
 
@@ -118,8 +118,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     if (!selectedCourseId) return;
     setLoading(true);
     try {
-      const res = await apiService.get('asistencia', { 
-        courseId: selectedCourseId, 
+      const res = await apiService.get('asistencia', {
+        courseId: selectedCourseId,
         month: selectedMonth,
         sector: selectedSector
       });
@@ -143,7 +143,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   const handleCellChange = (alumnoId, day, value) => {
     if (!canEdit) return;
     const val = value.toUpperCase().trim();
-    
+
     if (val !== '') {
       if (val === 'AJ') {
         // Full AJ is allowed
@@ -163,23 +163,23 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
     const date = `${selectedMonth}-${String(day).padStart(2, '0')}`;
     const key = `${alumnoId}|${date}`;
-    
+
     setPending(prev => ({ ...prev, [key]: val }));
   };
 
   const handleCellClick = (alumnoId, day) => {
     if (!isMobile || !canEdit) return;
-    
+
     const currentVal = getCellValue(alumnoId, day);
     if (currentVal === '-' || currentVal === 'PD') return; // Do not cycle these states via click
-    
+
     let nextVal = '';
-    
+
     if (currentVal === '') nextVal = 'P';
     else if (currentVal === 'P') nextVal = 'A';
     else if (currentVal === 'A') nextVal = 'AJ';
     else if (currentVal === 'AJ') nextVal = '';
-    
+
     const date = `${selectedMonth}-${String(day).padStart(2, '0')}`;
     const key = `${alumnoId}|${date}`;
     setPending(prev => ({ ...prev, [key]: nextVal }));
@@ -193,7 +193,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
   const handleParoToggle = (day, checked) => {
     if (!canEdit) return;
-    
+
     if (checked) {
       if (!window.confirm("Estas a punto de sobreescribir la columna en Paro Docente ¿Esta seguro?")) {
         return;
@@ -252,7 +252,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   const hasPendingChanges = Object.keys(pending).length > 0;
 
   const filteredStudents = useMemo(() => {
-    return (data.students || []).filter(s => 
+    return (data.students || []).filter(s =>
       `${s.apellido} ${s.nombre}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [data.students, searchTerm]);
@@ -304,8 +304,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
         <div className="attendance-header glass-card">
           <div className="month-selector-wrapper">
             <label htmlFor="sector-select">Visión:</label>
-            <select 
-              id="sector-select" 
+            <select
+              id="sector-select"
               className="month-select"
               value={selectedSector}
               onChange={(e) => setSelectedSector(e.target.value)}
@@ -319,8 +319,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
           <div className="month-selector-wrapper">
             <label htmlFor="month-select">Período:</label>
-            <select 
-              id="month-select" 
+            <select
+              id="month-select"
               className="month-select"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
@@ -334,8 +334,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
           <div className="search-wrapper">
             <div className="search-input-container">
               <Search size={16} className="search-icon" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Buscar alumno..."
                 className="search-input"
                 value={searchTerm}
@@ -355,8 +355,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
             />
 
             {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'director', 'vicedirector'].includes(user.rol) && (
-              <button 
-                className="btn btn-secondary" 
+              <button
+                className="btn btn-secondary"
                 onClick={() => onPrintInformacion?.(selectedMonth, attendance)}
                 disabled={loading}
                 title="Imprimir Parte Mensual con Asistencias"
@@ -370,6 +370,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
         <div className="attendance-grid-wrapper shadow-xl">
           {loading && !Object.keys(attendance).length ? (
             <TableSkeleton rows={15} cols={monthDays.length + 1} />
+          ) : (
             <>
               {/* Desktop Table View */}
               <div className="attendance-table-container mobile-hide">
@@ -518,6 +519,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
             </div>
           </div>
           </>
+          )}
         </div>
       </div>
     </section>
