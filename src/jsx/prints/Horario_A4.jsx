@@ -33,12 +33,22 @@ export const handlePrintHorario = (course, grid) => {
       const cell = row.days?.[day] || {};
       const subject = cell.subject || 'Horario Libre';
       const isFree = subject.toUpperCase() === 'HORARIO LIBRE';
-      const teacher = isFree ? '' : (cell.teacher || '');
+      const originalTeacher = isFree ? '' : (cell.teacher || '');
+      const substituteTeacher = isFree ? '' : (cell.substitute_teacher || '');
       
+      let teacherHTML = '';
+      if (!isFree) {
+        if (substituteTeacher) {
+          teacherHTML = `<div class="print-teacher">${originalTeacher}</div><div class="print-teacher" style="font-style: italic; opacity: 0.85;">Supl. ${substituteTeacher}</div>`;
+        } else if (originalTeacher) {
+          teacherHTML = `<div class="print-teacher">${originalTeacher}</div>`;
+        }
+      }
+
       return `
         <td class="print-slot-cell">
           <div class="print-subject ${isFree ? 'is-free' : ''}">${subject}</div>
-          ${teacher ? `<div class="print-teacher">${teacher}</div>` : ''}
+          ${teacherHTML}
         </td>
       `;
     }).join('');

@@ -527,15 +527,13 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
         }
 
         const slotTeacher = nextSlots[matchedSlotIndex] || nextSlots[0] || {};
-        const visibleTeacher = slotTeacher.substituteName
-          ? { name: slotTeacher.substituteName, id: slotTeacher.substituteId }
-          : { name: slotTeacher.actualName, id: slotTeacher.actualId };
-
         rowChanged = true;
         nextDays[day] = {
           ...cell,
-          teacher: visibleTeacher.name || '',
-          teacher_id: visibleTeacher.id || null
+          teacher: slotTeacher.actualName || '',
+          teacher_id: slotTeacher.actualId || null,
+          substitute_teacher: slotTeacher.substituteName || '',
+          substitute_teacher_id: slotTeacher.substituteId || null
         };
       });
 
@@ -860,7 +858,11 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                                       {row.days?.[day]?.subject || 'Horario Libre'}
                                     </div>
                                     {row.days?.[day]?.subject && row.days?.[day]?.subject.toUpperCase() !== 'HORARIO LIBRE' && (
-                                      <div className="view-teacher">{row.days?.[day]?.teacher ? 'Prof. ' + row.days[day].teacher : ''}</div>
+                                      <div className="view-teacher">
+                                        {row.days?.[day]?.teacher ? 'Prof. ' + row.days[day].teacher : ''}
+                                        {row.days?.[day]?.substitute_teacher && <br />}
+                                        {row.days?.[day]?.substitute_teacher ? <span style={{fontStyle: 'italic', opacity: 0.85}}>Supl. {row.days[day].substitute_teacher}</span> : ''}
+                                      </div>
                                     )}
                                   </>
                                 )}
@@ -944,7 +946,11 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                                           {cell?.subject || 'Horario Libre'}
                                         </div>
                                         {cell?.subject && cell.subject.toUpperCase() !== 'HORARIO LIBRE' && (
-                                          <div className="view-teacher">{cell?.teacher ? 'Prof. ' + cell.teacher : ''}</div>
+                                          <div className="view-teacher">
+                                            {cell?.teacher ? 'Prof. ' + cell.teacher : ''}
+                                            {cell?.substitute_teacher && <br />}
+                                            {cell?.substitute_teacher ? <span style={{fontStyle: 'italic', opacity: 0.85}}>Supl. {cell.substitute_teacher}</span> : ''}
+                                          </div>
                                         )}
                                       </>
                                     )}
