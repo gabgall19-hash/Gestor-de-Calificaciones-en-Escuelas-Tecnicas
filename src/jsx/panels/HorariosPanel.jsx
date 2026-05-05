@@ -8,7 +8,9 @@ import {
   X, 
   CheckCircle2,
   AlertCircle,
-  GripVertical
+  GripVertical,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { TableSkeleton } from '../UI/Skeleton';
 import apiService from '../functions/apiService';
@@ -141,6 +143,14 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   const professors = users.filter((userRow) =>
     ['profesor', 'preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userRow.rol) || userRow.is_professor_hybrid === 1
   );
+
+  const currentDay = new Date().getDay();
+  const initialMobileDay = currentDay >= 1 && currentDay <= 5 ? currentDay - 1 : 0;
+  const [mobileDayIndex, setMobileDayIndex] = useState(initialMobileDay);
+
+  const handlePrevDay = () => setMobileDayIndex(prev => Math.max(0, prev - 1));
+  const handleNextDay = () => setMobileDayIndex(prev => Math.min(4, prev + 1));
+
   const buildSnapshot = (nextMeta, nextGrid) => JSON.stringify({ meta: nextMeta || {}, grid: nextGrid || [] });
 
   useEffect(() => {
@@ -779,7 +789,8 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
             </div>
 
 
-            <div className="schedule-table-container print-hide">
+            {/* Desktop Table View */}
+            <div className="schedule-table-container print-hide mobile-hide">
               <table className="schedule-table">
                 <thead>
                   <tr>
@@ -867,6 +878,88 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Carousel View */}
+            <div className="mobile-carousel-container desktop-hide print-hide">
+              <div className="carousel-controls">
+                <button className="btn-icon" onClick={handlePrevDay} disabled={mobileDayIndex === 0}>
+                  <ChevronLeft size={20} />
+                </button>
+                <div className="carousel-day-indicator">
+                  <Calendar size={16} />
+                  <span>{DAYS[mobileDayIndex]}</span>
+                </div>
+                <button className="btn-icon" onClick={handleNextDay} disabled={mobileDayIndex === 4}>
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+              
+              <div className="carousel-track-wrapper">
+                <div className="carousel-track" style={{ transform: `translateX(calc(-${mobileDayIndex * 85}% + 7.5%))` }}>
+                  {DAYS.map((day, dIdx) => {
+                    const isActive = dIdx === mobileDayIndex;
+                    return (
+                      <div className={`carousel-slide ${isActive ? 'active' : 'dimmed'}`} key={day}>
+                        <div className="mobile-day-card">
+                          <h3 className="mobile-day-title">{day}</h3>
+                          <div className="mobile-day-slots">
+                            {grid.map((row, rowIndex) => {
+                              if (row.type === 'break') {
+                                return (
+                                  <div className="mobile-slot break-slot" key={rowIndex}>
+                                    <div className="mobile-slot-time">{row.time}</div>
+                                    <div className="mobile-slot-label">{row.label}</div>
+                                  </div>
+                                );
+                              }
+                              const cell = row.days?.[day];
+                              return (
+                                <div className="mobile-slot data-slot" key={rowIndex}>
+                                  <div className="mobile-slot-time">{row.time}</div>
+                                  <div className="mobile-slot-content">
+                                    {canEdit ? (
+                                      <>
+                                        <input 
+                                          type="text"
+                                          list="list-subjects"
+                                          className={`input-subject-search ${(!cell?.subject || cell.subject.toUpperCase() === 'HORARIO LIBRE') ? 'centered-free is-free-input' : ''} ${cell?.subject && cell.subject.toUpperCase() !== 'HORARIO LIBRE' && !cell?.subject_id ? 'invalid' : ''}`}
+                                          placeholder="Materia..."
+                                          value={cell?.subject || ''} 
+                                          onChange={(e) => updateCell(rowIndex, day, 'subject', e.target.value)}
+                                        />
+                                        {cell?.subject && cell.subject.toUpperCase() !== 'HORARIO LIBRE' && (
+                                          <input 
+                                            type="text"
+                                            list="list-teachers"
+                                            className={`input-teacher-search ${cell?.teacher && !cell?.teacher_id ? 'invalid' : ''}`}
+                                            placeholder="Profesor..."
+                                            value={cell?.teacher || ''} 
+                                            onChange={(e) => updateCell(rowIndex, day, 'teacher', e.target.value)}
+                                          />
+                                        )}
+                                      </>
+                                    ) : (
+                                      <>
+                                        <div className={`view-subject ${(!cell?.subject || cell.subject.toUpperCase() === 'HORARIO LIBRE') ? 'is-free centered-free' : ''}`}>
+                                          {cell?.subject || 'Horario Libre'}
+                                        </div>
+                                        {cell?.subject && cell.subject.toUpperCase() !== 'HORARIO LIBRE' && (
+                                          <div className="view-teacher">{cell?.teacher ? 'Prof. ' + cell.teacher : ''}</div>
+                                        )}
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {selectedCourseId && (

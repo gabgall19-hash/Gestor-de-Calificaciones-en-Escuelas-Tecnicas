@@ -312,4 +312,207 @@
   .bulk-editor-table { min-width: 860px; }
 }
 
+/* --- Mobile Carousel Defaults (Hidden on Desktop) --- */
+.desktop-hide {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-hide {
+    display: none !important;
+  }
+  .desktop-hide {
+    display: block;
+  }
+  
+  .editor-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .editor-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .main-editor {
+    padding: 15px;
+  }
+
+  /* Carousel Layout */
+  .mobile-carousel-container {
+    width: 100%;
+    margin: 10px 0;
+  }
+  
+  .carousel-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .carousel-controls button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  
+  .carousel-controls button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  
+  .carousel-day-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .carousel-track-wrapper {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 10px 0;
+  }
+  
+  .carousel-track {
+    display: flex;
+    width: 100%;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  
+  .carousel-slide {
+    flex: 0 0 85%;
+    width: 85%;
+    padding: 0 8px;
+    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  
+  .carousel-slide.dimmed {
+    opacity: 0.3;
+    transform: scale(0.9);
+    filter: blur(2px);
+    pointer-events: none; /* Disallow interacting with dimmed slides */
+  }
+  
+  .carousel-slide.active {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  
+  .mobile-day-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  
+  .mobile-day-title {
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--dynamic-primary, #fff);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+    text-transform: uppercase;
+  }
+  
+  .mobile-day-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .mobile-slot {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+  }
+  
+  .mobile-slot-time {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .mobile-slot-time::before {
+    content: '';
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--dynamic-primary, #fff);
+  }
+  
+  .mobile-slot.break-slot {
+    background: rgba(251, 146, 60, 0.1);
+    border-color: rgba(251, 146, 60, 0.2);
+    align-items: center;
+    text-align: center;
+    padding: 8px;
+  }
+  
+  .mobile-slot.break-slot .mobile-slot-time {
+    justify-content: center;
+    margin-bottom: 2px;
+  }
+  .mobile-slot.break-slot .mobile-slot-time::before {
+    display: none;
+  }
+  
+  .mobile-slot-label {
+    color: #fbbf24;
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+  }
+  
+  .mobile-slot-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .mobile-slot-content input {
+    font-size: 0.9rem !important;
+    padding: 10px !important;
+  }
+  
+  .mobile-slot-content .view-subject {
+    font-size: 1.05rem;
+    text-align: left;
+  }
+  
+  .mobile-slot-content .view-teacher {
+    text-align: left;
+    font-size: 0.85rem;
+  }
+}
+
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
