@@ -17,6 +17,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileDayIndex, setMobileDayIndex] = useState(-1);
+  const [slideDir, setSlideDir] = useState('');
   
   const canEdit = useMemo(() => {
     const editRoles = ['preceptor', 'admin', 'jefe_de_auxiliares'];
@@ -80,6 +81,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
   useEffect(() => {
     setMobileDayIndex(-1);
+    setSlideDir('');
   }, [selectedMonth]);
 
   const isToday = (day) => {
@@ -349,14 +351,22 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
               <div className="mobile-nav-arrows">
                 <button 
                   className="btn btn-icon" 
-                  onClick={() => setMobileDayIndex(Math.max(0, resolvedIndex - 1))}
+                  onClick={() => {
+                    setSlideDir('slide-left');
+                    setMobileDayIndex(Math.max(0, resolvedIndex - 1));
+                    setTimeout(() => setSlideDir(''), 300);
+                  }}
                   disabled={resolvedIndex === 0}
                 >
                   <ChevronLeft size={18} />
                 </button>
                 <button 
                   className="btn btn-icon" 
-                  onClick={() => setMobileDayIndex(Math.min(monthDays.length - 1, resolvedIndex + 1))}
+                  onClick={() => {
+                    setSlideDir('slide-right');
+                    setMobileDayIndex(Math.min(monthDays.length - 1, resolvedIndex + 1));
+                    setTimeout(() => setSlideDir(''), 300);
+                  }}
                   disabled={resolvedIndex === monthDays.length - 1}
                 >
                   <ChevronRight size={18} />
@@ -393,7 +403,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
                 <tr>
                   <th className="student-col">Alumno</th>
                   {visibleDays.map((d, i) => (
-                    <th key={i} className={`day-cell ${d.day ? (d.weekIndex % 2 === 0 ? '' : 'week-alt') : 'day-empty'} ${isToday(d.day) ? 'day-active' : ''}`}>
+                    <th key={`${d.day || 'empty'}-${mobileDayIndex}`} className={`day-cell ${slideDir} ${d.day ? (d.weekIndex % 2 === 0 ? '' : 'week-alt') : 'day-empty'} ${isToday(d.day) ? 'day-active' : ''}`}>
                       <div className="day-label">{d.label}</div>
                       <div className="day-num">{d.day || ''}</div>
                       {d.day && (
@@ -426,8 +436,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
                       const isBlocked = val === '-' || isDayParo(d.day);
                       return (
                         <td 
-                          key={i} 
-                          className={`day-cell ${d.weekIndex % 2 === 0 ? '' : 'week-alt'} ${isToday(d.day) ? 'day-active' : ''}`}
+                          key={`${d.day || 'empty'}-${mobileDayIndex}`} 
+                          className={`day-cell ${slideDir} ${d.weekIndex % 2 === 0 ? '' : 'week-alt'} ${isToday(d.day) ? 'day-active' : ''}`}
                           onClick={() => handleCellClick(student.id, d.day)}
                           style={isMobile && !isBlocked ? { cursor: 'pointer' } : {}}
                         >

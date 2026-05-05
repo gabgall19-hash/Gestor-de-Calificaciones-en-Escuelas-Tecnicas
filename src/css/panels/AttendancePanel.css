@@ -291,14 +291,7 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .attendance-grid-wrapper {
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .day-cell {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
+    overflow-x: hidden; /* Hide scrollbar since we use arrows */
   }
   
   .attendance-header {
@@ -332,4 +325,21 @@
     height: 18px;
     font-size: 0.55rem;
   }
+  
+  .slide-left {
+    animation: slideLeftAnim 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .slide-right {
+    animation: slideRightAnim 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+}
+
+@keyframes slideLeftAnim {
+  0% { opacity: 0; transform: translateX(-15px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideRightAnim {
+  0% { opacity: 0; transform: translateX(15px); }
+  100% { opacity: 1; transform: translateX(0); }
 }
