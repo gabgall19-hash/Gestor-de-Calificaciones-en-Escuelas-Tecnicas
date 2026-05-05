@@ -1,5 +1,62 @@
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 
+const HORARIOS_TEMPLATES = {
+  'Mañana': {
+    'Básico': [
+      { type: 'slot', time: '07:10 a 07:50 hrs' },
+      { type: 'slot', time: '07:50 a 08:30 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '08:40 a 09:20 hrs' },
+      { type: 'slot', time: '09:20 a 10:00 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '10:10 a 10:50 hrs' },
+      { type: 'slot', time: '10:50 a 11:30 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '11:40 a 12:20 hrs' },
+      { type: 'slot', time: '12:20 a 13:00 hrs' },
+    ],
+    'Superior': [
+      { type: 'slot', time: '07:10 a 07:50 hrs' },
+      { type: 'slot', time: '07:50 a 08:30 hrs' },
+      { type: 'slot', time: '08:30 a 09:10 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '09:20 a 10:00 hrs' },
+      { type: 'slot', time: '10:00 a 10:40 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '10:50 a 11:30 hrs' },
+      { type: 'slot', time: '11:30 a 12:10 hrs' },
+      { type: 'slot', time: '12:10 a 13:00 hrs' },
+    ]
+  },
+  'Tarde': {
+    'Básico': [
+      { type: 'slot', time: '13:20 a 14:00 hrs' },
+      { type: 'slot', time: '14:00 a 14:40 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '14:50 a 15:30 hrs' },
+      { type: 'slot', time: '15:30 a 16:10 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '16:20 a 17:00 hrs' },
+      { type: 'slot', time: '17:00 a 17:40 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '17:50 a 18:30 hrs' },
+      { type: 'slot', time: '18:30 a 19:00 hrs' },
+    ],
+    'Superior': [
+      { type: 'slot', time: '13:20 a 14:00 hrs' },
+      { type: 'slot', time: '14:00 a 14:40 hrs' },
+      { type: 'slot', time: '14:40 a 15:20 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '15:30 a 16:10 hrs' },
+      { type: 'slot', time: '16:20 a 17:00 hrs' },
+      { type: 'break', label: 'Recreo', time: '' },
+      { type: 'slot', time: '17:10 a 17:50 hrs' },
+      { type: 'slot', time: '17:50 a 18:40 hrs' },
+      { type: 'slot', time: '18:40 a 19:00 hrs' },
+    ]
+  }
+};
+
 const getHeaderColor = (course) => {
   const tec = course?.tecnicatura_nombre?.toUpperCase() || '';
   if (tec.includes('CICLO BASICO')) return '#ff9900'; 
@@ -31,6 +88,33 @@ export const handlePrintHorario_AllGrades = (allCourses, allSchedules) => {
         }
       } catch (e) {
         gridData = [];
+      }
+    }
+
+    const turno = course?.turno;
+    const ano = parseInt(course?.ano, 10);
+    const ciclo = (ano && ano <= 3) ? 'Básico' : 'Superior';
+    const template = HORARIOS_TEMPLATES[turno]?.[ciclo];
+    
+    if (template) {
+      const isCompatible = gridData.length === template.length && 
+                           gridData.every((row, i) => row.type === template[i].type && row.time === template[i].time);
+                           
+      if (!isCompatible && gridData.length > 0) {
+        const existingSlotsWithData = gridData.filter(r => r.days && Object.values(r.days).some(d => d.subject));
+        let slotCounter = 0;
+        gridData = template.map(tRow => {
+          if (tRow.type === 'break') return { ...tRow };
+          const existing = existingSlotsWithData[slotCounter];
+          slotCounter++;
+          return {
+            ...tRow,
+            days: existing?.days || DAYS.reduce((acc, day) => ({ 
+              ...acc, 
+              [day]: { subject: '', teacher: '', subject_id: null, subject_logical_id: null, teacher_id: null } 
+            }), {})
+          };
+        });
       }
     }
 
@@ -133,7 +217,7 @@ export const handlePrintHorario_AllGrades = (allCourses, allSchedules) => {
             <tr>
               <td>${course.preceptor_nombre || '---'}</td>
               <td>${course.ano}</td>
-              <td>${parseInt(course.ano, 10) <= 3 ? 'BÁSICO' : 'SUPERIOR'}</td>
+              <td>${parseInt(course.ano, 10) <= 2 ? 'BÁSICO' : 'SUPERIOR'}</td>
               <td>${course.division || '---'}</td>
               <td>${course.turno || '---'}</td>
             </tr>

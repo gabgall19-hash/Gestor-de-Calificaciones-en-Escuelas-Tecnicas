@@ -754,7 +754,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
   const getCiclo = (courseArg) => {
     const course = courseArg || selectedCourse;
     const ano = parseInt(course?.ano, 10);
-    if (ano <= 3) return 'Básico';
+    if (ano <= 2) return 'Básico';
     return 'Superior';
   };
 

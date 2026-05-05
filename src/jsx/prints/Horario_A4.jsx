@@ -181,7 +181,7 @@ export const handlePrintHorario = (course, grid) => {
               <tr>
                 <td>${course.preceptor_nombre || '---'}</td>
                 <td>${course.ano}</td>
-                <td>${parseInt(course.ano, 10) <= 3 ? 'BÁSICO' : 'SUPERIOR'}</td>
+                <td>${parseInt(course.ano, 10) <= 2 ? 'BÁSICO' : 'SUPERIOR'}</td>
                 <td>${course.division || '---'}</td>
                 <td>${course.turno || '---'}</td>
               </tr>
