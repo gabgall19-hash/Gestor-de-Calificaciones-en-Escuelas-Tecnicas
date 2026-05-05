@@ -217,7 +217,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
 
       const syncWithTemplate = (currentGrid) => {
         const turno = currentCourse?.turno;
-        const ano = Number(currentCourse?.ano);
+        const ano = parseInt(currentCourse?.ano, 10);
         const ciclo = (ano && ano <= 3) ? 'Básico' : 'Superior';
         const template = HORARIOS_TEMPLATES[turno]?.[ciclo];
         
@@ -715,7 +715,7 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
 
   const getCiclo = (courseArg) => {
     const course = courseArg || selectedCourse;
-    const ano = Number(course?.ano);
+    const ano = parseInt(course?.ano, 10);
     if (ano <= 3) return 'Básico';
     return 'Superior';
   };
