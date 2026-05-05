@@ -249,6 +249,46 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
       };
 
       const synchronizedGrid = syncWithTemplate(finalGrid);
+      
+      // AUTO-FIX: Aplicar suplentes desde meta automáticamente
+      if (nextMeta && nextMeta.subjectAssignments) {
+        synchronizedGrid.forEach(row => {
+          if (!isSlotRow(row)) return;
+          DAYS.forEach(day => {
+            const cell = row.days[day];
+            if (!cell || !cell.subject || cell.subject.toUpperCase() === 'HORARIO LIBRE') return;
+            
+            const currentTeacherStr = String(cell.teacher || '').replace('Prof. ', '').trim().toLowerCase();
+            if (!currentTeacherStr) return;
+
+            for (const key in nextMeta.subjectAssignments) {
+              const assignment = nextMeta.subjectAssignments[key];
+              const substitutes = Array.isArray(assignment.substituteTeachers) ? assignment.substituteTeachers : [assignment.substituteTeacherName || ''];
+              const actuals = Array.isArray(assignment.actualTeachers) ? assignment.actualTeachers : [assignment.actualTeacherName || ''];
+              
+              const subIndex = substitutes.findIndex(sub => sub && sub.toLowerCase().includes(currentTeacherStr));
+              const actIndex = actuals.findIndex(act => act && act.toLowerCase().includes(currentTeacherStr));
+              
+              if (subIndex !== -1 && currentTeacherStr.length > 3) {
+                cell.teacher = actuals[subIndex] || actuals[0] || '';
+                cell.substitute_teacher = substitutes[subIndex];
+                
+                const actIds = Array.isArray(assignment.actualTeacherIds) ? assignment.actualTeacherIds : [assignment.actualTeacherId || null];
+                const subIds = Array.isArray(assignment.substituteTeacherIds) ? assignment.substituteTeacherIds : [assignment.substituteTeacherId || null];
+                cell.teacher_id = actIds[subIndex] || actIds[0] || null;
+                cell.substitute_teacher_id = subIds[subIndex] || null;
+                break;
+              } else if (actIndex !== -1 && substitutes[actIndex] && currentTeacherStr.length > 3) {
+                cell.substitute_teacher = substitutes[actIndex];
+                const subIds = Array.isArray(assignment.substituteTeacherIds) ? assignment.substituteTeacherIds : [assignment.substituteTeacherId || null];
+                cell.substitute_teacher_id = subIds[actIndex] || null;
+                break;
+              }
+            }
+          });
+        });
+      }
+
       setGrid(synchronizedGrid);
       setLastSavedSnapshot(buildSnapshot(nextMeta, synchronizedGrid));
     } catch (err) {

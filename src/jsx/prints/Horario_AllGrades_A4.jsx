@@ -19,13 +19,50 @@ export const handlePrintHorario_AllGrades = (allCourses, allSchedules) => {
     if (!course) return '';
 
     let gridData = [];
+    let meta = {};
     if (typeof item.grid_data === 'string') {
       try {
         const parsed = JSON.parse(item.grid_data);
-        gridData = Array.isArray(parsed) ? parsed : (parsed.grid || []);
+        if (Array.isArray(parsed)) {
+          gridData = parsed;
+        } else {
+          gridData = parsed.grid || [];
+          meta = parsed.meta || {};
+        }
       } catch (e) {
         gridData = [];
       }
+    }
+
+    if (meta.subjectAssignments) {
+      gridData.forEach(row => {
+        if (row.type === 'break') return;
+        DAYS.forEach(day => {
+          const cell = row.days?.[day];
+          if (!cell || !cell.subject || cell.subject.toUpperCase() === 'HORARIO LIBRE') return;
+          
+          const currentTeacherStr = String(cell.teacher || '').replace('Prof. ', '').trim().toLowerCase();
+          if (!currentTeacherStr) return;
+
+          for (const key in meta.subjectAssignments) {
+            const assignment = meta.subjectAssignments[key];
+            const substitutes = Array.isArray(assignment.substituteTeachers) ? assignment.substituteTeachers : [assignment.substituteTeacherName || ''];
+            const actuals = Array.isArray(assignment.actualTeachers) ? assignment.actualTeachers : [assignment.actualTeacherName || ''];
+            
+            const subIndex = substitutes.findIndex(sub => sub && sub.toLowerCase().includes(currentTeacherStr));
+            const actIndex = actuals.findIndex(act => act && act.toLowerCase().includes(currentTeacherStr));
+            
+            if (subIndex !== -1 && currentTeacherStr.length > 3) {
+              cell.teacher = actuals[subIndex] || actuals[0] || '';
+              cell.substitute_teacher = substitutes[subIndex];
+              break;
+            } else if (actIndex !== -1 && substitutes[actIndex] && currentTeacherStr.length > 3) {
+              cell.substitute_teacher = substitutes[actIndex];
+              break;
+            }
+          }
+        });
+      });
     }
 
     if (gridData.length === 0) return '';
