@@ -17,7 +17,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileDayIndex, setMobileDayIndex] = useState(-1);
-
+  
   const canEdit = useMemo(() => {
     const editRoles = ['preceptor', 'admin', 'jefe_de_auxiliares'];
     return editRoles.includes(user.rol) || (user.rol === 'profesor' && !!user.is_professor_hybrid);
@@ -50,13 +50,13 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     const date = new Date(year, month - 1, 1);
     const days = [];
     const dayLabels = ['DOM', 'LU', 'MA', 'MIE', 'JUE', 'VIE', 'SAB'];
-
+    
     let currentWeek = 0;
     while (date.getMonth() === month - 1) {
       const dayOfWeek = date.getDay();
       // Start a new week on Mondays (day 1)
       if (dayOfWeek === 1 && days.length > 0) currentWeek++;
-
+      
       if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude Sunday (0) and Saturday (6)
         days.push({
           day: date.getDate(),
@@ -98,7 +98,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
   const visibleDays = useMemo(() => {
     if (!isMobile) return monthDays;
-
+    
     const idx = resolvedIndex;
     if (monthDays.length === 0) return [];
 
@@ -118,8 +118,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
     if (!selectedCourseId) return;
     setLoading(true);
     try {
-      const res = await apiService.get('asistencia', {
-        courseId: selectedCourseId,
+      const res = await apiService.get('asistencia', { 
+        courseId: selectedCourseId, 
         month: selectedMonth,
         sector: selectedSector
       });
@@ -143,7 +143,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   const handleCellChange = (alumnoId, day, value) => {
     if (!canEdit) return;
     const val = value.toUpperCase().trim();
-
+    
     if (val !== '') {
       if (val === 'AJ') {
         // Full AJ is allowed
@@ -163,23 +163,23 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
     const date = `${selectedMonth}-${String(day).padStart(2, '0')}`;
     const key = `${alumnoId}|${date}`;
-
+    
     setPending(prev => ({ ...prev, [key]: val }));
   };
 
   const handleCellClick = (alumnoId, day) => {
     if (!isMobile || !canEdit) return;
-
+    
     const currentVal = getCellValue(alumnoId, day);
     if (currentVal === '-' || currentVal === 'PD') return; // Do not cycle these states via click
-
+    
     let nextVal = '';
-
+    
     if (currentVal === '') nextVal = 'P';
     else if (currentVal === 'P') nextVal = 'A';
     else if (currentVal === 'A') nextVal = 'AJ';
     else if (currentVal === 'AJ') nextVal = '';
-
+    
     const date = `${selectedMonth}-${String(day).padStart(2, '0')}`;
     const key = `${alumnoId}|${date}`;
     setPending(prev => ({ ...prev, [key]: nextVal }));
@@ -193,7 +193,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
   const handleParoToggle = (day, checked) => {
     if (!canEdit) return;
-
+    
     if (checked) {
       if (!window.confirm("Estas a punto de sobreescribir la columna en Paro Docente ¿Esta seguro?")) {
         return;
@@ -252,7 +252,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
   const hasPendingChanges = Object.keys(pending).length > 0;
 
   const filteredStudents = useMemo(() => {
-    return (data.students || []).filter(s =>
+    return (data.students || []).filter(s => 
       `${s.apellido} ${s.nombre}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [data.students, searchTerm]);
@@ -304,8 +304,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
         <div className="attendance-header glass-card">
           <div className="month-selector-wrapper">
             <label htmlFor="sector-select">Visión:</label>
-            <select
-              id="sector-select"
+            <select 
+              id="sector-select" 
               className="month-select"
               value={selectedSector}
               onChange={(e) => setSelectedSector(e.target.value)}
@@ -319,8 +319,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
 
           <div className="month-selector-wrapper">
             <label htmlFor="month-select">Período:</label>
-            <select
-              id="month-select"
+            <select 
+              id="month-select" 
               className="month-select"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
@@ -334,8 +334,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
           <div className="search-wrapper">
             <div className="search-input-container">
               <Search size={16} className="search-icon" />
-              <input
-                type="text"
+              <input 
+                type="text" 
                 placeholder="Buscar alumno..."
                 className="search-input"
                 value={searchTerm}
@@ -345,7 +345,24 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
           </div>
 
           <div className="attendance-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-
+            {isMobile && (
+              <div className="mobile-nav-arrows">
+                <button 
+                  className="btn btn-icon" 
+                  onClick={() => setMobileDayIndex(Math.max(0, resolvedIndex - 1))}
+                  disabled={resolvedIndex === 0}
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button 
+                  className="btn btn-icon" 
+                  onClick={() => setMobileDayIndex(Math.min(monthDays.length - 1, resolvedIndex + 1))}
+                  disabled={resolvedIndex === monthDays.length - 1}
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
             <SaveStatusButton
               className="btn-save"
               onClick={saveChanges}
@@ -355,8 +372,8 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
             />
 
             {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'preceptor', 'director', 'vicedirector'].includes(user.rol) && (
-              <button
-                className="btn btn-secondary"
+              <button 
+                className="btn btn-secondary" 
                 onClick={() => onPrintInformacion?.(selectedMonth, attendance)}
                 disabled={loading}
                 title="Imprimir Parte Mensual con Asistencias"
@@ -371,10 +388,7 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
           {loading && !Object.keys(attendance).length ? (
             <TableSkeleton rows={15} cols={monthDays.length + 1} />
           ) : (
-            <>
-              {/* Desktop Table View */}
-              <div className="attendance-table-container mobile-hide">
-                <table className="attendance-table">
+            <table className="attendance-table">
               <thead>
                 <tr>
                   <th className="student-col">Alumno</th>
@@ -434,91 +448,6 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
                 ))}
               </tbody>
             </table>
-          </div>
-
-          {/* Mobile Carousel View */}
-          <div className="mobile-carousel-container desktop-hide print-hide" style={{ width: '100%', margin: '10px 0' }}>
-            <div className="carousel-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '10px', marginBottom: '15px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-              <button 
-                className="btn-icon" 
-                onClick={() => setMobileDayIndex(Math.max(0, resolvedIndex - 1))} 
-                disabled={resolvedIndex === 0}
-                style={{ background: 'rgba(255, 255, 255, 0.1)', border: 'none', color: 'white', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <div className="carousel-day-indicator" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '800', fontSize: '1.1rem', color: 'white', textTransform: 'uppercase' }}>
-                <Calendar size={16} />
-                <span>{monthDays[resolvedIndex]?.label} {monthDays[resolvedIndex]?.day}</span>
-              </div>
-              <button 
-                className="btn-icon" 
-                onClick={() => setMobileDayIndex(Math.min(monthDays.length - 1, resolvedIndex + 1))} 
-                disabled={resolvedIndex === monthDays.length - 1}
-                style={{ background: 'rgba(255, 255, 255, 0.1)', border: 'none', color: 'white', width: '40px', height: '40px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
-            
-            <div className="carousel-track-wrapper" style={{ width: '100%', overflow: 'hidden', position: 'relative', padding: '10px 0' }}>
-              <div className="carousel-track" style={{ display: 'flex', width: '100%', transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)', transform: `translateX(calc(-${resolvedIndex * 85}% + 7.5%))` }}>
-                {monthDays.map((d, dIdx) => {
-                  const isActive = dIdx === resolvedIndex;
-                  if (!d.day) return <div className="carousel-slide" key={dIdx} style={{ flex: '0 0 85%', width: '85%' }}></div>;
-                  return (
-                    <div className={`carousel-slide ${isActive ? 'active' : 'dimmed'}`} key={dIdx} style={{ flex: '0 0 85%', width: '85%', padding: '0 8px', transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)', opacity: isActive ? 1 : 0.3, transform: isActive ? 'scale(1)' : 'scale(0.9)', filter: isActive ? 'blur(0px)' : 'blur(2px)', pointerEvents: isActive ? 'auto' : 'none' }}>
-                      <div className="mobile-day-card" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02))', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', padding: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
-                        <div className="mobile-attendance-header" style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px dashed rgba(255, 255, 255, 0.2)' }}>
-                          <label className="paro-checkbox-mobile" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: canEdit ? 'pointer' : 'default', color: '#fbbf24', fontWeight: '700', fontSize: '0.9rem' }}>
-                            <input 
-                              type="checkbox" 
-                              checked={isDayParo(d.day)}
-                              onChange={(e) => handleParoToggle(d.day, e.target.checked)}
-                              disabled={!canEdit}
-                              style={{ transform: 'scale(1.2)' }}
-                            />
-                            <span>¿Paro Docente?</span>
-                          </label>
-                        </div>
-                        
-                        <div className="mobile-attendance-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                          {filteredStudents.map(student => {
-                            const val = getCellValue(student.id, d.day);
-                            const isBlocked = val === '-' || isDayParo(d.day);
-                            return (
-                              <div 
-                                key={student.id} 
-                                className="mobile-attendance-row" 
-                                onClick={() => !isBlocked && handleCellClick(student.id, d.day)}
-                                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '10px', padding: '12px 15px', border: '1px solid rgba(255, 255, 255, 0.05)', cursor: (!canEdit || isBlocked) ? 'default' : 'pointer' }}
-                              >
-                                <div className="mobile-student-name" style={{ fontSize: '0.95rem', fontWeight: '500', color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '75%' }}>
-                                  {student.apellido.toUpperCase()}, {student.nombre}
-                                </div>
-                                <div className="mobile-student-input">
-                                    <input 
-                                      type="text"
-                                      className={`attendance-input ${getInputClass(val)}`}
-                                      value={val}
-                                      onChange={(e) => handleCellChange(student.id, d.day, e.target.value)}
-                                      readOnly={!canEdit || isBlocked}
-                                      maxLength={2}
-                                      style={{ width: '40px', height: '40px', textAlign: 'center', fontSize: '1.1rem', fontWeight: '800', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', pointerEvents: (!canEdit || isBlocked) ? 'none' : 'auto' }}
-                                    />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-          </>
           )}
         </div>
       </div>

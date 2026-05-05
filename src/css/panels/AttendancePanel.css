@@ -7,10 +7,6 @@
   padding-bottom: 2rem;
 }
 
-.desktop-hide {
-  display: none;
-}
-
 .attendance-header {
   display: flex;
   justify-content: space-between;
@@ -294,101 +290,9 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .mobile-hide { display: none !important; }
-  .desktop-hide { display: block; }
-  .desktop-hide-inverse { display: none !important; }
-  
   .attendance-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
-  }
-  
-  .attendance-actions {
-    width: 100%;
-    justify-content: flex-end;
-  }
-  
-  .attendance-grid-wrapper {
-    overflow-x: auto;
-    margin: 0 -1rem;
-    border-radius: 0;
-  }
-  
-  /* Mobile Carousel Layout for Attendance */
-  .mobile-carousel-container {
-    width: 100%;
-    margin: 10px 0;
-  }
-  
-  .carousel-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .carousel-controls button {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-  
-  .carousel-controls button:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-  
-  .carousel-track-wrapper {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    padding: 10px 0;
-  }
-  
-  .carousel-track {
-    display: flex;
-    width: 100%;
-    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-  
-  .carousel-slide {
-    flex: 0 0 85%;
-    width: 85%;
-    padding: 0 8px;
-    transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-  
-  .carousel-slide.dimmed {
-    opacity: 0.3;
-    transform: scale(0.9);
-    filter: blur(2px);
-    pointer-events: none;
-  }
-  
-  .carousel-slide.active {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0px);
-  }
-  
-  .mobile-day-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 16px;
-    padding: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
   }
   
   .attendance-table .student-col {
