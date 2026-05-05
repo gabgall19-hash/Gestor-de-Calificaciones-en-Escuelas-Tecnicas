@@ -772,13 +772,13 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                   <Printer size={20} />
                 </button>
                 <button 
-                  className={`btn btn-outline btn-sm ${isPrintingAll ? 'loading' : ''}`} 
+                  className={`btn btn-outline btn-sm print-all-btn ${isPrintingAll ? 'loading' : ''}`} 
                   onClick={handlePrintAll} 
                   disabled={isPrintingAll}
                   title="Imprimir todos los horarios del año"
                 >
-                  <Printer size={16} />
-                  <span>{isPrintingAll ? 'Cargando...' : 'Imprimir todos'}</span>
+                  <Printer size={16} className="print-icon-all" />
+                  <span className="print-all-text">{isPrintingAll ? 'Cargando...' : 'Imprimir todos'}</span>
                 </button>
                 {canEdit && (
                   <button className="btn btn-icon text-danger" onClick={handleDelete} title="Eliminar horario">
@@ -902,7 +902,6 @@ const HorariosPanel = ({ user, selectedYearId, selectedCourseId, allCourses, sub
                     return (
                       <div className={`carousel-slide ${isActive ? 'active' : 'dimmed'}`} key={day}>
                         <div className="mobile-day-card">
-                          <h3 className="mobile-day-title">{day}</h3>
                           <div className="mobile-day-slots">
                             {grid.map((row, rowIndex) => {
                               if (row.type === 'break') {
