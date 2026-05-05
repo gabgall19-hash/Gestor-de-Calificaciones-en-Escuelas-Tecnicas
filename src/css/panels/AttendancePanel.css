@@ -290,6 +290,17 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .attendance-grid-wrapper {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .day-cell {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+  
   .attendance-header {
     flex-direction: column;
     align-items: stretch;
