@@ -5,6 +5,23 @@
 ---
 
 ## 📜 Registro de Cambios (Changelog)
+
+### 🚀 [3.5.9] - 2026-05-04 (Optimización y Experiencia Móvil UI/UX)
+**"Rediseño Responsivo de Horarios y Asistencias"**
+
+#### ✨ Nuevas Implementaciones y Mejoras
+*   **📱 Rediseño de Horarios Móvil**:
+    - **Carrusel Interactivo**: Transformación de la grilla de horarios de escritorio en un carrusel dinámico para dispositivos móviles que centra automáticamente el día actual.
+    - **Editor Masivo tipo Pilas**: Adaptación del asignador masivo de docentes a un formato vertical de "tarjetas" (cards), simplificando la visualización en pantallas pequeñas al ocultar campos redundantes (como N° y Tipo).
+*   **📱 Mejoras en Panel de Asistencias Móvil**:
+    - **Animaciones UI**: Se integró un efecto visual de deslizamiento suave (slide-fade) al navegar entre días de la semana mediante las flechas de control.
+    - **Leyendas Optimizadas**: Reestructuración y agrupación responsiva de las referencias de asistencia para ajustarse armónicamente y evitar desbordamientos en la vista móvil.
+*   **🛡️ UX y Seguridad (Asistencia)**:
+    - Se añadió un control preventivo (`window.confirm`) al intentar marcar el Paro Docente general para evitar sobreescrituras accidentales en la grilla.
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   **🩹 Accesibilidad de Módulos**: Remoción de los bloqueos condicionales (`!isMobile`) en el panel central que impedían el acceso al módulo de Horarios desde smartphones.
+
  
 ### 🚀 [3.5.8] - 2026-04-29 (Sistema Global de Egresados y Refinamiento Académico)
 **"Registro Histórico Global, Egreso Diferenciado y Auditoría de Promoción"**
