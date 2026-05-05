@@ -67,8 +67,9 @@ export const handlePrintHorario_AllGrades = (allCourses, allSchedules) => {
 
     if (gridData.length === 0) return '';
 
-    const rowCount = Math.max(gridData.length || 0, 1);
-    const rowHeight = rowCount <= 8 ? '16mm' : rowCount <= 10 ? '13mm' : rowCount <= 12 ? '11mm' : '9.5mm';
+    const breakCount = gridData.filter(r => r.type === 'break').length;
+    const dataCount = Math.max(gridData.length - breakCount, 1);
+    const rowHeight = ((145 - (breakCount * 6)) / dataCount).toFixed(1) + 'mm';
 
     const rowsHTML = gridData.map((row) => {
       const isBreak = row.type === 'break';
