@@ -227,14 +227,14 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       list.push({ id: 'settings', label: 'Ajustes', icon: <UserCog size={16} /> });
     }
     
-    if (!isMobile && (user.rol !== 'profesor' || isHybrid)) list.push({ id: 'horarios', label: 'Horarios', icon: <Calendar size={16} /> });
+    if (user.rol !== 'profesor' || isHybrid) list.push({ id: 'horarios', label: 'Horarios', icon: <Calendar size={16} /> });
     list.push({ id: 'planillas', label: 'Generar Planillas', icon: <Save size={16} /> });
     
     return isMobile ? list.filter((tab) => tab.id !== 'rac') : list;
   }, [isMobile, user.rol, user.is_professor_hybrid]);
 
   React.useEffect(() => {
-    if (isMobile && (page === 'rac' || page === 'horarios')) {
+    if (isMobile && page === 'rac') {
       setPage('grades');
     }
   }, [isMobile, page, setPage]);
@@ -523,7 +523,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         />
       )}
 
-      {page === 'horarios' && !isMobile && <HorariosPanel user={user} selectedYearId={selectedYearId} selectedCourseId={selectedCourseId} allCourses={data.allCourses} subjects={data.subjects} allSubjects={data.allSubjects} users={data.users} />}
+      {page === 'horarios' && <HorariosPanel user={user} selectedYearId={selectedYearId} selectedCourseId={selectedCourseId} allCourses={data.allCourses} subjects={data.subjects} allSubjects={data.allSubjects} users={data.users} />}
 
       {page === 'students' && (
         <StudentManager
