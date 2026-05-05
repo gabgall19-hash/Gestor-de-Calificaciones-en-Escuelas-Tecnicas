@@ -267,25 +267,29 @@ const AttendancePanel = ({ data, user, selectedCourseId, apiService, showToast, 
       </div>
 
       <div className="attendance-legend-top glass-card">
-        <div class="legend-item">
-          <div className="legend-badge badge-p">P</div>
-          <span>Presente</span>
+        <div className="legend-group">
+          <div class="legend-item">
+            <div className="legend-badge badge-p">P</div>
+            <span>Presente</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-badge badge-a">A</div>
+            <span>Ausente</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-badge badge-aj">AJ</div>
+            <span>Ausente Justificado</span>
+          </div>
         </div>
-        <div className="legend-item">
-          <div className="legend-badge badge-a">A</div>
-          <span>Ausente</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-badge badge-aj">AJ</div>
-          <span>Ausente Justificado</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-badge badge-pd">PD</div>
-          <span>Paro Docente</span>
-        </div>
-        <div className="legend-item">
-          <div className="legend-badge badge-blocked">-</div>
-          <span>Inactivo / No Cursa</span>
+        <div className="legend-group secondary">
+          <div className="legend-item">
+            <div className="legend-badge badge-pd">PD</div>
+            <span>Paro Docente</span>
+          </div>
+          <div className="legend-item">
+            <div className="legend-badge badge-blocked">-</div>
+            <span>Inactivo / No Cursa</span>
+          </div>
         </div>
       </div>
 
