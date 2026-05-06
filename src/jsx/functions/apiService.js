@@ -45,7 +45,13 @@ const handleApiError = (error, status) => {
   if (isAuthError) {
     console.warn("Autenticación fallida o sesión expirada. Redirigiendo al login...");
     localStorage.removeItem('currentUser');
-    window.location.replace(window.location.origin + window.location.pathname);
+    window.dispatchEvent(new CustomEvent('auth_error'));
+    // Fallback if event is not handled
+    setTimeout(() => {
+      if (window.location.hash !== '' && window.location.hash !== '#/') {
+        window.location.replace(window.location.origin);
+      }
+    }, 1000);
   }
 };
 

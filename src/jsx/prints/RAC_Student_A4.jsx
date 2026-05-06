@@ -12,31 +12,29 @@ export const handlePrintRAC_Student = (data, student) => {
 
   const getG = (subjectId, pid, type = 'valor_t') => {
     const g = studentGrades.find(x => x.materia_id === subjectId && x.periodo_id === pid);
-    return g ? g[type] : '';
-  };
-
-  const calcProm = (sid) => {
-    const sub = subjects.find(s => s.id === sid);
-    if (!sub) return '';
-    const isMod = (sub.tipo || '').toLowerCase().includes('modular');
-    const isTaller = sub.es_taller === 1;
-    const field = (isMod && isTaller) ? 'valor_pond' : 'valor_t';
-
-    const p1 = Number(getG(sid, 2, field)) || 0;
-    const p2 = Number(getG(sid, 4, field)) || 0;
-    const p3 = Number(getG(sid, 6, field)) || 0;
-    let count = 0;
-    if (p1 > 0) count++;
-    if (p2 > 0) count++;
-    if (p3 > 0) count++;
-    return count > 0 ? (([p1, p2, p3].reduce((a, b) => a + (b || 0), 0)) / count).toFixed(1) : '';
+    return g ? (g[type] ?? '') : '';
   };
 
   const simpleSubjects = subjects.filter(s => s.es_taller !== 1 || (s.tipo || '').toLowerCase().includes('modular')).slice(0, 12);
+
+  // PROMEDIO ANUAL: average of 3rd trimester grades across all simple subjects
+  // Excludes Taller I (1°) and Taller II (2°) workshop subjects
+  const calcPromedioAnual = () => {
+    let sum = 0, count = 0;
+    simpleSubjects.forEach(sub => {
+      const isMod = (sub.tipo || '').toLowerCase().includes('modular');
+      const isTaller = sub.es_taller === 1;
+      const field = (isMod && isTaller) ? 'valor_pond' : 'valor_t';
+      const val = Number(getG(sub.id, 6, field)) || 0;
+      if (val > 0) { sum += val; count++; }
+    });
+    return count > 0 ? (sum / count).toFixed(1) : '';
+  };
+  const promedioAnual = calcPromedioAnual();
+
   const rowsHTML = simpleSubjects.map((sub, i) => {
     const isMod = (sub.tipo || '').toLowerCase().includes('modular');
     const isTaller = sub.es_taller === 1;
-    const prom = (isMod && !isTaller) ? '' : calcProm(sub.id);
     const getV = (pid, f = 'valor_t') => getG(sub.id, pid, f);
 
     const periodCells = (pid) => {
@@ -82,7 +80,7 @@ export const handlePrintRAC_Student = (data, student) => {
         ${periodCells(2)}
         ${periodCells(4)}
         ${periodCells(6)}
-        <td class="grade-cell gray">${prom}</td>
+        <td class="grade-cell gray">${i === 0 ? promedioAnual : ''}</td>
         <td class="grade-cell">${getG(sub.id, 7)}</td>
         <td class="grade-cell">${getG(sub.id, 8)}</td>
         <td class="grade-cell">${getG(sub.id, 9)}</td>

@@ -104,7 +104,7 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
       const getV = (pid, f = 'valor_t') => {
         if (!s) return '';
         const g = data.grades.find(g => g.alumno_id === s.id && g.materia_id === subject.id && g.periodo_id === pid);
-        return g ? (g[f] || '') : '';
+        return g ? (g[f] ?? '') : '';
       };
 
       const isModular = (subject.tipo || '').toLowerCase().includes('modular');

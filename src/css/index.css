@@ -168,6 +168,8 @@ body {
 .badge-danger { background: #ef4444; color: white; border: 1px solid #dc2626; }
 .badge-warning { background: #f59e0b; color: white; border: 1px solid #d97706; }
 .badge-never { background: #facc15; color: #1e1b4b; border: 1px solid #eab308; }
+.badge-egresado { background: #d4af37; color: white; border: 1px solid #b8860b; }
+.badge-recibido { background: #10b981; color: white; border: 1px solid #059669; }
 
 /* Generic Table Styles */
 .table-container {

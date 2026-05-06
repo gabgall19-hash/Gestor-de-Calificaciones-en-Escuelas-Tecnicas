@@ -76,6 +76,42 @@ export async function onRequestGet({ env, request }) {
 
     const configData = configRaw.reduce((acc, curr) => ({ ...acc, [curr.clave]: curr.valor }), {});
     const mode = configData.period_view_mode || 'full';
+    
+    const queryYear = url.searchParams.get("year");
+    let finalGrades = grades;
+    let finalSubjects = all_subjects;
+
+    if (queryYear) {
+      const historialEntry = await env.DB.prepare('SELECT boletin_data, tecnicatura_nombre, curso_label FROM historial_escolar WHERE alumno_id = ? AND ciclo_lectivo_nombre = ?').bind(alumno.id, queryYear).first();
+      if (historialEntry && historialEntry.boletin_data) {
+        try {
+          const parsedGrades = JSON.parse(historialEntry.boletin_data);
+          finalGrades = parsedGrades.map(g => ({
+            materia_id: g.materia_id,
+            materia_nombre: g.materia || g.materia_nombre,
+            valor_t: g.valor_t ?? g.definitiva ?? '',
+            periodo_id: g.periodo_id ?? 10
+          }));
+          
+          // Generate pseudo subjects list from historical grades
+          const subjectMap = new Map();
+          parsedGrades.forEach(g => {
+             if (!subjectMap.has(g.materia_id)) {
+                subjectMap.set(g.materia_id, { id: g.materia_id, nombre: g.materia || g.materia_nombre });
+             }
+          });
+          finalSubjects = Array.from(subjectMap.values());
+          // Re-write the student year visually to match the requested year
+          alumno.year_nombre = queryYear;
+          alumno.tecnicatura_nombre = historialEntry.tecnicatura_nombre;
+          if (historialEntry.curso_label) {
+            const parts = historialEntry.curso_label.split(' ');
+            alumno.ano = parts[0] || '';
+            alumno.division = parts.slice(1).join(' ') || '';
+          }
+        } catch(e) {}
+      }
+    }
 
     // Lógica de validación de contraseña (Bypass si es staff)
     if (!isStaffRequest) {
@@ -108,10 +144,10 @@ export async function onRequestGet({ env, request }) {
     return new Response(JSON.stringify({
       alumno,
       pase,
-      grades,
+      grades: finalGrades,
       previas,
       config: {
-        subjects: all_subjects,
+        subjects: finalSubjects,
         periodos: visible_periods,
         mode
       }

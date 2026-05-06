@@ -37,7 +37,9 @@ function App() {
     // Solo mostrar si no ha sido aceptado permanentemente en la base de datos
     return u.security_acknowledged !== 1 && u.security_acknowledged !== true;
   });
+  const [showLogin, setShowLogin] = useState(false);
   const [dniSearch, setDniSearch] = useState('');
+  const [searchYear, setSearchYear] = useState(null);
   const [boletinPassword, setBoletinPassword] = useState('');
   const [showBoletinPassword, setShowBoletinPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -63,9 +65,26 @@ function App() {
     }
   };
   
-  const showToast = (message, type = 'success') => {
+  const showToast = React.useCallback((message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
-  };
+  }, []);
+
+  const handlePreviewStudent = React.useCallback((dni, yearLabel) => {
+    setDniSearch(dni);
+    setSearchYear(yearLabel || null);
+    navigate('/boletin');
+  }, [navigate]);
+
+  React.useEffect(() => {
+    const handleAuthError = () => {
+      setUser(null);
+      localStorage.removeItem('currentUser');
+      navigate('/');
+      showToast('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'danger');
+    };
+    window.addEventListener('auth_error', handleAuthError);
+    return () => window.removeEventListener('auth_error', handleAuthError);
+  }, [navigate, showToast]);
 
   React.useEffect(() => {
     const saved = localStorage.getItem('loginData');
@@ -518,10 +537,7 @@ function App() {
             <PreceptorPanel
               user={user}
               onLogout={handleLogout}
-              onPreviewStudent={(dni) => {
-                setDniSearch(dni);
-                navigate('/boletin');
-              }}
+              onPreviewStudent={handlePreviewStudent}
               showToast={showToast}
             />
           ) : (
@@ -530,7 +546,7 @@ function App() {
         } />
 
         <Route path="/boletin" element={
-          <StudentView dni={dniSearch} password={boletinPassword} isStaff={!!user} onBack={() => navigate(user ? '/dashboard' : '/')} />
+          <StudentView dni={dniSearch} password={boletinPassword} year={searchYear} isStaff={!!user} onBack={() => navigate(user ? '/dashboard' : '/')} />
         } />
 
         <Route path="*" element={<Navigate to="/" replace />} />

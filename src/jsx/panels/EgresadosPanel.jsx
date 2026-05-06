@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Search, GraduationCap, FileText, Filter } from 'lucide-react';
+import { simplifyTecName } from '../functions/PreceptorHelpers';
 
-export default function EgresadosPanel({ data, onViewFicha }) {
+export default function EgresadosPanel({ data, onViewFicha, onUpdateGraduate }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('todos');
 
@@ -15,7 +16,9 @@ export default function EgresadosPanel({ data, onViewFicha }) {
       list = list.filter(s_obj => 
         (s_obj.nombre || '').toLowerCase().includes(s) || 
         (s_obj.apellido || '').toLowerCase().includes(s) || 
-        (s_obj.dni || '').includes(s)
+        (s_obj.dni || '').includes(s) ||
+        (s_obj.tecnicatura_nombre || '').toLowerCase().includes(s) ||
+        (s_obj.ciclo_egreso || '').toLowerCase().includes(s)
       );
     }
     return list;
@@ -76,6 +79,7 @@ export default function EgresadosPanel({ data, onViewFicha }) {
             <tr>
               <th>Alumno</th>
               <th>DNI</th>
+              <th>Carrera / Tecnicatura</th>
               <th style={{ textAlign: 'center' }}>Estado / Tipo</th>
               <th style={{ textAlign: 'center' }}>Ciclo de Egreso</th>
               <th style={{ textAlign: 'center' }}>Acciones</th>
@@ -86,7 +90,7 @@ export default function EgresadosPanel({ data, onViewFicha }) {
               <tr key={s.id} className="hover-row">
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div className="avatar-small" style={{ background: s.egresado_tipo === 'Recibido' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)', color: s.egresado_tipo === 'Recibido' ? '#10b981' : '#f59e0b', fontWeight: 'bold' }}>
+                    <div className="avatar-small" style={{ background: s.egresado_tipo === 'Recibido' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(212, 175, 55, 0.2)', color: s.egresado_tipo === 'Recibido' ? '#10b981' : '#d4af37', fontWeight: 'bold' }}>
                       {s.apellido?.charAt(0)}
                     </div>
                     <div>
@@ -95,10 +99,34 @@ export default function EgresadosPanel({ data, onViewFicha }) {
                   </div>
                 </td>
                 <td style={{ opacity: 0.8, fontFamily: 'monospace' }}>{s.dni || '---'}</td>
+                <td>
+                  <div style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--primary)' }}>
+                    {s.tecnicatura_nombre ? simplifyTecName(s.tecnicatura_nombre) : '---'}
+                  </div>
+                </td>
                 <td style={{ textAlign: 'center' }}>
-                  <span className={`badge ${s.egresado_tipo === 'Recibido' ? 'success' : 'warning'}`} style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    {s.egresado_tipo}
-                  </span>
+                  <select 
+                    className={`badge ${s.egresado_tipo === 'Recibido' ? 'badge-recibido' : 'badge-egresado'}`} 
+                    style={{ 
+                      padding: '4px 8px', 
+                      borderRadius: '20px', 
+                      fontSize: '0.75rem', 
+                      textTransform: 'uppercase', 
+                      letterSpacing: '0.5px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      outline: 'none',
+                      textAlign: 'center',
+                      appearance: 'none',
+                      width: '100px',
+                      color: 'white'
+                    }}
+                    value={s.egresado_tipo}
+                    onChange={(e) => onUpdateGraduate(s, 'egresado_tipo', e.target.value)}
+                  >
+                    <option value="Egresado">Egresado</option>
+                    <option value="Recibido">Recibido</option>
+                  </select>
                 </td>
                 <td style={{ textAlign: 'center', fontWeight: '500' }}>
                     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.85rem' }}>

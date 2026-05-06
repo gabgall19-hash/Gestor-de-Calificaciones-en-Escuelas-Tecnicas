@@ -6,6 +6,30 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.6.1] - 2026-05-06 (Refinamiento de Previas y Egresados)
+**"Gestión Inteligente de Previas y Sincronización Global de Graduados"**
+
+#### ✨ Nuevas Implementaciones y Mejoras
+*   **🎓 Gestión Dinámica de Previas**:
+    - **Normalización Curricular**: Motor de búsqueda inteligente que ignora tildes y mayúsculas, agrupando materias idénticas (ej: *Matemática*) entre distintos años.
+    - **Diferenciación de Carga**: 
+        - Las materias únicas autocompletan el año automáticamente.
+        - Las materias repetidas habilitan un selector desplegable filtrado por la tecnicatura del alumno.
+    - **UX de Búsqueda**: Inclusión de "pistas de año" visuales (ej: `Informatica (1°)`) en los resultados de búsqueda para una identificación inequívoca.
+*   **📊 Registro de Egresados Interactivo**:
+    - **Edición en Tiempo Real**: Los administradores ahora pueden modificar el estado de un graduado entre **Egresado** (con deuda) y **Recibido** (sin deuda) directamente desde la tabla.
+    - **Sincronización de Historial (RAC)**: La actualización del estado se propaga automáticamente a la tabla de `historial_escolar`, garantizando que las impresiones de RAC y antecedentes reflejen el cambio al instante.
+*   **🎨 Identidad Visual de Graduación**:
+    - **Código de Colores Premium**:
+        - **Dorado (Gold)**: Identificación visual para alumnos **Egresados**.
+        - **Esmeralda (Green)**: Identificación visual para alumnos **Recibidos**.
+    - Los badges y avatares ahora utilizan esta paleta institucional para una auditoría visual rápida del estado de titulación.
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   **🩹 Robustez en API (D1)**: 
+    - Implementación de actualizaciones parciales en el handler de alumnos para evitar errores de tipo (`D1_TYPE_ERROR`) ante campos omitidos.
+    - Normalización de tipos de datos (`toNumber`) en las consultas de sincronización de historial para asegurar compatibilidad total con el motor SQL.
+
 ### 🚀 [3.6.0] - 2026-05-05 (Automatización de Impresión y Gestión de Suplentes)
 **"Plantillas Horarias Institucionales y Detección Inteligente de Docentes"**
 

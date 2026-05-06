@@ -1,0 +1,1608 @@
+﻿[
+  {
+    "results": [
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 1,
+        "materia": "Lengua y Literatura",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 2,
+        "materia": "Geografia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 3,
+        "materia": "Historia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 4,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 5,
+        "materia": "Formacion Etica y Ciudadana",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 6,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 7,
+        "materia": "Matematica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 8,
+        "materia": "Fisica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 9,
+        "materia": "Quimica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 10,
+        "materia": "Informatica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 11,
+        "materia": "Dibujo Tecnico y Representacion Grafica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 15,
+        "materia": "Seguridad e Higiene y Proteccion Ambiental",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 16,
+        "materia": "Motores de Aviacion",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 17,
+        "materia": "Fundamentos de Aeronaves",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 1,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "3┬░ I - 3┬░ VI",
+        "materia_id": 18,
+        "materia": "Sistemas Electricos Aeronauticos",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 145,
+        "materia": "Lengua y Literatura",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 146,
+        "materia": "Geografia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 147,
+        "materia": "Historia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 148,
+        "materia": "Lengua extranjera - Ingl├®s",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 149,
+        "materia": "Biologia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 150,
+        "materia": "Formacion Etica y Ciudadana",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 151,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 152,
+        "materia": "Matematica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 153,
+        "materia": "Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 154,
+        "materia": "Quimica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 155,
+        "materia": "Educacion Tecnologica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 156,
+        "materia": "Informatica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 157,
+        "materia": "Dibujo Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 171,
+        "materia": "Electricidad I",
+        "tipo": "comun",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 172,
+        "materia": "Carpinteria",
+        "tipo": "comun",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 173,
+        "materia": "Hojalateria y Herraria",
+        "tipo": "comun",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 4,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "1┬░",
+        "materia_id": 174,
+        "materia": "Ajuste Mecanico I",
+        "tipo": "comun",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 19,
+        "materia": "Lengua y Literatura",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 20,
+        "materia": "Geografia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 21,
+        "materia": "Historia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 22,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 23,
+        "materia": "Formacion Etica y Ciudadana",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 24,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 25,
+        "materia": "Matematica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 26,
+        "materia": "Fisica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 27,
+        "materia": "Quimica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 28,
+        "materia": "Informatica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 29,
+        "materia": "Dibujo Tecnico y Representacion Grafica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 30,
+        "materia": "Seguridad e Higiene y Proteccion Ambiental",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 31,
+        "materia": "Fundamento de electricidad - electronica",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 32,
+        "materia": "Mediciones electricas - electronicas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 5,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "3┬░ II",
+        "materia_id": 33,
+        "materia": "Dispositivos y componentes electricos - electronicos",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 34,
+        "materia": "Lengua y Literatura",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 35,
+        "materia": "Geografia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 36,
+        "materia": "Historia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 37,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 38,
+        "materia": "Formacion Etica y Ciudadana",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 39,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 40,
+        "materia": "Matematica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 41,
+        "materia": "Fisica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 42,
+        "materia": "Quimica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 43,
+        "materia": "Informatica Aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 44,
+        "materia": "Dibujo Tecnico y Representacion Grafica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 45,
+        "materia": "Seguridad e Higiene y Proteccion Ambiental",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 46,
+        "materia": "Procesos de mecanizado y motores",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 47,
+        "materia": "Electricidad y electronica",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 6,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "3┬░ III - 3┬░ V",
+        "materia_id": 48,
+        "materia": "Estructuras y sistemas mecanicos",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 49,
+        "materia": "Lengua y Literatura",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 50,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 51,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 52,
+        "materia": "Matematica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 53,
+        "materia": "Ensayo y evaluacion de sistemas con entornos de simulacion",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 54,
+        "materia": "Tecnologia de los materiales",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 55,
+        "materia": "Tecnolog├¡a de la representaci├│n gr├ífica e interpretaci├│n de planos",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 56,
+        "materia": "Aeronaves",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 57,
+        "materia": "Motores aeronauticos I",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 58,
+        "materia": "Equipos e instalaciones electricas aeronauticas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 7,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "4┬░ I - 4┬░ VI",
+        "materia_id": 59,
+        "materia": "Aerodinamica de aeronaves",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 60,
+        "materia": "Lengua y Literatura",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 61,
+        "materia": "Lenguaje extranjero - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 62,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 63,
+        "materia": "Matematica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 64,
+        "materia": "Ensayo y evaluacion de sistemas con entornos de simulacion",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 65,
+        "materia": "Tecnologia de los materiales",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 66,
+        "materia": "Tecnolog├¡a de la representaci├│n gr├ífica e interpretaci├│n de planos",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 67,
+        "materia": "Dise├▒o y construccion de prototipos electronicos discretos I",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 68,
+        "materia": "Ensayos y mediciones de sistemas con instrumentos y herramientas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 69,
+        "materia": "Montaje, operaci├│n y mantenimiento de circuitos electronicos y redes",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 8,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "4┬░ II",
+        "materia_id": 70,
+        "materia": "Introduccion a la programacion y analisis de sistemas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 71,
+        "materia": "Lengua y Literatura",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 72,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 73,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 74,
+        "materia": "Matematica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 75,
+        "materia": "Ensayo y evaluacion de sistemas con entornos de simulacion",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 76,
+        "materia": "Tecnologia de los materiales",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 77,
+        "materia": "Tecnolog├¡a de la representaci├│n gr├ífica e interpretaci├│n de planos",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 78,
+        "materia": "Fundamentos de electricidad y electronica",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 79,
+        "materia": "Esfuerzos y tensiones en mecanismos de automotores",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 80,
+        "materia": "Motores I",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 9,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "4┬░ III - 4┬░ IV",
+        "materia_id": 81,
+        "materia": "Materiales y procesos de mecanizado",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 82,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 83,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 84,
+        "materia": "Analisis Matematico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 85,
+        "materia": "Economia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 86,
+        "materia": "Mantenimiento de aeronaves",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 87,
+        "materia": "Operaci├│n y mantenimiento de sistemas de la aeronave",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 88,
+        "materia": "Operaci├│n y mantenimiento de grupos propulsores",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 89,
+        "materia": "Operaci├│n y mantenimiento de equipos e instalaciones electromecanicas aeronauticas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 90,
+        "materia": "Operaci├│n y mantenimiento de instrumental, equipos e instalaciones electr├│nicas e aeronaves",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 10,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "5┬░ I",
+        "materia_id": 91,
+        "materia": "Practica Profesionalizante I",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 92,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 93,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 94,
+        "materia": "Analisis Matematico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 95,
+        "materia": "Economia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 96,
+        "materia": "Dise├▒o y construccion de prototipos electronicos discretos II",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 97,
+        "materia": "Dise├▒o y construccion de prototipos digitales I",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 98,
+        "materia": "Montaje, operaci├│n y mantenimiento de maquinas electronicas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 99,
+        "materia": "Montaje, operaci├│n y mantenimiento de instalaciones electrico-electronicas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 196,
+        "materia": "Sistemas de Comunicaciones I",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 100,
+        "materia": "Introduccion a los sistemas electronicos de control",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 11,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "5┬░ II",
+        "materia_id": 101,
+        "materia": "Practica Profesionalizante I",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 102,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 103,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 104,
+        "materia": "Analisis Matematico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 105,
+        "materia": "Economia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 106,
+        "materia": "Motores II",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 107,
+        "materia": "Instalaciones El├®ctrico - Electr├│nicas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 108,
+        "materia": "Sistemas de transmision, direccion, suspension y frenos",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 109,
+        "materia": "Sistemas de alimentacion",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 110,
+        "materia": "Estructura del Vehiculo",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 12,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "5┬░ III - 5┬░ IV",
+        "materia_id": 111,
+        "materia": "Practica Profesionalizante I",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 112,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 113,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 114,
+        "materia": "Marco jur├¡dico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 115,
+        "materia": "Gestion de los procesos productivos",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 116,
+        "materia": "Ensayo de aeronaves",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 117,
+        "materia": "Avionica",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 118,
+        "materia": "Motores aeronauticos II",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 119,
+        "materia": "Anteproyecto de aeronaves",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 120,
+        "materia": "Proyecto de instalaciones de motores aeronauticos",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 121,
+        "materia": "Proyecto de instalaciones de sistemas aeronauticos",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 13,
+        "tecnicatura": "Tecnicatura en Aeronautica",
+        "curso": "6┬░ I",
+        "materia_id": 122,
+        "materia": "Practica Profesionalizante II",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 123,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 124,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 125,
+        "materia": "Marco jur├¡dico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 126,
+        "materia": "Gestion de los procesos productivos",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 127,
+        "materia": "Proyecto y dise├▒o electronico",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 128,
+        "materia": "Sistemas de electronica de potencia",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 129,
+        "materia": "Sistemas de electronica industrial",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 130,
+        "materia": "Sistemas de electronica de control",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 131,
+        "materia": "Sistemas de comunicaciones II",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 132,
+        "materia": "Dise├▒o y construccion de prototipos electronicos digitales II",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 14,
+        "tecnicatura": "Tecnicatura en Electronica",
+        "curso": "6┬░ II",
+        "materia_id": 133,
+        "materia": "Practica Profesionalizante II",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 134,
+        "materia": "Lengua extranjera - Ingles Tecnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 135,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 136,
+        "materia": "Marco jur├¡dico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 137,
+        "materia": "Gestion de los procesos productivos",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 138,
+        "materia": "Verificacion y mantenimiento de motores",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 139,
+        "materia": "Ver y mant. de sistemas de alimentacion",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 140,
+        "materia": "Verificacion y mantenimiento de instalaciones electrico-electronicas",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 141,
+        "materia": "Ver y mant. de sist. de transmisi├│n, direc, suspensi├│n y frenos",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 142,
+        "materia": "Proy. y ensayo de componentes, sist. e instalaciones del automotor",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 143,
+        "materia": "Dise├▒o y construccion de prototipos electronicos digitales II",
+        "tipo": "modular",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 15,
+        "tecnicatura": "Tecnicatura en Automotores",
+        "curso": "6┬░ III",
+        "materia_id": 144,
+        "materia": "Practica Profesionalizante II",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 158,
+        "materia": "Lengua y Literatura",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 159,
+        "materia": "Geografia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 160,
+        "materia": "Historia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 161,
+        "materia": "Lengua extranjera - Ingl├®s",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 162,
+        "materia": "Biologia",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 163,
+        "materia": "Formacion Etica y Ciudadana",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 164,
+        "materia": "Educacion Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 165,
+        "materia": "Matematica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 166,
+        "materia": "Fisica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 167,
+        "materia": "Quimica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 168,
+        "materia": "Educacion Tecnologica",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 169,
+        "materia": "Inform├ítica t├®cnica aplicada",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 170,
+        "materia": "Dibujo y representaci├│n t├®cnico",
+        "tipo": "comun",
+        "es_taller": 0
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 175,
+        "materia": "Electricidad II",
+        "tipo": "comun",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 176,
+        "materia": "Soldadura",
+        "tipo": "comun",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 177,
+        "materia": "Automotores",
+        "tipo": "comun",
+        "es_taller": 1
+      },
+      {
+        "tec_id": 16,
+        "tecnicatura": "Ciclo Basico",
+        "curso": "2┬░",
+        "materia_id": 178,
+        "materia": "Materiales Aeronauticos",
+        "tipo": "comun",
+        "es_taller": 1
+      }
+    ],
+    "success": true,
+    "meta": {
+      "served_by": "v3-prod",
+      "served_by_region": "ENAM",
+      "served_by_colo": "EWR",
+      "served_by_primary": true,
+      "timings": {
+        "sql_duration_ms": 0.9752
+      },
+      "duration": 0.9752,
+      "changes": 0,
+      "last_row_id": 0,
+      "changed_db": false,
+      "size_after": 1593344,
+      "rows_read": 528,
+      "rows_written": 0,
+      "total_attempts": 1
+    }
+  }
+]

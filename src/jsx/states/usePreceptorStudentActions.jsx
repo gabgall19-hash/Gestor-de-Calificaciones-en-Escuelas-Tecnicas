@@ -109,7 +109,8 @@ export default function usePreceptorStudentActions(deps) {
   const updateStudentField = async (student, field, value) => {
     setData((prev) => ({
       ...prev,
-      students: prev.students.map((s) => s.id === student.id ? { ...s, [field]: value } : s)
+      students: prev.students?.map((s) => s.id === student.id ? { ...s, [field]: value } : s) || [],
+      graduates: prev.graduates?.map((s) => s.id === student.id ? { ...s, [field]: value } : s) || []
     }));
     try {
       await post('students', { action: 'update', studentId: student.id, ...student, [field]: value });

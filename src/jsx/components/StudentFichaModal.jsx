@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, Shield, Home, Phone, Mail, Calendar, BookOpen, Save, X, ArrowLeft, History, Image as ImageIcon, Plus, Trash2, Eye, Maximize2, FileText } from 'lucide-react';
 import Modal from '../UI/Modal';
-import { formatDNI } from '../functions/PreceptorHelpers';
+import { formatDNI, simplifyTecName } from '../functions/PreceptorHelpers';
 
 const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, studentForm, setStudentForm, fullPage = false, getHistorial }) => {
   const [historial, setHistorial] = React.useState([]);
@@ -333,33 +333,86 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
                     <th style={{ padding: '12px 16px' }}>Ciclo</th>
                     <th style={{ padding: '12px 16px' }}>Curso</th>
                     <th style={{ padding: '12px 16px' }}>Carrera</th>
+                    <th style={{ padding: '12px 16px' }}>Estado Final</th>
                     <th style={{ padding: '12px 16px' }}>Detalles</th>
                   </tr>
                 </thead>
                 <tbody>
                   {historial.map((h, i) => {
                     const boletin = JSON.parse(h.boletin_data || '[]');
+                    const estadoColor = h.estado_final?.toLowerCase().includes('promovido') ? '#2ecc71' : 
+                                        h.estado_final?.toLowerCase().includes('repitente') ? '#e74c3c' : 
+                                        h.estado_final?.toLowerCase().includes('promocionado') ? '#f1c40f' : 
+                                        '#3498db';
+
+                    // Reusable items calculation
+                    const seen = new Set();
+                    const definitivas = boletin.filter(n => {
+                      if (n.periodo_id !== 10) return false;
+                      const key = n.materia_id || n.materia;
+                      if (seen.has(key)) return false;
+                      seen.add(key);
+                      return true;
+                    });
+                    const items = definitivas.length > 0 ? definitivas : (() => {
+                      const s2 = new Set();
+                      return boletin.filter(n => {
+                        const key = n.materia_id || n.materia;
+                        if (s2.has(key)) return false;
+                        s2.add(key);
+                        return true;
+                      });
+                    })();
+
+                    const failedSubjects = items.filter(n => {
+                      const valStr = n.valor_t || n.definitiva || '';
+                      const numVal = parseFloat(valStr);
+                      return !isNaN(numVal) && numVal > 0 && numVal <= 6;
+                    });
+
                     return (
                       <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                         <td style={{ padding: '12px 16px', fontWeight: 'bold' }}>{h.ciclo_lectivo_nombre}</td>
                         <td style={{ padding: '12px 16px' }}>{h.curso_label}</td>
-                        <td style={{ padding: '12px 16px' }}>{h.tecnicatura_nombre}</td>
+                        <td style={{ padding: '12px 16px' }}>{simplifyTecName(h.tecnicatura_nombre)}</td>
+                        <td style={{ padding: '12px 16px', fontWeight: 'bold', color: estadoColor }}>{h.estado_final || '-'}</td>
                         <td style={{ padding: '12px 16px' }}>
                           <details>
                             <summary style={{ cursor: 'pointer', color: 'var(--primary)', fontSize: '0.8rem' }}>Ver Notas</summary>
                             <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-                              {boletin.length > 0 ? (
+                              {items.length > 0 ? (
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                  {boletin.map((n, ni) => (
-                                    <li key={ni} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
-                                      <span>{n.materia}:</span>
-                                      <span style={{ fontWeight: 'bold' }}>{n.definitiva || '-'}</span>
-                                    </li>
-                                  ))}
+                                  {items.map((n, ni) => {
+                                    const valStr = n.valor_t || n.definitiva || '';
+                                    const numVal = parseFloat(valStr);
+                                    const isFailed = !isNaN(numVal) && numVal > 0 && numVal <= 6;
+                                    return (
+                                      <li key={ni} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px', borderBottom: '1px solid rgba(255,255,255,0.02)', paddingBottom: '2px' }}>
+                                        <span>{n.materia || n.materia_nombre}:</span>
+                                        <span style={{ fontWeight: '800', color: isFailed ? '#ff7675' : '#ced6e0' }}>{valStr || '-'}</span>
+                                      </li>
+                                    );
+                                  })}
                                 </ul>
                               ) : 'Sin notas registradas.'}
                             </div>
                           </details>
+                          
+                          {failedSubjects.length > 0 && (
+                            <details style={{ marginTop: '6px' }}>
+                              <summary style={{ cursor: 'pointer', color: '#ff7675', fontSize: '0.8rem', fontWeight: '600' }}>Ver Previas ({failedSubjects.length})</summary>
+                              <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(255, 118, 117, 0.05)', borderRadius: '8px', border: '1px solid rgba(255, 118, 117, 0.1)' }}>
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                  {failedSubjects.map((n, ni) => (
+                                    <li key={ni} style={{ fontSize: '0.72rem', color: '#ff7675', fontWeight: '700', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                                      <span>{n.materia || n.materia_nombre}</span>
+                                      <span>{n.valor_t || n.definitiva}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </details>
+                          )}
                         </td>
                       </tr>
                     );

@@ -29,7 +29,7 @@ export default function PreceptorModals(props) {
     handleEndCycleConfirm,
     showPreviasModal,
     setShowPreviasModal,
-    savePrevia,
+    savePrevias,
     deletePrevia,
     tecMode,
     setTecMode,
@@ -203,7 +203,8 @@ export default function PreceptorModals(props) {
           student={selectedRacStudent}
           previas={data.previas.filter((previa) => previa.alumno_id === selectedRacStudent.id)}
           subjects={data.allSubjects}
-          onSave={savePrevia}
+          tecnicaturas={data.tecnicaturas}
+          onSave={savePrevias}
           onDelete={deletePrevia}
           onClose={() => {
             setShowPreviasModal(false);
@@ -470,14 +471,18 @@ export default function PreceptorModals(props) {
       {academicYearSummary && (
         <Modal title="Resumen del Año Lectivo" onClose={() => setAcademicYearSummary(null)}>
           <div className="ficha-alumno">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '2rem' }}>
-              <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Alumnos Activos</div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: '#10b981' }}>{academicYearSummary.totals.active}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', marginBottom: '2rem' }}>
+              <div style={{ background: 'rgba(16, 185, 129, 0.08)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.15)', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '4px' }}>Alumnos Activos</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#10b981' }}>{academicYearSummary.totals.active}</div>
               </div>
-              <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '20px', borderRadius: '15px', border: '1px solid rgba(239, 68, 68, 0.2)', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.8rem', opacity: 0.7, marginBottom: '5px' }}>Dados de Pase</div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: '#ef4444' }}>{academicYearSummary.totals.pases}</div>
+              <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.15)', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '4px' }}>Dados de Pase</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#ef4444' }}>{academicYearSummary.totals.pases}</div>
+              </div>
+              <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '12px', borderRadius: '12px', border: '1px solid rgba(245, 158, 11, 0.15)', textAlign: 'center' }}>
+                <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '4px' }}>Repitentes</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: '#f59e0b' }}>{academicYearSummary.totals.repeaters}</div>
               </div>
             </div>
 
@@ -514,11 +519,18 @@ export default function PreceptorModals(props) {
                       <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{c.tecnicatura}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.85rem', fontWeight: '700' }}>
-                        (V: <span style={{ color: '#3498db' }}>{c.males}</span> / M: <span style={{ color: '#e84393' }}>{c.females}</span>)
+                      <div style={{ fontSize: '0.8rem', fontWeight: '700' }}>
+                        Total: <span style={{ color: 'var(--primary)' }}>{c.total_students}</span> 
+                        <span style={{ fontSize: '0.7rem', opacity: 0.6, marginLeft: '8px' }}>
+                          (V: {c.males} / M: {c.females})
+                        </span>
                       </div>
-                      <div style={{ fontSize: '0.75rem', marginTop: '4px', opacity: 0.8 }}>
-                        Repitentes: <span style={{ color: '#f39c12', fontWeight: 'bold' }}>{c.repeaters}</span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'flex-end', marginTop: '6px' }}>
+                        {c.repeaters > 0 && <span style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '4px', color: '#f59e0b' }}>Rep: <strong>{c.repeaters}</strong></span>}
+                        {c.promoted > 0 && <span style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '4px', color: '#3b82f6' }}>Prom: <strong>{c.promoted}</strong></span>}
+                        {c.promoted_with_debt > 0 && <span style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '4px', color: '#6366f1' }}>PromC: <strong>{c.promoted_with_debt}</strong></span>}
+                        {c.graduated_ok > 0 && <span style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.2)', borderRadius: '4px', color: '#8b5cf6' }}>Rec: <strong>{c.graduated_ok}</strong></span>}
+                        {c.graduated_debt > 0 && <span style={{ fontSize: '0.68rem', padding: '2px 6px', background: 'rgba(168, 85, 247, 0.1)', border: '1px solid rgba(168, 85, 247, 0.2)', borderRadius: '4px', color: '#a855f7' }}>Egr: <strong>{c.graduated_debt}</strong></span>}
                       </div>
                     </div>
                   </div>

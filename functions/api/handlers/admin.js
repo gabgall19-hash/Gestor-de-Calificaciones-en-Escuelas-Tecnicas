@@ -164,11 +164,6 @@ export async function handleEndCycle(env, request, userId, body) {
     // Logic for 6th year graduation
     const isGraduation = data.ano === '6°' && egresadoTipo;
     
-    const SABANA_STRING = "Alumno repitente de Ciclo Lectivo 2025 - Importado de la Lista Sabana 2026";
-    const historyLabel = (isRepeater && cycleName === "2025") ? SABANA_STRING : cycleName;
-    
-    statements.push(env.DB.prepare('INSERT INTO historial_escolar (alumno_id, curso_label, tecnicatura_nombre, ciclo_lectivo_nombre, boletin_data) VALUES (?, ?, ?, ?, ?)').bind(s.id, `${data.ano} ${data.division}`, data.tec_nombre, historyLabel, JSON.stringify(grades)));
-    
     let currentYearPending = 0;
     for (const g of grades) {
       const val = g.definitiva ? Number(String(g.definitiva).replace(',', '.')) : 0;
@@ -180,25 +175,38 @@ export async function handleEndCycle(env, request, userId, body) {
     
     const totalPending = currentYearPending + (previasCountMap[s.id] || 0);
 
+    let estadoFinalStr = "";
     if (isGraduation) {
+      estadoFinalStr = `Egresado ${cycleName} (${egresadoTipo})`;
       const obsLabel = `EGRESADO (${egresadoTipo}) - Ciclo ${cycleName}. Alumno de 6to año ${data.division}.`;
       const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
       statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = NULL, estado = 2, egresado_tipo = ?, ciclo_egreso = ? WHERE id = ?').bind(obs, egresadoTipo, cycleName, s.id));
     } else {
-      let obsLabel = "";
       if (isRepeater) {
-        obsLabel = (cycleName === "2025") ? SABANA_STRING : `Alumno repitente de Ciclo Lectivo ${cycleName} (Queda en el mismo curso del año que viene)`;
+        estadoFinalStr = `Repitente ${cycleName}`;
+        const SABANA_STRING = `Alumno repitente de Ciclo Lectivo 2025 - Importado de la Lista Sabana 2026`;
+        const obsLabel = (cycleName === "2025") ? SABANA_STRING : `Alumno repitente de Ciclo Lectivo ${cycleName} (Queda en el mismo curso del año que viene)`;
+        const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
+        statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = ? WHERE id = ?').bind(obs, targetCourseId, s.id));
       } else {
         if (totalPending === 0) {
-          obsLabel = `Alumno pasa de Curso Promovido (Sin materias adeudadas o previas) del curso ${data.ano} ${data.division} (${cycleName})`;
+          estadoFinalStr = `Promovido a ${targetCourseId}`; // We can't easily get the target label here without joining, so we just say Promovido
+          const obsLabel = `Alumno pasa de Curso Promovido (Sin materias adeudadas o previas) del curso ${data.ano} ${data.division} (${cycleName})`;
+          const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
+          statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = ? WHERE id = ?').bind(obs, targetCourseId, s.id));
         } else {
-          obsLabel = `Alumno pasa de Curso Promocionado (Con materias adeudadas o previas) del curso ${data.ano} ${data.division} (${cycleName})`;
+          estadoFinalStr = `Promocionado (Adeuda previas)`;
+          const obsLabel = `Alumno pasa de Curso Promocionado (Con materias adeudadas o previas) del curso ${data.ano} ${data.division} (${cycleName})`;
+          const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
+          statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = ? WHERE id = ?').bind(obs, targetCourseId, s.id));
         }
       }
-      
-      const obs = (data.observaciones ? data.observaciones + "\n" : "") + obsLabel;
-      statements.push(env.DB.prepare('UPDATE alumnos SET observaciones = ?, course_id = ? WHERE id = ?').bind(obs, targetCourseId, s.id));
     }
+
+    const SABANA_STRING = "Alumno repitente de Ciclo Lectivo 2025 - Importado de la Lista Sabana 2026";
+    const historyLabel = (isRepeater && cycleName === "2025") ? SABANA_STRING : cycleName;
+
+    statements.push(env.DB.prepare('INSERT INTO historial_escolar (alumno_id, curso_label, tecnicatura_nombre, ciclo_lectivo_nombre, boletin_data, course_id, estado_final) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(s.id, `${data.ano} ${data.division}`, data.tec_nombre, historyLabel, JSON.stringify(grades), data.course_id, estadoFinalStr));
     
     statements.push(env.DB.prepare('DELETE FROM calificaciones WHERE alumno_id = ?').bind(s.id));
   }

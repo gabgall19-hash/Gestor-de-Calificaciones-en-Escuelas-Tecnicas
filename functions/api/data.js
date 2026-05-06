@@ -33,7 +33,15 @@ export async function onRequestGet({ env, request }) {
     
     if (type === 'historial_escolar') {
       const studentId = url.searchParams.get('studentId') || url.searchParams.get('student_id');
-      const res = await env.DB.prepare('SELECT * FROM historial_escolar WHERE alumno_id = ? ORDER BY id DESC').bind(Number(studentId)).all();
+      const res = await env.DB.prepare(`
+        SELECT h.*, 
+               COALESCE(t.nombre, NULLIF(h.tecnicatura_nombre, 'Tecnicatura'), 'Sin Carrera') as tecnicatura_nombre
+        FROM historial_escolar h
+        LEFT JOIN cursos c ON c.id = h.course_id
+        LEFT JOIN tecnicaturas t ON t.id = c.tecnicatura_id
+        WHERE h.alumno_id = ? 
+        ORDER BY h.id DESC
+      `).bind(Number(studentId)).all();
       return json(res.results);
     }
     
@@ -48,14 +56,25 @@ export async function onRequestGet({ env, request }) {
     }
     
     if (type === 'year_summary') {
-      const yearId = url.searchParams.get('yearId');
+      const yearId = toNumber(url.searchParams.get('yearId'));
       
       // Totales generales del año
       const totals = await env.DB.prepare(`
         SELECT 
-          (SELECT COUNT(*) FROM alumnos WHERE estado = 1 AND course_id IN (SELECT id FROM cursos WHERE year_id = ?)) as active,
-          (SELECT COUNT(*) FROM pases WHERE course_id_origen IN (SELECT id FROM cursos WHERE year_id = ?)) as pases
-      `).bind(yearId, yearId).first();
+          (
+            SELECT COUNT(DISTINCT id) FROM (
+              SELECT a.id FROM alumnos a WHERE a.estado = 1 AND a.course_id IN (SELECT id FROM cursos WHERE year_id = ?)
+              UNION
+              SELECT h.alumno_id FROM historial_escolar h WHERE h.course_id IN (SELECT id FROM cursos WHERE year_id = ?)
+            )
+          ) as active,
+          (SELECT COUNT(*) FROM pases WHERE course_id_origen IN (SELECT id FROM cursos WHERE year_id = ?)) as pases,
+          (SELECT COUNT(*) FROM historial_escolar WHERE course_id IN (SELECT id FROM cursos WHERE year_id = ?) AND UPPER(estado_final) LIKE '%REPITENTE%') as repeaters,
+          (SELECT COUNT(*) FROM historial_escolar WHERE course_id IN (SELECT id FROM cursos WHERE year_id = ?) AND UPPER(estado_final) LIKE '%PROMOVIDO%') as promoted,
+          (SELECT COUNT(*) FROM historial_escolar WHERE course_id IN (SELECT id FROM cursos WHERE year_id = ?) AND UPPER(estado_final) LIKE '%PROMOCIONADO%') as promoted_with_debt,
+          (SELECT COUNT(*) FROM historial_escolar WHERE course_id IN (SELECT id FROM cursos WHERE year_id = ?) AND UPPER(estado_final) LIKE '%RECIBIDO%') as graduated_ok,
+          (SELECT COUNT(*) FROM historial_escolar WHERE course_id IN (SELECT id FROM cursos WHERE year_id = ?) AND UPPER(estado_final) LIKE '%EGRESADO%' AND UPPER(estado_final) NOT LIKE '%RECIBIDO%') as graduated_debt
+      `).bind(yearId, yearId, yearId, yearId, yearId, yearId, yearId, yearId).first();
 
       // Detalles por curso
       const courses = await env.DB.prepare(`
@@ -63,18 +82,66 @@ export async function onRequestGet({ env, request }) {
           c.id,
           (c.ano || ' ' || c.division || ' ' || c.turno) as label,
           t.nombre as tecnicatura,
-          COUNT(CASE WHEN a.genero = 'Masculino' AND a.estado = 1 THEN 1 END) as males,
-          COUNT(CASE WHEN a.genero = 'Femenino' AND a.estado = 1 THEN 1 END) as females,
           (
+            SELECT COUNT(DISTINCT al.id) 
+            FROM alumnos al 
+            WHERE al.course_id = c.id AND al.estado = 1 AND UPPER(COALESCE(al.genero, '')) = 'MASCULINO'
+          ) + (
             SELECT COUNT(DISTINCT h.alumno_id) 
             FROM historial_escolar h 
             JOIN alumnos al ON h.alumno_id = al.id
-            WHERE al.course_id = c.id
-            AND h.ciclo_lectivo_nombre LIKE '%repitente%'
-          ) as repeaters
+            WHERE h.course_id = c.id AND UPPER(COALESCE(al.genero, '')) = 'MASCULINO'
+          ) as males,
+          (
+            SELECT COUNT(DISTINCT al.id) 
+            FROM alumnos al 
+            WHERE al.course_id = c.id AND al.estado = 1 AND UPPER(COALESCE(al.genero, '')) = 'FEMENINO'
+          ) + (
+            SELECT COUNT(DISTINCT h.alumno_id) 
+            FROM historial_escolar h 
+            JOIN alumnos al ON h.alumno_id = al.id
+            WHERE h.course_id = c.id AND UPPER(COALESCE(al.genero, '')) = 'FEMENINO'
+          ) as females,
+          (
+            SELECT COUNT(DISTINCT id) FROM (
+              SELECT al.id FROM alumnos al WHERE al.course_id = c.id AND al.estado = 1
+              UNION
+              SELECT h.alumno_id FROM historial_escolar h WHERE h.course_id = c.id
+            )
+          ) as total_students,
+          (
+            SELECT COUNT(DISTINCT h.alumno_id) 
+            FROM historial_escolar h 
+            WHERE h.course_id = c.id
+            AND UPPER(h.estado_final) LIKE '%REPITENTE%'
+          ) as repeaters,
+          (
+            SELECT COUNT(DISTINCT h.alumno_id) 
+            FROM historial_escolar h 
+            WHERE h.course_id = c.id
+            AND UPPER(h.estado_final) LIKE '%PROMOVIDO%'
+          ) as promoted,
+          (
+            SELECT COUNT(DISTINCT h.alumno_id) 
+            FROM historial_escolar h 
+            WHERE h.course_id = c.id
+            AND UPPER(h.estado_final) LIKE '%PROMOCIONADO%'
+          ) as promoted_with_debt,
+          (
+            SELECT COUNT(DISTINCT h.alumno_id) 
+            FROM historial_escolar h 
+            WHERE h.course_id = c.id
+            AND UPPER(h.estado_final) LIKE '%RECIBIDO%'
+          ) as graduated_ok,
+          (
+            SELECT COUNT(DISTINCT h.alumno_id) 
+            FROM historial_escolar h 
+            WHERE h.course_id = c.id
+            AND UPPER(h.estado_final) LIKE '%EGRESADO%' 
+            AND UPPER(h.estado_final) NOT LIKE '%RECIBIDO%'
+          ) as graduated_debt
         FROM cursos c
         JOIN tecnicaturas t ON c.tecnicatura_id = t.id
-        LEFT JOIN alumnos a ON c.id = a.course_id
         WHERE c.year_id = ?
         GROUP BY c.id, c.ano, c.division, c.turno, t.nombre
         ORDER BY c.ano, c.division

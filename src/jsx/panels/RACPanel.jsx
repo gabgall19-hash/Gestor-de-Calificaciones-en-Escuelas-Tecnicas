@@ -152,6 +152,9 @@ const RACPanel = ({
                         <button className="icon-btn" style={{ background: 'rgba(99,102,241,0.1)', color: 'var(--primary)', width: '32px', height: '32px' }} onClick={() => setViewingFichaStudent(student)} title="Ver Ficha y Editar">
                           <FileText size={16} />
                         </button>
+                        <button className="icon-btn" style={{ background: 'rgba(52,152,219,0.1)', color: '#3498db', width: '32px', height: '32px' }} onClick={() => onPreviewStudent && onPreviewStudent(student.dni)} title="Ver Boletín (RAC)">
+                          <Eye size={16} />
+                        </button>
                         <button className="btn" style={{ padding: '6px 12px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)' }} onClick={() => { setSelectedRacStudent(student); setShowPreviasModal(true); }}>
                           <Wrench size={14} />
                         </button>

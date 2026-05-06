@@ -409,7 +409,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     handleUpdateRACModular,
     handleUpdatePreceptorMode,
     handleUpdatePasswordMsg,
-    savePrevia,
+    savePrevias,
     deletePrevia,
     handleUpdatePeriods,
     onPrintAllCourses,
@@ -455,7 +455,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     startEndCycle, handleEndCycleConfirm, handleViewFicha, getHistorial, startCreateTec, startEditTec, addTec, editTec, removeTec,
     handleUpdateLocks, handleUpdateSystemMode, handleUpdateMobileLogin, handleUpdateRACModular, handleUpdatePreceptorMode,
     handleUpdatePasswordMsg,
-    duplicateTec, savePrevia, deletePrevia, page, setPage, handleUpdatePeriods,
+    duplicateTec, savePrevias, deletePrevia, page, setPage, handleUpdatePeriods,
     onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC_Student, onPrintRAC_AllStudents, onPrintParteDiario, onPrintParteDiarioGlobal, onPrintParteConInformacion,
     academicYearSummary, setAcademicYearSummary, getYearSummary, populateYearCourses
   };

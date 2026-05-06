@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Printer, FileText, AlertCircle } from 'lucide-react';
 
-export default function StudentView({ dni, password, onBack, isStaff }) {
+export default function StudentView({ dni, password, year, onBack, isStaff }) {
   useEffect(() => {
     const handleContextMenu = (e) => e.preventDefault();
     const handleKeyDown = (e) => {
@@ -57,7 +57,12 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
       }
     }
 
-    fetch(`/api/student?dni=${cleanDNI}&password=${password || ''}`, { headers })
+    let url = `/api/student?dni=${cleanDNI}&password=${password || ''}`;
+    if (year) {
+      url += `&year=${encodeURIComponent(year)}`;
+    }
+
+    fetch(url, { headers })
       .then(res => {
         const newToken = res.headers.get('X-Refresh-Token');
         if (newToken) {
@@ -108,7 +113,7 @@ export default function StudentView({ dni, password, onBack, isStaff }) {
 
   const getGradeValue = (materiaId, periodoId, field) => {
     const grade = data.grades.find(g => g.materia_id === materiaId && g.periodo_id === periodoId);
-    return grade ? grade[field] : '-';
+    return grade ? (grade[field] ?? '-') : '-';
   };
 
   const shortenPeriodName = (name) => {

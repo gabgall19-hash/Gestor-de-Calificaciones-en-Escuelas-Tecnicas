@@ -169,11 +169,41 @@ export async function handlePrevias(env, request, userId, body) {
   if (user.rol === 'profesor' && !user.is_professor_hybrid) {
      throw new Error('No tienes permiso para gestionar materias previas.');
   }
-  const { action, id, alumno_id, materia_id, materia_nombre_custom, curso_ano, libro, folio, calificacion, fecha, estado } = body;
+  const { action, id, updates } = body;
   if (action === 'delete') {
     await env.DB.prepare('DELETE FROM previas WHERE id = ?').bind(id).run();
     return json({ success: true });
   }
+
+  if (updates && Array.isArray(updates)) {
+    const statements = [];
+    for (const u of updates) {
+      if (u.id) {
+        statements.push(
+          env.DB.prepare(
+            `UPDATE previas SET 
+             materia_id = ?, materia_nombre_custom = ?, curso_ano = ?, libro = ?, folio = ?, 
+             calificacion = ?, fecha = ?, estado = ?
+             WHERE id = ?`
+          ).bind(u.materia_id || null, u.materia_nombre_custom || null, u.curso_ano || null, u.libro || null, u.folio || null, u.calificacion || null, u.fecha || null, u.estado || 'pendiente', u.id)
+        );
+      } else {
+        statements.push(
+          env.DB.prepare(
+            `INSERT INTO previas (alumno_id, materia_id, materia_nombre_custom, curso_ano, libro, folio, calificacion, fecha, estado)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ).bind(u.alumno_id, u.materia_id || null, u.materia_nombre_custom || null, u.curso_ano || null, u.libro || null, u.folio || null, u.calificacion || null, u.fecha || null, u.estado || 'pendiente')
+        );
+      }
+    }
+    if (statements.length > 0) {
+      await env.DB.batch(statements);
+    }
+    return json({ success: true });
+  }
+
+  // Fallback for old single update/insert just in case
+  const { alumno_id, materia_id, materia_nombre_custom, curso_ano, libro, folio, calificacion, fecha, estado } = body;
   if (action === 'update' || id) {
     await env.DB.prepare(
       `UPDATE previas SET 

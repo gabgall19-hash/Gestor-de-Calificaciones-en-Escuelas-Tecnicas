@@ -81,18 +81,28 @@ export default function usePreceptorConfigActions(deps) {
     }
   };
 
-  const savePrevia = async (previaData) => {
+  const savePrevias = async (previasArray, deletedIds = []) => {
     try {
-      await post('previas', ...[{ ...previaData, userId: user.id }]);
-      showToast(previaData.id ? 'Previa actualizada' : 'Previa agregada', 'success');
+      setLoading(true);
+      // Perform deletions first
+      if (deletedIds.length > 0) {
+        for (const id of deletedIds) {
+          await post('previas', { action: 'delete', id, userId: user.id });
+        }
+      }
+      // Then perform updates/inserts
+      await post('previas', { updates: previasArray, userId: user.id });
+      
+      showToast('Cambios guardados correctamente', 'success');
       await loadData(selectedCourseId, selectedYearId);
     } catch (err) {
       alert(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const deletePrevia = async (previaId) => {
-    if (!window.confirm('Â¿Seguro que deseas eliminar esta previa?')) return;
     try {
       await post('previas', { action: 'delete', id: previaId, userId: user.id });
       showToast('Previa eliminada', 'success');
@@ -184,7 +194,7 @@ export default function usePreceptorConfigActions(deps) {
     handleUpdateRACModular,
     handleUpdatePreceptorMode,
     handleUpdatePasswordMsg,
-    savePrevia,
+    savePrevias,
     deletePrevia,
     handleUpdatePeriods,
     onPrintAllCourses,

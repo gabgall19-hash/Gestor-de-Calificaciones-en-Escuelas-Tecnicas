@@ -144,7 +144,7 @@ export async function handleStudents(env, request, userId, body) {
   }
 
   if (action === 'update') {
-    const student = await env.DB.prepare('SELECT course_id FROM alumnos WHERE id = ?').bind(studentId).first();
+    const student = await env.DB.prepare('SELECT * FROM alumnos WHERE id = ?').bind(studentId).first();
     if (!student) throw new Error('Alumno no encontrado');
     if (user.rol !== 'admin' && user.rol !== 'secretaria_de_alumnos' && user.rol !== 'jefe_de_auxiliares' && user.rol !== 'director' && user.rol !== 'vicedirector') {
       if (Number(user.preceptor_course_id) !== student.course_id && !(user.rol === 'profesor' && user.is_professor_hybrid && Number(user.preceptor_course_id) === student.course_id)) {
@@ -153,30 +153,69 @@ export async function handleStudents(env, request, userId, body) {
     }
     const { 
       nombre, apellido, dni, genero, matricula, libro, folio, legajo, estado, observaciones,
-      cuil, fecha_nacimiento, edad, tutor_nombre, tutor_parentesco, tutor_dni, tutor_contacto, tutor_mail, domicilio
+      cuil, fecha_nacimiento, edad, tutor_nombre, tutor_parentesco, tutor_dni, tutor_contacto, tutor_mail, domicilio,
+      egresado_tipo
     } = body;
-    const finalDni = (dni && dni.trim() !== '') ? dni : null;
+    
+    const finalDni = (dni && String(dni).trim() !== '') ? dni : (body.hasOwnProperty('dni') ? null : student.dni);
     if (finalDni && !validateDNI(finalDni)) throw new Error('El DNI debe tener 7 u 8 dígitos numéricos.');
     if (cuil && !validateCUIL(cuil)) throw new Error('El CUIL debe tener 11 dígitos numéricos.');
     if (tutor_dni && !validateDNI(tutor_dni)) throw new Error('El DNI del tutor debe tener 7 u 8 dígitos numéricos.');
     if (tutor_mail && !validateEmail(tutor_mail)) throw new Error('El Email del tutor no tiene un formato válido.');
-    const finalNombre = toTitleCase(nombre);
-    const finalApellido = toTitleCase(apellido);
+    
+    const finalNombre = toTitleCase(nombre || student.nombre);
+    const finalApellido = toTitleCase(apellido || student.apellido);
+    
     await env.DB.prepare(
       `UPDATE alumnos SET 
         nombre = ?, apellido = ?, dni = ?, genero = ?, matricula = ?, 
         libro = ?, folio = ?, legajo = ?, estado = ?, observaciones = ?,
         cuil = ?, fecha_nacimiento = ?, edad = ?, tutor_nombre = ?, 
         tutor_parentesco = ?, tutor_dni = ?, tutor_contacto = ?, 
-        tutor_mail = ?, domicilio = ?
+        tutor_mail = ?, domicilio = ?, egresado_tipo = ?, ciclo_egreso = ?
       WHERE id = ?`
     ).bind(
-      finalNombre, finalApellido, finalDni, genero, matricula, 
-      libro, folio, legajo, estado !== undefined ? estado : 1, observaciones || '',
-      cuil || null, fecha_nacimiento || null, edad || null, tutor_nombre || null,
-      tutor_parentesco || null, tutor_dni || null, tutor_contacto || null,
-      tutor_mail || null, domicilio || null, studentId
+      finalNombre, 
+      finalApellido, 
+      finalDni, 
+      genero !== undefined ? genero : student.genero,
+      matricula !== undefined ? matricula : student.matricula, 
+      libro !== undefined ? libro : student.libro, 
+      folio !== undefined ? folio : student.folio, 
+      legajo !== undefined ? legajo : student.legajo, 
+      estado !== undefined ? estado : student.estado, 
+      observaciones !== undefined ? observaciones : (student.observaciones || ''),
+      cuil !== undefined ? cuil : student.cuil, 
+      fecha_nacimiento !== undefined ? fecha_nacimiento : student.fecha_nacimiento, 
+      edad !== undefined ? edad : student.edad, 
+      tutor_nombre !== undefined ? tutor_nombre : student.tutor_nombre,
+      tutor_parentesco !== undefined ? tutor_parentesco : student.tutor_parentesco, 
+      tutor_dni !== undefined ? tutor_dni : student.tutor_dni, 
+      tutor_contacto !== undefined ? tutor_contacto : student.tutor_contacto,
+      tutor_mail !== undefined ? tutor_mail : student.tutor_mail, 
+      domicilio !== undefined ? domicilio : student.domicilio,
+      egresado_tipo !== undefined ? egresado_tipo : student.egresado_tipo,
+      body.ciclo_egreso !== undefined ? body.ciclo_egreso : student.ciclo_egreso,
+      studentId
     ).run();
+
+    // Update historial_escolar (for RAC and History display) if egresado status changed
+    if (egresado_tipo !== undefined || body.ciclo_egreso !== undefined) {
+      const finalType = egresado_tipo !== undefined ? egresado_tipo : student.egresado_tipo;
+      const finalCycle = body.ciclo_egreso !== undefined ? body.ciclo_egreso : student.ciclo_egreso;
+      const sid = Number(studentId);
+
+      if (finalType && finalCycle && !isNaN(sid)) {
+        const newEstado = `${finalType} ${finalCycle}`;
+        await env.DB.prepare(`
+          UPDATE historial_escolar 
+          SET estado_final = ? 
+          WHERE alumno_id = ? 
+          AND (ciclo_lectivo_nombre LIKE ? OR ? LIKE '%' || ciclo_lectivo_nombre || '%')
+        `).bind(newEstado, sid, `%${finalCycle}%`, String(finalCycle)).run();
+      }
+    }
+
     await logHistory(env, userId, student.course_id, 'ficha_edit', `Actualización de ficha de alumno: ${finalApellido}, ${finalNombre}`, studentId);
     return json({ success: true });
   }

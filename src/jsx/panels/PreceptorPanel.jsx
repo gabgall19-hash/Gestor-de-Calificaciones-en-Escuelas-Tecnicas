@@ -151,7 +151,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     handleEndCycleConfirm,
     showPreviasModal,
     selectedRacStudent,
-    savePrevia,
+    savePrevias,
     deletePrevia,
     tecMode,
     setTecMode,
@@ -564,6 +564,10 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           setShowPreviasModal={setShowPreviasModal}
           updateStudentField={updateStudentField}
           setViewingFichaStudent={handleViewFicha}
+          onPreviewStudent={(dni) => {
+            const y = data.academicYears?.find(y => y.id === selectedYearId);
+            onPreviewStudent(dni, y && y.es_actual === 0 ? y.nombre : null);
+          }}
           isSelectionMode={isSelectionMode}
           setIsSelectionMode={setIsSelectionMode}
           selectedStudentIds={selectedStudentIds}
@@ -576,7 +580,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       {page === 'materias' && <AcademicManager isMobile={isMobile} user={user} data={data} selectedCourseId={selectedCourseId} materiasSearch={materiasSearch} setMateriasSearch={setMateriasSearch} handleUpdateLocks={handleUpdateLocks} />}
       {page === 'pases' && <PasesPanel isMobile={isMobile} user={user} data={data} pasesSearch={pasesSearch} setPasesSearch={setPasesSearch} setEditingPase={setEditingPase} undoPase={undoPase} onPreviewStudent={onPreviewStudent} onViewFicha={handleViewFicha} />}
       {page === 'anuncios' && <AnunciosPanel isMobile={isMobile} data={data} post={post} loadData={loadData} />}
-      {page === 'egresados' && <EgresadosPanel data={data} onViewFicha={handleViewFicha} />}
+      {page === 'egresados' && <EgresadosPanel data={data} onViewFicha={handleViewFicha} onUpdateGraduate={updateStudentField} />}
 
       {page === 'settings' && (
         <SettingsPanel
@@ -634,7 +638,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
         handleEndCycleConfirm={handleEndCycleConfirm}
         showPreviasModal={showPreviasModal}
         setShowPreviasModal={setShowPreviasModal}
-        savePrevia={savePrevia}
+        savePrevias={savePrevias}
         deletePrevia={deletePrevia}
         tecMode={tecMode}
         setTecMode={setTecMode}
