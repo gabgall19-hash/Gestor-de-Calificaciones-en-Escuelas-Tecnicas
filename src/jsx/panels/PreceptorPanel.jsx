@@ -191,7 +191,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     setUserError,
     getYearSummary,
     academicYearSummary,
-    setAcademicYearSummary
+    setAcademicYearSummary,
+    populateYearCourses
   } = logic;
 
   const tabs = useMemo(() => {
@@ -616,6 +617,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           getYearSummary={getYearSummary}
           academicYearSummary={academicYearSummary}
           setAcademicYearSummary={setAcademicYearSummary}
+          populateYearCourses={populateYearCourses}
         />
       )}
 

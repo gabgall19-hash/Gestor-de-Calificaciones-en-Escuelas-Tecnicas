@@ -18,7 +18,8 @@ const SettingsPanel = ({
   handleUpdatePasswordMsg,
   setYearAsCurrent, copyYearInfo,
   setUserError,
-  getYearSummary, academicYearSummary, setAcademicYearSummary
+  getYearSummary, academicYearSummary, setAcademicYearSummary,
+  populateYearCourses
 }) => {
   const [userSearch, setUserSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -261,6 +262,24 @@ const SettingsPanel = ({
               </div>
             ))}
           </div>
+          {(data.allCourses || []).length === 0 && (
+            <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(241, 196, 15, 0.08)', border: '1px solid rgba(241, 196, 15, 0.25)', borderRadius: '10px', textAlign: 'center' }}>
+              <p style={{ fontSize: '0.8rem', color: '#f1c40f', marginBottom: '10px', fontWeight: 'bold' }}>⚠️ Este año no tiene cursos asignados.</p>
+              <button
+                className="btn btn-primary"
+                style={{ fontSize: '0.8rem', padding: '8px 20px' }}
+                onClick={() => {
+                  const selectedYear = data.academicYears.find(y => (data.allCourses || []).length === 0 && y.id);
+                  const currentYearId = data.selectedYearId;
+                  if (currentYearId && window.confirm('¿Heredar todos los cursos desde el año activo actual? Los profesores quedarán vacíos.')) {
+                    populateYearCourses(currentYearId);
+                  }
+                }}
+              >
+                📋 Heredar Cursos del Año Activo
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

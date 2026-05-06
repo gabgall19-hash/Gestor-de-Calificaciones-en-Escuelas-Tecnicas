@@ -111,6 +111,86 @@ async function syncProfessorAssignmentsForCourse(env, courseId, gridData) {
   if (updateStatements.length > 0) await env.DB.batch(updateStatements);
 }
 
+// ─── Course Inheritance Helper ───────────────────────────────────────────────
+
+async function inheritCoursesFromActiveYear(env, targetYearId, userId, yearName) {
+  const currentYear = await env.DB.prepare('SELECT id FROM años_lectivos WHERE es_actual = 1 LIMIT 1').first();
+  const sourceYearId = currentYear?.id;
+  if (!sourceYearId || sourceYearId === targetYearId) return 0;
+
+  const sourceCourses = await env.DB.prepare('SELECT * FROM cursos WHERE year_id = ?').bind(sourceYearId).all();
+  if (sourceCourses.results.length === 0) return 0;
+
+  // Create all courses for the target year
+  const courseInserts = sourceCourses.results.map(c =>
+    env.DB.prepare('INSERT INTO cursos (ano, division, turno, tecnicatura_id, year_id, detalle, activo) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id')
+      .bind(c.ano, c.division, c.turno, c.tecnicatura_id, targetYearId, c.detalle || '', c.activo ?? 1)
+  );
+  const insertResults = await env.DB.batch(courseInserts);
+
+  // Build a map: old course id -> new course id
+  const courseIdMap = {};
+  sourceCourses.results.forEach((oldCourse, i) => {
+    const newRow = insertResults[i]?.results?.[0];
+    if (newRow?.id) courseIdMap[oldCourse.id] = newRow.id;
+  });
+
+  // Copy schedule structures with teachers cleared
+  const oldCourseIds = Object.keys(courseIdMap).map(Number);
+  if (oldCourseIds.length > 0) {
+    const placeholders = oldCourseIds.map(() => '?').join(',');
+    const schedules = await env.DB.prepare(
+      `SELECT * FROM course_schedules WHERE course_id IN (${placeholders})`
+    ).bind(...oldCourseIds).all();
+
+    const scheduleInserts = [];
+    for (const sch of schedules.results) {
+      const newCourseId = courseIdMap[sch.course_id];
+      if (!newCourseId) continue;
+
+      let cleanedData = '[]';
+      try {
+        const parsed = JSON.parse(sch.grid_data || '[]');
+        const payload = Array.isArray(parsed)
+          ? { meta: {}, grid: parsed }
+          : { meta: parsed?.meta || {}, grid: Array.isArray(parsed?.grid) ? parsed.grid : [] };
+
+        const cleanGrid = payload.grid.map(row => {
+          if (row?.type === 'break') return row;
+          if (!row?.days) return row;
+          const cleanDays = {};
+          Object.keys(row.days).forEach(day => {
+            const cell = row.days[day];
+            cleanDays[day] = {
+              subject: cell?.subject || '',
+              subject_id: cell?.subject_id || null,
+              subject_logical_id: cell?.subject_logical_id || null,
+              teacher: '',
+              teacher_id: null
+            };
+          });
+          return { ...row, days: cleanDays };
+        });
+
+        const cleanMeta = { ...payload.meta };
+        delete cleanMeta.subjectAssignments;
+        cleanedData = JSON.stringify({ meta: cleanMeta, grid: cleanGrid });
+      } catch (e) {
+        cleanedData = '[]';
+      }
+
+      scheduleInserts.push(
+        env.DB.prepare('INSERT INTO course_schedules (course_id, grid_data) VALUES (?, ?) ON CONFLICT(course_id) DO UPDATE SET grid_data = excluded.grid_data')
+          .bind(newCourseId, cleanedData)
+      );
+    }
+    if (scheduleInserts.length > 0) await env.DB.batch(scheduleInserts);
+  }
+
+  await logHistory(env, userId, null, 'gestion_cursos', `Año ${yearName} poblado con ${sourceCourses.results.length} cursos heredados del año activo.`);
+  return sourceCourses.results.length;
+}
+
 // ─── Handlers ────────────────────────────────────────────────────────────────
 
 export async function handleCourses(env, request, userId, body) {
@@ -183,92 +263,19 @@ export async function handleYears(env, request, userId, body) {
     if (statements.length) await env.DB.batch(statements);
     return json({ success: true });
   }
+  if (action === 'populate_courses') {
+    const existingCourses = await env.DB.prepare('SELECT COUNT(*) as count FROM cursos WHERE year_id = ?').bind(yearId).first('count');
+    if (existingCourses > 0) return json({ error: 'Este año ya tiene cursos asignados.' }, 400);
+    const yearRow = await env.DB.prepare('SELECT nombre FROM años_lectivos WHERE id = ?').bind(yearId).first();
+    const count = await inheritCoursesFromActiveYear(env, yearId, userId, yearRow?.nombre || '');
+    return json({ success: true, coursesCreated: count });
+  }
   const r = await env.DB.prepare('INSERT INTO años_lectivos (nombre, es_actual) VALUES (?, 0) RETURNING *').bind(nombre || body).first();
-  const newYearId = r.id;
 
   // Auto-inherit courses from the current active year
   try {
-    const currentYear = await env.DB.prepare('SELECT id FROM años_lectivos WHERE es_actual = 1 LIMIT 1').first();
-    const sourceYearId = currentYear?.id;
-
-    if (sourceYearId && sourceYearId !== newYearId) {
-      const sourceCourses = await env.DB.prepare('SELECT * FROM cursos WHERE year_id = ?').bind(sourceYearId).all();
-
-      if (sourceCourses.results.length > 0) {
-        // Create all courses for the new year
-        const courseInserts = sourceCourses.results.map(c =>
-          env.DB.prepare('INSERT INTO cursos (ano, division, turno, tecnicatura_id, year_id, detalle, activo) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id')
-            .bind(c.ano, c.division, c.turno, c.tecnicatura_id, newYearId, c.detalle || '', c.activo ?? 1)
-        );
-        const insertResults = await env.DB.batch(courseInserts);
-
-        // Build a map: old course id -> new course id
-        const courseIdMap = {};
-        sourceCourses.results.forEach((oldCourse, i) => {
-          const newRow = insertResults[i]?.results?.[0];
-          if (newRow?.id) courseIdMap[oldCourse.id] = newRow.id;
-        });
-
-        // Copy schedule structures with teachers cleared
-        const oldCourseIds = Object.keys(courseIdMap).map(Number);
-        if (oldCourseIds.length > 0) {
-          const placeholders = oldCourseIds.map(() => '?').join(',');
-          const schedules = await env.DB.prepare(
-            `SELECT * FROM course_schedules WHERE course_id IN (${placeholders})`
-          ).bind(...oldCourseIds).all();
-
-          const scheduleInserts = [];
-          for (const sch of schedules.results) {
-            const newCourseId = courseIdMap[sch.course_id];
-            if (!newCourseId) continue;
-
-            // Parse and clear teacher data from grid, keep subjects
-            let cleanedData = '[]';
-            try {
-              const parsed = JSON.parse(sch.grid_data || '[]');
-              const payload = Array.isArray(parsed)
-                ? { meta: {}, grid: parsed }
-                : { meta: parsed?.meta || {}, grid: Array.isArray(parsed?.grid) ? parsed.grid : [] };
-
-              const cleanGrid = payload.grid.map(row => {
-                if (row?.type === 'break') return row;
-                if (!row?.days) return row;
-                const cleanDays = {};
-                Object.keys(row.days).forEach(day => {
-                  const cell = row.days[day];
-                  cleanDays[day] = {
-                    subject: cell?.subject || '',
-                    subject_id: cell?.subject_id || null,
-                    subject_logical_id: cell?.subject_logical_id || null,
-                    teacher: '',
-                    teacher_id: null
-                  };
-                });
-                return { ...row, days: cleanDays };
-              });
-
-              // Clear subjectAssignments from meta (teacher mappings)
-              const cleanMeta = { ...payload.meta };
-              delete cleanMeta.subjectAssignments;
-
-              cleanedData = JSON.stringify({ meta: cleanMeta, grid: cleanGrid });
-            } catch (e) {
-              cleanedData = '[]';
-            }
-
-            scheduleInserts.push(
-              env.DB.prepare('INSERT INTO course_schedules (course_id, grid_data) VALUES (?, ?) ON CONFLICT(course_id) DO UPDATE SET grid_data = excluded.grid_data')
-                .bind(newCourseId, cleanedData)
-            );
-          }
-          if (scheduleInserts.length > 0) await env.DB.batch(scheduleInserts);
-        }
-
-        await logHistory(env, userId, null, 'gestion_cursos', `Año ${nombre} creado con ${sourceCourses.results.length} cursos heredados del año activo.`);
-      }
-    }
+    await inheritCoursesFromActiveYear(env, r.id, userId, nombre || '');
   } catch (inheritError) {
-    // Non-critical: if inheritance fails, the year is still created successfully
     console.error('Course inheritance error:', inheritError);
   }
 

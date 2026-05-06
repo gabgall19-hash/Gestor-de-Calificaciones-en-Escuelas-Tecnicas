@@ -369,7 +369,8 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     editTec,
     removeTec,
     duplicateTec,
-    getYearSummary
+    getYearSummary,
+    populateYearCourses
   } = usePreceptorAdminActions({
     data,
     post,
@@ -456,6 +457,6 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     handleUpdatePasswordMsg,
     duplicateTec, savePrevia, deletePrevia, page, setPage, handleUpdatePeriods,
     onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC_Student, onPrintRAC_AllStudents, onPrintParteDiario, onPrintParteDiarioGlobal, onPrintParteConInformacion,
-    academicYearSummary, setAcademicYearSummary, getYearSummary
+    academicYearSummary, setAcademicYearSummary, getYearSummary, populateYearCourses
   };
 }

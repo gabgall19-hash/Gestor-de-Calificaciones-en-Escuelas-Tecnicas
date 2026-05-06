@@ -297,6 +297,19 @@ export default function usePreceptorAdminActions(deps) {
     }
   };
 
+  const populateYearCourses = async (yearId) => {
+    try {
+      setLoading(true);
+      const res = await post('years', { action: 'populate_courses', yearId });
+      showToast(`${res.coursesCreated} cursos heredados del año activo`, 'success');
+      await loadData(null, yearId);
+    } catch (err) {
+      showToast(err.message || 'Error al poblar cursos', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     prepareEditCourse,
     editCourse,
@@ -318,6 +331,7 @@ export default function usePreceptorAdminActions(deps) {
     editTec,
     removeTec,
     duplicateTec,
-    getYearSummary
+    getYearSummary,
+    populateYearCourses
   };
 }
