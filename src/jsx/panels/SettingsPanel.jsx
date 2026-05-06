@@ -110,11 +110,15 @@ const SettingsPanel = ({
                         <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>
                           · {u.username}
                         </span>
-                        {(u.rol === 'preceptor' || u.rol === 'preceptor_taller' || u.rol === 'preceptor_ef') && u.preceptor_course_id && (
-                          <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold' }}>
-                            · {data.allCourses.find(c => c.id === Number(u.preceptor_course_id))?.label || 'Curso no encontrado'}
-                          </span>
-                        )}
+                        {(u.rol === 'preceptor' || u.rol === 'preceptor_taller' || u.rol === 'preceptor_ef') && u.preceptor_course_id && (() => {
+                          const course = data.allCourses.find(c => c.id === Number(u.preceptor_course_id));
+                          if (!course) return null;
+                          return (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 'bold' }}>
+                              · {course.label}
+                            </span>
+                          );
+                        })()}
                       </div>
                     </div>
                     <div className="student-item-actions">

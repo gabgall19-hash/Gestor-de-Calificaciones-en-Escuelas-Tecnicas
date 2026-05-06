@@ -404,16 +404,20 @@ export default function PreceptorModals(props) {
                       ? userForm.professor_subject_ids 
                       : (userForm.professor_subject_ids || '').split(',').filter(Boolean);
                     
-                    if (pairs.length === 0) return <p style={{ fontSize: '0.85rem', opacity: 0.5, fontStyle: 'italic' }}>Sin materias asignadas en horarios.</p>;
+                    // Filter to only show assignments for courses in the current year
+                    const currentYearCourseIds = new Set((data.allCourses || []).map(c => String(c.id)));
+                    const relevantPairs = pairs.filter(pair => currentYearCourseIds.has(pair.split('-')[0]));
+                    
+                    if (relevantPairs.length === 0) return <p style={{ fontSize: '0.85rem', opacity: 0.5, fontStyle: 'italic' }}>Sin materias asignadas en este año lectivo.</p>;
 
-                    return pairs.map((pair) => {
+                    return relevantPairs.map((pair) => {
                       const [cid, sid] = pair.split('-');
                       const course = data.allCourses.find((item) => String(item.id) === String(cid));
                       const subject = data.allSubjects.find((item) => String(item.id) === String(sid));
                       return (
                         <div key={pair} style={{ fontSize: '0.82rem', padding: '6px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', borderLeft: '3px solid var(--primary)' }}>
                           <strong>{subject?.nombre || 'Materia no encontrada'}</strong>
-                          <div style={{ opacity: 0.6, fontSize: '0.75rem' }}>{course?.label} ({course?.year_nombre})</div>
+                          <div style={{ opacity: 0.6, fontSize: '0.75rem' }}>{course?.label}</div>
                         </div>
                       );
                     });
