@@ -6,6 +6,25 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.6.0] - 2026-05-05 (Automatización de Impresión y Gestión de Suplentes)
+**"Plantillas Horarias Institucionales y Detección Inteligente de Docentes"**
+
+#### ✨ Nuevas Implementaciones y Mejoras
+*   **📋 Plantillas Horarias Dinámicas**: 
+    - Implementación de `HORARIOS_TEMPLATES` que se ajustan automáticamente según el **Turno** (Mañana/Tarde) y el **Ciclo** (Básico/Superior).
+    - Esto garantiza que los bloques horarios (slots) y recreos coincidan exactamente con la estructura horaria oficial de la institución.
+*   **👥 Gestión Avanzada de Suplentes en Impresión**:
+    - **Detección Automática**: El sistema ahora analiza la metadata de asignaciones para identificar docentes suplentes.
+    - **Visualización Dual**: Al imprimir el horario, si existe un suplente, se muestran ambos nombres (Titular y Suplente) de forma clara y profesional.
+*   **📐 Optimización de Espacio A4**:
+    - Cálculo dinámico del alto de filas (`rowHeight`) restando el espacio de los recreos para maximizar la legibilidad en la hoja impresa sin desbordamientos.
+*   **🔄 Migración y Auto-corrección de Datos**:
+    - Nueva lógica que valida y corrige automáticamente la estructura de la grilla al momento de imprimir, asegurando la compatibilidad de horarios antiguos con las nuevas plantillas institucionales.
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   **🩹 Fix de Lógica de Ciclo**: Corrección en la comparación de años escolares (`parseInt`) para una clasificación precisa entre Ciclo Básico y Superior en todos los módulos de impresión.
+
+ 
 ### 🚀 [3.5.9] - 2026-05-04 (Optimización y Experiencia Móvil UI/UX)
 **"Rediseño Responsivo de Horarios y Asistencias"**
 
