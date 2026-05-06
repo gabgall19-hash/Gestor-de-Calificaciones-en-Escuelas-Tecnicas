@@ -23,7 +23,7 @@ export async function handleGrid(env, request, url) {
   // 1. Fetch metadata needed to determine the final course and year
   const [yearsRes, allCoursesRes] = await Promise.all([
     env.DB.prepare(`
-      SELECT y.*, COALESCE(stats.total, 0) as student_count
+      SELECT y.*, (COALESCE(stats.total, 0) + COALESCE(h_stats.total, 0)) as student_count
       FROM años_lectivos y
       LEFT JOIN (
         SELECT c.year_id, COUNT(*) as total
@@ -31,6 +31,12 @@ export async function handleGrid(env, request, url) {
         JOIN cursos c ON a.course_id = c.id
         GROUP BY c.year_id
       ) stats ON stats.year_id = y.id
+      LEFT JOIN (
+        SELECT c.year_id, COUNT(DISTINCT h.alumno_id) as total
+        FROM historial_escolar h
+        JOIN cursos c ON h.course_id = c.id
+        GROUP BY c.year_id
+      ) h_stats ON h_stats.year_id = y.id
       ORDER BY y.nombre DESC
     `).all(),
     env.DB.prepare(`
@@ -118,7 +124,14 @@ export async function handleGrid(env, request, url) {
     // Fetch graduates for high roles
     if (['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector'].includes(userRecord.rol)) {
       idx.graduates = statements.length;
-      statements.push(env.DB.prepare(`SELECT id, nombre, apellido, dni, estado, egresado_tipo, ciclo_egreso, observaciones FROM alumnos WHERE estado = 2 ORDER BY ciclo_egreso DESC, apellido, nombre`));
+      statements.push(env.DB.prepare(`
+        SELECT a.id, a.nombre, a.apellido, a.dni, a.estado, a.egresado_tipo, a.ciclo_egreso, a.observaciones,
+               COALESCE(
+                 (SELECT t.nombre FROM historial_escolar h JOIN cursos c ON c.id = h.course_id JOIN tecnicaturas t ON t.id = c.tecnicatura_id WHERE h.alumno_id = a.id AND h.ciclo_lectivo_nombre = a.ciclo_egreso LIMIT 1),
+                 (SELECT h.tecnicatura_nombre FROM historial_escolar h WHERE h.alumno_id = a.id AND h.ciclo_lectivo_nombre = a.ciclo_egreso LIMIT 1)
+               ) as tecnicatura_nombre
+        FROM alumnos a WHERE a.estado = 2 ORDER BY a.ciclo_egreso DESC, a.apellido, a.nombre
+      `));
     }
   } else {
     idx.reportUsers = statements.length;
@@ -126,14 +139,63 @@ export async function handleGrid(env, request, url) {
   }
 
   if (finalCourseId) {
+    const isPastCourse = (() => {
+      const c = (allCoursesRes.results || []).find(x => x.id === finalCourseId);
+      if (!c) return false;
+      const y = (yearsRes.results || []).find(x => x.id === c.year_id);
+      return y && y.es_actual === 0;
+    })();
+
     idx.students = statements.length;
-    statements.push(env.DB.prepare(`SELECT a.*, c.ano, c.division, c.turno, c.year_id, c.tecnicatura_id, y.nombre AS year_nombre, t.nombre AS tecnicatura_nombre, (c.ano || ' ' || c.division || ' · ' || c.turno) AS course_label, rotacion FROM alumnos a JOIN cursos c ON c.id = a.course_id JOIN años_lectivos y ON y.id = c.year_id JOIN tecnicaturas t ON t.id = c.tecnicatura_id WHERE a.course_id = ? AND a.estado = 1 ORDER BY a.apellido, a.nombre`).bind(finalCourseId));
-    idx.locks = statements.length;
-    statements.push(env.DB.prepare('SELECT * FROM bloqueos_materias WHERE course_id = ?').bind(finalCourseId));
-    idx.grades = statements.length;
-    statements.push(env.DB.prepare('SELECT * FROM calificaciones WHERE alumno_id IN (SELECT id FROM alumnos WHERE course_id = ?)').bind(finalCourseId));
-    idx.previas = statements.length;
-    statements.push(env.DB.prepare(`SELECT p.*, m.nombre as materia_nombre FROM previas p LEFT JOIN materias m ON m.id = p.materia_id WHERE p.alumno_id IN (SELECT id FROM alumnos WHERE course_id = ?)`).bind(finalCourseId));
+    if (isPastCourse) {
+      statements.push(env.DB.prepare(`
+        SELECT a.id, a.nombre, a.apellido, a.dni, a.genero, h.course_id, a.password,
+               c.ano, c.division, c.turno, c.year_id, c.tecnicatura_id, 
+               y.nombre AS year_nombre, t.nombre AS tecnicatura_nombre, 
+               (c.ano || ' ' || c.division || ' · ' || c.turno) AS course_label, 
+               a.rotacion, h.estado_final as observaciones, 1 as estado, h.boletin_data 
+        FROM historial_escolar h 
+        JOIN alumnos a ON a.id = h.alumno_id 
+        JOIN cursos c ON c.id = h.course_id 
+        JOIN años_lectivos y ON y.id = c.year_id 
+        JOIN tecnicaturas t ON t.id = c.tecnicatura_id 
+        WHERE h.course_id = ? ORDER BY a.apellido, a.nombre
+      `).bind(finalCourseId));
+      
+      idx.locks = statements.length;
+      statements.push(env.DB.prepare('SELECT * FROM bloqueos_materias WHERE course_id = ?').bind(finalCourseId));
+      idx.grades = statements.length;
+      statements.push(env.DB.prepare('SELECT 1 as dummy WHERE 0=1')); // Empty for past years in grid
+      idx.previas = statements.length;
+      statements.push(env.DB.prepare(`
+        SELECT p.*, m.nombre as materia_nombre 
+        FROM previas p LEFT JOIN materias m ON m.id = p.materia_id 
+        WHERE p.alumno_id IN (SELECT alumno_id FROM historial_escolar WHERE course_id = ?)
+      `).bind(finalCourseId));
+    } else {
+      statements.push(env.DB.prepare(`
+        SELECT a.*, c.ano, c.division, c.turno, c.year_id, c.tecnicatura_id, 
+               y.nombre AS year_nombre, t.nombre AS tecnicatura_nombre, 
+               (c.ano || ' ' || c.division || ' · ' || c.turno) AS course_label, rotacion 
+        FROM alumnos a 
+        JOIN cursos c ON c.id = a.course_id 
+        JOIN años_lectivos y ON y.id = c.year_id 
+        JOIN tecnicaturas t ON t.id = c.tecnicatura_id 
+        WHERE a.course_id = ? AND a.estado = 1 ORDER BY a.apellido, a.nombre
+      `).bind(finalCourseId));
+      
+      idx.locks = statements.length;
+      statements.push(env.DB.prepare('SELECT * FROM bloqueos_materias WHERE course_id = ?').bind(finalCourseId));
+      idx.grades = statements.length;
+      statements.push(env.DB.prepare('SELECT * FROM calificaciones WHERE alumno_id IN (SELECT id FROM alumnos WHERE course_id = ?)').bind(finalCourseId));
+      idx.previas = statements.length;
+      statements.push(env.DB.prepare(`
+        SELECT p.*, m.nombre as materia_nombre 
+        FROM previas p LEFT JOIN materias m ON m.id = p.materia_id 
+        WHERE p.alumno_id IN (SELECT id FROM alumnos WHERE course_id = ?)
+      `).bind(finalCourseId));
+    }
+
     idx.historial = statements.length;
     statements.push(env.DB.prepare(`SELECT h.*, u.nombre as usuario_nombre, u.rol as usuario_rol, a.apellido as alumno_apellido, a.nombre as alumno_nombre FROM historial h LEFT JOIN usuarios u ON u.id = h.usuario_id LEFT JOIN alumnos a ON a.id = h.alumno_id WHERE h.course_id = ? OR h.course_id IS NULL ORDER BY h.fecha DESC LIMIT 100`).bind(finalCourseId));
   }
@@ -150,7 +212,30 @@ export async function handleGrid(env, request, url) {
 
   const courseStudents = idx.students !== -1 ? results[idx.students].results : [];
   const locks = idx.locks !== -1 ? results[idx.locks].results : [];
-  const grades = idx.grades !== -1 ? results[idx.grades].results : [];
+  let grades = idx.grades !== -1 ? results[idx.grades].results : [];
+  
+  if (courseStudents.length > 0 && courseStudents[0].boletin_data !== undefined) {
+    grades = [];
+    courseStudents.forEach(s => {
+      if (s.boletin_data) {
+        try {
+          const arr = JSON.parse(s.boletin_data);
+          arr.forEach(g => {
+            const val = g.valor_t ?? g.definitiva ?? '';
+            grades.push({
+              alumno_id: s.id,
+              materia_id: g.materia_id,
+              periodo_id: g.periodo_id || 10,
+              valor_t: val,
+              valor_p: g.valor_p ?? '',
+              valor_pond: g.valor_pond ?? val
+            });
+          });
+        } catch(e) {}
+      }
+      delete s.boletin_data;
+    });
+  }
   const previas = idx.previas !== -1 ? results[idx.previas].results : [];
   const historial = idx.historial !== -1 ? results[idx.historial].results : [];
 
