@@ -67,6 +67,14 @@ export async function handleGrid(env, request, url) {
 
   const allCoursesRaw = allCoursesRes.results;
   const allCoursesForYear = allCoursesRaw.filter(c => c.year_id === finalYearId).map(c => ({ ...c, label: `${c.ano} ${c.division} · ${c.turno}` }));
+
+  // Compute next year courses for End Cycle destination
+  const selectedYearName = selectedYear?.nombre;
+  const nextYearName = selectedYearName ? String(Number(selectedYearName) + 1) : null;
+  const nextYear = nextYearName ? yearsRes.results.find(y => y.nombre === nextYearName) : null;
+  const nextYearCourses = nextYear
+    ? allCoursesRaw.filter(c => c.year_id === nextYear.id).map(c => ({ ...c, label: `${c.ano} ${c.division} · ${c.turno}` }))
+    : [];
   
   let accessibleCourses = allCoursesForYear;
   if (!HIGH_ROLES.includes(userRecord.rol)) {
@@ -171,6 +179,7 @@ export async function handleGrid(env, request, url) {
     selectedCourseId: finalCourseId,
     selectedTecnicaturaId: selectedTecnicaturaId,
     selectedCourse: selectedCourse,
+    nextYearCourses,
     version: SYSTEM_VERSION
   });
 

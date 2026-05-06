@@ -160,13 +160,19 @@ export default function PreceptorModals(props) {
 
                   {!endCycleForm.isRepeater ? (
                     <div style={{ marginTop: '1rem' }}>
-                      <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', opacity: 0.7 }}>Curso Destino</label>
-                      <select className="input-field" value={endCycleForm.targetCourseId || ''} onChange={(e) => setEndCycleForm((prev) => ({ ...prev, targetCourseId: e.target.value }))}>
-                        <option value="">-- Seleccionar curso destino --</option>
-                        {(data.allCourses ?? []).map((course) => (
-                          <option key={course.id} value={course.id}>{course.year_nombre} · {course.label} · {course.tecnicatura_nombre}</option>
-                        ))}
-                      </select>
+                      <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', opacity: 0.7 }}>Curso Destino (Año Siguiente)</label>
+                      {(data.nextYearCourses || []).length > 0 ? (
+                        <select className="input-field" value={endCycleForm.targetCourseId || ''} onChange={(e) => setEndCycleForm((prev) => ({ ...prev, targetCourseId: e.target.value }))}>
+                          <option value="">-- Seleccionar Curso --</option>
+                          {(data.nextYearCourses).map((course) => (
+                            <option key={course.id} value={course.id}>{course.year_nombre} · {course.label} · {course.tecnicatura_nombre}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div style={{ padding: '12px', background: 'rgba(241, 196, 15, 0.08)', border: '1px solid rgba(241, 196, 15, 0.25)', borderRadius: '8px', fontSize: '0.82rem', color: '#f1c40f' }}>
+                          ⚠️ No existe un año lectivo siguiente. Creá el próximo año desde Ajustes para habilitar la transferencia.
+                        </div>
+                      )}
                     </div>
                   ) : null}
                 </>

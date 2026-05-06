@@ -32,30 +32,26 @@ const SettingsPanel = ({
           <button className="btn btn-primary" type="button" onClick={() => { setUserError(''); setEditingUserId('new'); setUserForm({ ...emptyUser, rol: 'profesor' }); }}>
             <Plus size={16} /> Nuevo Usuario
           </button>
-          {data.academicYears.length >= 2 && (
-            <button
-              className="btn btn-secondary"
-              type="button"
-              onClick={() => {
-                const years = data.academicYears;
-                if (years.length < 2) {
-                  alert("Se necesitan al menos dos años lectivos para realizar copias.");
-                  return;
-                }
-                const to = window.prompt(`Sincronización Masiva: Copiar TODOS los roles DESDE el año anterior AL año destino. Confirma el año DESTINO:`, data.academicYears[0].nombre);
-                if (to) {
-                  const targetYear = data.academicYears.find(y => y.nombre === to || String(y.id) === to);
-                  const fromYear = data.academicYears.find(y => y.id !== targetYear?.id);
-                  if (targetYear && fromYear && window.confirm(`¿Sincronizar TODOS los usuarios de (${fromYear.nombre}) a (${targetYear.nombre})?`)) {
-                    copyYearInfo(fromYear.id, targetYear.id);
+          {(() => {
+            const selectedYear = data.academicYears.find(y => y.id === data.selectedYearId);
+            const prevYearName = selectedYear ? String(Number(selectedYear.nombre) - 1) : null;
+            const prevYear = prevYearName ? data.academicYears.find(y => y.nombre === prevYearName) : null;
+            if (!prevYear || !selectedYear) return null;
+            return (
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={() => {
+                  if (window.confirm(`¿Sincronizar TODOS los roles y accesos de los usuarios desde ${prevYear.nombre} → ${selectedYear.nombre}?`)) {
+                    copyYearInfo(prevYear.id, selectedYear.id);
                   }
-                }
-              }}
-              title="Sincronización masiva de roles"
-            >
-              <ArrowUpCircle size={16} /> Sincronización Masiva
-            </button>
-          )}
+                }}
+                title={`Copiar roles desde ${prevYear.nombre} a ${selectedYear.nombre}`}
+              >
+                <ArrowUpCircle size={16} /> Sincronización Masiva ({prevYear.nombre} → {selectedYear.nombre})
+              </button>
+            );
+          })()}
         </div>
         <div style={{ marginBottom: '1rem' }}>
           <input
@@ -122,24 +118,26 @@ const SettingsPanel = ({
                       </div>
                     </div>
                     <div className="student-item-actions">
-                      {data.academicYears.length >= 2 && (
-                        <button
-                          className="icon-btn"
-                          style={{ color: '#2ecc71', background: 'rgba(46,204,113,0.1)' }}
-                          onClick={() => {
-                            const years = data.academicYears;
-                            if (years.length < 2) return alert("Se requieren 2 años lectivos.");
-                            const targetYear = years.find(y => y.es_actual === 1) || years[0];
-                            const fromYear = years.find(y => y.id !== targetYear.id);
-                            if (window.confirm(`¿Copiar asignaciones de ${u.nombre} desde (${fromYear.nombre}) a (${targetYear.nombre})?`)) {
-                              copyYearInfo(fromYear.id, targetYear.id, u.id);
-                            }
-                          }}
-                          title="Copiar info de año anterior"
-                        >
-                          <Copy size={14} />
-                        </button>
-                      )}
+                      {(() => {
+                        const selectedYear = data.academicYears.find(y => y.id === data.selectedYearId);
+                        const prevYearName = selectedYear ? String(Number(selectedYear.nombre) - 1) : null;
+                        const prevYear = prevYearName ? data.academicYears.find(y => y.nombre === prevYearName) : null;
+                        if (!prevYear || !selectedYear) return null;
+                        return (
+                          <button
+                            className="icon-btn"
+                            style={{ color: '#2ecc71', background: 'rgba(46,204,113,0.1)' }}
+                            onClick={() => {
+                              if (window.confirm(`¿Copiar asignaciones de ${u.nombre} desde ${prevYear.nombre} → ${selectedYear.nombre}?`)) {
+                                copyYearInfo(prevYear.id, selectedYear.id, u.id);
+                              }
+                            }}
+                            title={`Copiar roles desde ${prevYear.nombre} a ${selectedYear.nombre}`}
+                          >
+                            <Copy size={14} />
+                          </button>
+                        );
+                      })()}
                       <button className="icon-btn" onClick={() => startEditUser(u)}><Wrench size={14} /></button>
                       {(user.rol === 'admin' || user.rol === 'secretaria_de_alumnos' || user.rol === 'jefe_de_auxiliares') && (
                         <button className="icon-btn danger" onClick={() => deleteUser(u)} disabled={u.id === user.id}><Trash2 size={14} /></button>
