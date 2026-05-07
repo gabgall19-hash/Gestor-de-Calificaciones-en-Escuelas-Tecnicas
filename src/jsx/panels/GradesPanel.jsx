@@ -1,5 +1,5 @@
 import React from 'react';
-import { ClipboardList, Search, Save, BookOpen, Users } from 'lucide-react';
+import { ClipboardList, Search, Save, BookOpen, Users, Eye } from 'lucide-react';
 import { truncate, truncateSubject, formatDNI, numberToWords } from '../functions/PreceptorHelpers';
 import { TableSkeleton } from '../UI/Skeleton';
 import SaveStatusButton from '../UI/SaveStatusButton';
@@ -9,6 +9,7 @@ const GradesPanel = ({
   data, user, pending, loading, viewMode, setViewMode, 
   notesSearch, setNotesSearch, 
   previewDni, setPreviewDni,
+  onPreviewStudent,
   selectedSubjectId,
   selectedPeriod, setSelectedPeriod,
   isMobile, updateCell, gradeValue, saveGrades,
@@ -30,9 +31,7 @@ const GradesPanel = ({
     { value: 10, label: 'Calificación Final' }
   ];
   const mobileGroupedColumnCount = isMobileFinalPeriod ? 5 : (isSelectedModular ? 3 : 2);
-  const saveDisabled = isMobileGroupedSubjectView
-    ? Object.keys(pending).length === 0
-    : (Object.keys(pending).length === 0 && !previewDni.trim());
+  const saveDisabled = Object.keys(pending).length === 0;
 
   return (
     <section className="page-section">
@@ -57,9 +56,16 @@ const GradesPanel = ({
       
       <div className="section-toolbar-compact" style={{ display: 'flex', gap: '0.6rem', alignItems: 'center', marginBottom: '0.8rem', flexWrap: 'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
         
-        {/* Selector de Modo (Tabs) - Primero en movil */}
-        <div style={{ width: isMobile ? '100%' : 'auto', display: 'flex', justifyContent: isMobile ? 'center' : 'flex-start', flex: isMobile ? 'none' : 1 }}>
-          <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+        {/* Selector de Modo (Tabs) + DNI */}
+        <div style={{ 
+          width: isMobile ? '100%' : 'auto', 
+          display: 'flex', 
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'stretch' : 'center', 
+          gap: '12px',
+          flex: isMobile ? 'none' : 1 
+        }}>
+          <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', alignSelf: isMobile ? 'center' : 'auto' }}>
             <div className="view-selector">
               {(user.rol !== 'profesor' || !!user.is_professor_hybrid) && user.rol !== 'preceptor_taller' && (
                 <button className={`tab-btn ${viewMode === 'simple' ? 'active' : ''}`} onClick={() => setViewMode('simple')}>Todas las Materias</button>
@@ -78,19 +84,50 @@ const GradesPanel = ({
               )}
             </div>
           </div>
+
+          {/* Buscador de Boletín con DNI */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            background: 'rgba(255,255,255,0.03)',
+            padding: '4px 8px',
+            borderRadius: '8px',
+            border: '1px solid rgba(255,255,255,0.05)',
+            marginLeft: isMobile ? '0' : '8px'
+          }}>
+            <BookOpen size={14} style={{ color: 'var(--primary)', opacity: 0.8 }} />
+            <span style={{ fontSize: '0.75rem', fontWeight: '800', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Boletín:</span>
+            <input 
+              type="text" 
+              value={previewDni} 
+              onChange={(e) => setPreviewDni(e.target.value)} 
+              className="input-field" 
+              placeholder="DNI Alumno..." 
+              style={{ padding: '0.4rem 0.6rem', width: '100px', fontSize: '0.85rem', background: 'rgba(0,0,0,0.2)' }} 
+            />
+            <button 
+              className="btn btn-primary compact-btn" 
+              onClick={() => onPreviewStudent(previewDni)}
+              disabled={!previewDni.trim()}
+              style={{ padding: '4px 10px', fontSize: '0.75rem', gap: '6px' }}
+            >
+              <Eye size={14} />
+              {!isMobile && "Ver Boletín"}
+            </button>
+          </div>
         </div>
 
-        {/* DNI + Guardar Cambios - Segundo en movil, en la misma linea */}
+        {/* Guardar Cambios / Selector de Periodo Movil */}
         <div style={{ 
           width: isMobile ? '100%' : 'auto', 
           display: 'flex', 
           gap: '8px', 
           alignItems: 'center',
-          justifyContent: isMobile ? 'space-between' : 'flex-end',
-          flexWrap: isMobile ? 'nowrap' : 'wrap'
+          justifyContent: isMobile ? 'space-between' : 'flex-end'
         }}>
-          <div className="preview-inline" style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '10px', flex: isMobileGroupedSubjectView ? 1 : 'none', minWidth: 0 }}>
-            {isMobileGroupedSubjectView ? (
+          {isMobileGroupedSubjectView && (
+            <div className="preview-inline" style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
               <select
                 className="input-field compact-inline-input"
                 value={isMobileFinalPeriod ? 10 : selectedTrimesterPeriod}
@@ -101,13 +138,8 @@ const GradesPanel = ({
                   <option key={period.value} value={period.value}>{period.label}</option>
                 ))}
               </select>
-            ) : (
-              <>
-                <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--primary)', whiteSpace: 'nowrap' }}>DNI:</span>
-                <input type="text" value={previewDni} onChange={(e) => setPreviewDni(e.target.value)} className="input-field compact-inline-input" placeholder="..." style={{ padding: '0.5rem 0.6rem', width: isMobile ? '100px' : '96px' }} />
-              </>
-            )}
-          </div>
+            </div>
+          )}
           <SaveStatusButton
             onClick={saveGrades}
             loading={loading}
@@ -369,7 +401,7 @@ const GradesPanel = ({
                           return (
                             <>
                               <td className="cell-t">
-                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_t', trimesterGradePeriod) || ''} disabled={isPeriodLocked(trimesterGradePeriod) || (trimesterGradePeriod === 6 && (isPassed(7) || isPassed(8) || isPassed(9) || isPassed(11)))} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, trimesterGradePeriod, 'valor_t', v); }} />
+                                <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_t', trimesterGradePeriod) || ''} disabled={isPeriodLocked( trimesterGradePeriod) || (trimesterGradePeriod === 6 && (isPassed(7) || isPassed(8) || isPassed(9) || isPassed(11)))} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, trimesterGradePeriod, 'valor_t', v); }} />
                               </td>
                               <td className="cell-p">
                                 <input type="text" className="cell-input" inputMode="decimal" value={gradeValue(student.id, sid, 'valor_p', trimesterGradePeriod) || ''} disabled={isPeriodLocked(trimesterGradePeriod) || (trimesterGradePeriod === 6 && (isPassed(7) || isPassed(8) || isPassed(9) || isPassed(11)))} onChange={(e) => { const v = e.target.value; if (v !== '' && (isNaN(v) || Number(v) < 1 || Number(v) > 10)) return; updateCell(student.id, sid, trimesterGradePeriod, 'valor_p', v); }} />

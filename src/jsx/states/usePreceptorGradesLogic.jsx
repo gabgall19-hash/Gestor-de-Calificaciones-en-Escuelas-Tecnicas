@@ -27,7 +27,6 @@ export default function usePreceptorGradesLogic(deps) {
     const snapshots = { ...pending };
     const updates = Object.values(snapshots);
     if (!updates.length) {
-      if (previewDni.trim()) onPreviewStudent(previewDni.trim());
       return;
     }
 
@@ -49,7 +48,6 @@ export default function usePreceptorGradesLogic(deps) {
       });
       showToast('Cambios guardados correctamente', 'success');
       await loadData(selectedCourseId, selectedYearId);
-      if (previewDni.trim()) onPreviewStudent(previewDni.trim());
     } catch (err) {
       showToast('Error al guardar notas: ' + err.message, 'error');
     }

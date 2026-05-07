@@ -148,12 +148,16 @@ export async function handleEndCycle(env, request, userId, body) {
   const [allDataRes, allGradesRes, allPreviasRes] = await Promise.all([
     env.DB.prepare(`SELECT a.*, c.ano, c.division, c.turno, t.nombre as tec_nombre FROM alumnos a JOIN cursos c ON c.id = a.course_id JOIN tecnicaturas t ON t.id = c.tecnicatura_id WHERE a.id IN (${sIds.map(() => '?').join(',')})`).bind(...sIds).all(),
     env.DB.prepare(`SELECT g.alumno_id, m.id as materia_id, m.nombre as materia, g.valor_t as definitiva FROM calificaciones g JOIN materias m ON m.id = g.materia_id WHERE g.alumno_id IN (${sIds.map(() => '?').join(',')}) AND g.periodo_id = 10`).bind(...sIds).all(),
-    env.DB.prepare(`SELECT alumno_id, COUNT(*) as count FROM previas WHERE alumno_id IN (${sIds.map(() => '?').join(',')}) AND estado = 'pendiente' GROUP BY alumno_id`).bind(...sIds).all()
+    env.DB.prepare(`SELECT p.*, m.nombre as materia_nombre FROM previas p LEFT JOIN materias m ON m.id = p.materia_id WHERE p.alumno_id IN (${sIds.map(() => '?').join(',')}) AND p.estado = 'pendiente'`).bind(...sIds).all()
   ]);
 
   const dataMap = allDataRes.results.reduce((acc, d) => ({ ...acc, [d.id]: d }), {});
   const gradesByStudent = allGradesRes.results.reduce((acc, g) => { if (!acc[g.alumno_id]) acc[g.alumno_id] = []; acc[g.alumno_id].push(g); return acc; }, {});
-  const previasCountMap = allPreviasRes.results.reduce((acc, p) => ({ ...acc, [p.alumno_id]: p.count }), {});
+  const previasByStudent = allPreviasRes.results.reduce((acc, p) => { 
+    if (!acc[p.alumno_id]) acc[p.alumno_id] = []; 
+    acc[p.alumno_id].push(p); 
+    return acc; 
+  }, {});
 
   const statements = [];
   for (const s of students) {
@@ -173,7 +177,8 @@ export async function handleEndCycle(env, request, userId, body) {
       }
     }
     
-    const totalPending = currentYearPending + (previasCountMap[s.id] || 0);
+    const existingPrevias = previasByStudent[s.id] || [];
+    const totalPending = currentYearPending + existingPrevias.length;
 
     let estadoFinalStr = "";
     if (isGraduation) {
@@ -206,7 +211,7 @@ export async function handleEndCycle(env, request, userId, body) {
     const SABANA_STRING = "Alumno repitente de Ciclo Lectivo 2025 - Importado de la Lista Sabana 2026";
     const historyLabel = (isRepeater && cycleName === "2025") ? SABANA_STRING : cycleName;
 
-    statements.push(env.DB.prepare('INSERT INTO historial_escolar (alumno_id, curso_label, tecnicatura_nombre, ciclo_lectivo_nombre, boletin_data, course_id, estado_final) VALUES (?, ?, ?, ?, ?, ?, ?)').bind(s.id, `${data.ano} ${data.division}`, data.tec_nombre, historyLabel, JSON.stringify(grades), data.course_id, estadoFinalStr));
+    statements.push(env.DB.prepare('INSERT INTO historial_escolar (alumno_id, curso_label, tecnicatura_nombre, ciclo_lectivo_nombre, boletin_data, previas_data, course_id, estado_final) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').bind(s.id, `${data.ano} ${data.division}`, data.tec_nombre, historyLabel, JSON.stringify(grades), JSON.stringify(existingPrevias), data.course_id, estadoFinalStr));
     
     statements.push(env.DB.prepare('DELETE FROM calificaciones WHERE alumno_id = ?').bind(s.id));
   }

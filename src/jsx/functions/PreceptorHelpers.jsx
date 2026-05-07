@@ -62,9 +62,16 @@ export const selectedValues = (options) => Array.from(options).map((o) => Number
 
 export const simplifyTecName = (name) => {
   if (!name) return '';
-  const parts = name.split(' - ');
-  if (parts.length > 1) return parts[1].toUpperCase();
-  return name.replace('TECNICATURA EN ', '').replace('TECNICATURA ', '').toUpperCase();
+  const clean = name
+    .replace(/Tecnicatura en\s+/i, '')
+    .replace(/Tecnicatura\s+/i, '')
+    .split('(')[0]
+    .trim();
+  
+  const parts = clean.split(' - ');
+  if (parts.length > 1) return parts[1].trim().toUpperCase();
+  
+  return clean.toUpperCase();
 };
 
 export const formatGender = (g) => {

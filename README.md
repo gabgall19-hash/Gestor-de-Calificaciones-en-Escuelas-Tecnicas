@@ -6,6 +6,22 @@
 
 ## 📜 Registro de Cambios (Changelog)
 
+### 🚀 [3.6.2] - 2026-05-07 (Optimización de Reportes y UX de Calificaciones)
+**"Rediseño del Panel de Notas, Boletín de una Hoja y UX Móvil de Egresados"**
+
+#### ✨ Nuevas Implementaciones y Mejoras
+*   **📊 Rediseño de GradesPanel (Notas)**:
+    *   **Independencia de Búsqueda**: Se separó la consulta de boletines (DNI) de la acción de guardado global. Ahora existe un botón dedicado **"Ver Boletín"** con icono de ojo para consultas rápidas.
+    *   **Buscador Optimizado**: Corrección del motor de filtrado de alumnos en el panel de notas; ahora soporta búsqueda instantánea por Nombre, Apellido o DNI.
+*   **📱 Optimización Móvil de Egresados**:
+    *   **Layout Compacto**: Rediseño visual que oculta columnas secundarias (DNI) y reduce tamaños de fuente en títulos y nombres para garantizar legibilidad en pantallas pequeñas.
+    *   **Simplificación Curricular**: Motor de limpieza automática para nombres de tecnicaturas (ej: elimina el prefijo "Tecnicatura en...").
+*   **🖨️ Boletín de Una Sola Hoja**:
+    *   **Eficiencia de Espacio**: Ajuste de márgenes y paddings en el motor de impresión A4 para asegurar que las firmas institucionales queden siempre en la primera hoja, incluso en cursos con carga horaria completa.
+
+#### 🛠️ Parches y Correcciones (Patch Fixes)
+*   **🩹 Fix de Búsqueda**: Resolución de la inconsistencia en `rotationFilteredStudents` que impedía el correcto filtrado de la lista de alumnos en el modo preceptor.
+
 ### 🚀 [3.6.1] - 2026-05-06 (Refinamiento de Previas y Egresados)
 **"Gestión Inteligente de Previas y Sincronización Global de Graduados"**
 

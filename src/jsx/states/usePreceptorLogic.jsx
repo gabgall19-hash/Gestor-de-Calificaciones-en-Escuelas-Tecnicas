@@ -145,7 +145,16 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     return base;
   }, [viewMode, data?.subjects, user, selectedCourseId]);
 
-  const rotationFilteredStudents = data?.students || [];
+  const rotationFilteredStudents = useMemo(() => {
+    if (!data?.students) return [];
+    if (!notesSearch.trim()) return data.students;
+    const query = notesSearch.toLowerCase().trim();
+    return data.students.filter((student) => 
+      student.nombre.toLowerCase().includes(query) || 
+      student.apellido.toLowerCase().includes(query) || 
+      String(student.dni).includes(query)
+    );
+  }, [data?.students, notesSearch]);
 
   const roleText = user.rol === 'admin'
     ? 'Administrador: control total del sistema.'

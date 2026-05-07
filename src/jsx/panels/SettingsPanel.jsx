@@ -36,7 +36,7 @@ const SettingsPanel = ({
             const selectedYear = data.academicYears.find(y => y.id === data.selectedYearId);
             const prevYearName = selectedYear ? String(Number(selectedYear.nombre) - 1) : null;
             const prevYear = prevYearName ? data.academicYears.find(y => y.nombre === prevYearName) : null;
-            if (!prevYear || !selectedYear) return null;
+            if (!prevYear || !selectedYear || selectedYear.nombre === '2026') return null;
             return (
               <button
                 className="btn btn-secondary"
@@ -122,7 +122,7 @@ const SettingsPanel = ({
                         const selectedYear = data.academicYears.find(y => y.id === data.selectedYearId);
                         const prevYearName = selectedYear ? String(Number(selectedYear.nombre) - 1) : null;
                         const prevYear = prevYearName ? data.academicYears.find(y => y.nombre === prevYearName) : null;
-                        if (!prevYear || !selectedYear) return null;
+                        if (!prevYear || !selectedYear || selectedYear.nombre === '2026') return null;
                         return (
                           <button
                             className="icon-btn"

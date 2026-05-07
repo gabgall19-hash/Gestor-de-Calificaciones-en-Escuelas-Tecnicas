@@ -6,6 +6,7 @@ const PreviasModal = ({ student, previas, subjects, tecnicaturas, onSave, onDele
   const [searchTerm, setSearchTerm] = useState('');
   const [editingPrevias, setEditingPrevias] = useState(previas);
   const [deletedIds, setDeletedIds] = useState([]);
+  const [lastClickedSubId, setLastClickedSubId] = useState(null);
 
   // Sync state when props change (only if no unsaved changes or on first load)
   useEffect(() => {
@@ -27,22 +28,30 @@ const PreviasModal = ({ student, previas, subjects, tecnicaturas, onSave, onDele
           changed = true;
         } else if (savedIndex === -1) {
           // It's a completely new item from the server
-          merged.push(p);
-          changed = true;
+          // Only add it if it's not currently marked for deletion locally
+          if (!deletedIds.includes(p.id)) {
+            merged.push(p);
+            changed = true;
+          }
         } else {
-          // Update existing saved item to match server (in case other fields were formatted by server)
-          // We only do this if it's identical to avoid overwriting ongoing typing, 
-          // but since they just saved, it's safe to sync
+          // Update existing saved item to match server
           merged[savedIndex] = { ...merged[savedIndex], ...p };
           changed = true;
         }
       });
       
+      // Cleanup deletedIds: if an ID is no longer in props, it's officially deleted on server
+      const stillInProps = new Set(previas.map(p => p.id));
+      const newDeletedIds = deletedIds.filter(id => stillInProps.has(id));
+      if (newDeletedIds.length !== deletedIds.length) {
+        setDeletedIds(newDeletedIds);
+      }
+      
       if (changed) {
          setEditingPrevias(merged);
       }
     }
-  }, [previas]);
+  }, [previas, deletedIds]);
   
   const normalize = (val) => String(val || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 
@@ -162,9 +171,10 @@ const PreviasModal = ({ student, previas, subjects, tecnicaturas, onSave, onDele
               return (
                 <button 
                   key={sub.id} 
-                  className="tab-btn" 
+                  className={`tab-btn ${lastClickedSubId === sub.id ? 'row-flash-green' : ''}`} 
                   style={{ fontSize: '0.75rem', textAlign: 'left', padding: '8px 12px' }}
                   onClick={() => {
+                    setLastClickedSubId(sub.id);
                     setEditingPrevias(prev => [...prev, {
                       _tempId: Date.now() + Math.random(),
                       alumno_id: student.id,
@@ -173,6 +183,7 @@ const PreviasModal = ({ student, previas, subjects, tecnicaturas, onSave, onDele
                       curso_ano: isUniqueYear ? availableYears[0] : '', 
                       estado: 'pendiente'
                     }]);
+                    setTimeout(() => setLastClickedSubId(null), 800);
                   }}
                 >
                   + {sub.nombre}{yearHint}{label}
@@ -181,6 +192,18 @@ const PreviasModal = ({ student, previas, subjects, tecnicaturas, onSave, onDele
             })}
           </div>
         </div>
+
+        <style>
+          {`
+            @keyframes flash-green {
+              0% { background-color: rgba(34, 197, 94, 0.4); }
+              100% { background-color: transparent; }
+            }
+            .row-flash-green {
+              animation: flash-green 1s ease-out forwards;
+            }
+          `}
+        </style>
 
         <div className="table-container">
           <table>

@@ -340,9 +340,31 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
                 <tbody>
                   {historial.map((h, i) => {
                     const boletin = JSON.parse(h.boletin_data || '[]');
-                    const estadoColor = h.estado_final?.toLowerCase().includes('promovido') ? '#2ecc71' : 
-                                        h.estado_final?.toLowerCase().includes('repitente') ? '#e74c3c' : 
-                                        h.estado_final?.toLowerCase().includes('promocionado') ? '#f1c40f' : 
+                    // Lógica para detectar Repitente automáticamente si falta el estado_final (para datos importados)
+                    let displayEstado = h.estado_final;
+                    if (!displayEstado) {
+                      const entryYear = h.curso_label?.split('°')[0];
+                      let nextYear = "";
+                      
+                      if (i > 0) {
+                        // El historial está ordenado por ID DESC (más reciente primero), 
+                        // por lo que el ciclo "siguiente" cronológicamente es el anterior en el array (i-1)
+                        nextYear = historial[i-1].curso_label?.split('°')[0];
+                      } else {
+                        // Si es el registro más reciente, comparamos con el curso actual del alumno
+                        nextYear = (student.curso_ano || student.ano)?.split('°')[0];
+                      }
+
+                      if (entryYear && nextYear && entryYear === nextYear) {
+                        displayEstado = "Repitente";
+                      } else {
+                        displayEstado = "-"; 
+                      }
+                    }
+
+                    const estadoColor = displayEstado?.toLowerCase().includes('promovido') ? '#2ecc71' : 
+                                        displayEstado?.toLowerCase().includes('repitente') ? '#e74c3c' : 
+                                        displayEstado?.toLowerCase().includes('promocionado') ? '#f1c40f' : 
                                         '#3498db';
 
                     // Reusable items calculation
@@ -369,13 +391,16 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
                       const numVal = parseFloat(valStr);
                       return !isNaN(numVal) && numVal > 0 && numVal <= 6;
                     });
+                    
+                    const draggedPrevias = JSON.parse(h.previas_data || '[]');
+                    const totalPreviasCount = failedSubjects.length + draggedPrevias.length;
 
                     return (
                       <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                         <td style={{ padding: '12px 16px', fontWeight: 'bold' }}>{h.ciclo_lectivo_nombre}</td>
                         <td style={{ padding: '12px 16px' }}>{h.curso_label}</td>
                         <td style={{ padding: '12px 16px' }}>{simplifyTecName(h.tecnicatura_nombre)}</td>
-                        <td style={{ padding: '12px 16px', fontWeight: 'bold', color: estadoColor }}>{h.estado_final || '-'}</td>
+                        <td style={{ padding: '12px 16px', fontWeight: 'bold', color: estadoColor }}>{displayEstado || '-'}</td>
                         <td style={{ padding: '12px 16px' }}>
                           <details>
                             <summary style={{ cursor: 'pointer', color: 'var(--primary)', fontSize: '0.8rem' }}>Ver Notas</summary>
@@ -398,15 +423,23 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
                             </div>
                           </details>
                           
-                          {failedSubjects.length > 0 && (
+                          {totalPreviasCount > 0 && (
                             <details style={{ marginTop: '6px' }}>
-                              <summary style={{ cursor: 'pointer', color: '#ff7675', fontSize: '0.8rem', fontWeight: '600' }}>Ver Previas ({failedSubjects.length})</summary>
+                              <summary style={{ cursor: 'pointer', color: '#ff7675', fontSize: '0.8rem', fontWeight: '600' }}>Ver Previas ({totalPreviasCount})</summary>
                               <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(255, 118, 117, 0.05)', borderRadius: '8px', border: '1px solid rgba(255, 118, 117, 0.1)' }}>
                                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                  {/* Previas del año actual */}
                                   {failedSubjects.map((n, ni) => (
-                                    <li key={ni} style={{ fontSize: '0.72rem', color: '#ff7675', fontWeight: '700', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                                    <li key={`failed-${ni}`} style={{ fontSize: '0.72rem', color: '#ff7675', fontWeight: '700', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
                                       <span>{n.materia || n.materia_nombre}</span>
                                       <span>{n.valor_t || n.definitiva}</span>
+                                    </li>
+                                  ))}
+                                  {/* Previas de arrastre */}
+                                  {draggedPrevias.map((p, pi) => (
+                                    <li key={`dragged-${pi}`} style={{ fontSize: '0.72rem', color: '#ff9ff3', fontWeight: '700', marginBottom: '4px', display: 'flex', justifyContent: 'space-between' }}>
+                                      <span>{p.materia_nombre || p.materia_nombre_custom} <span style={{fontSize: '0.6rem', opacity: 0.7}}>(Arrastre)</span></span>
+                                      <span style={{fontSize: '0.65rem'}}>{p.curso_ano || ''}</span>
                                     </li>
                                   ))}
                                 </ul>

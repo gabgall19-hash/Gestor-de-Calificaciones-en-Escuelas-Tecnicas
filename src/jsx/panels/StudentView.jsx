@@ -209,7 +209,7 @@ export default function StudentView({ dni, password, year, onBack, isStaff }) {
           .label { color: black !important; font-weight: bold !important; }
           .student-name-print { color: black !important; -webkit-print-color-adjust: exact; }
           span, div, h1, h2, h3, b, strong { color: black !important; opacity: 1 !important; border-color: black !important; }
-          .boletin-footer { margin-top: 4.5rem !important; }
+          .boletin-footer { margin-top: 1rem !important; }
           .signature-line { border-top: 1.5px solid #000 !important; padding-top: 5px !important; width: 220px; margin: 0 auto; }
           .previas-table td { height: 18px !important; font-size: 7.5pt !important; border: 1px solid #000 !important; padding: 1px 4px !important; }
           .previas-table th { font-size: 7.5pt !important; padding: 4px 2px !important; border: 1.5px solid #000 !important; }
@@ -259,7 +259,7 @@ export default function StudentView({ dni, password, year, onBack, isStaff }) {
         alignItems: 'center', 
         justifyContent: 'center', 
         gap: '2.5rem', 
-        marginBottom: '0.75rem',
+        marginBottom: '0.35rem', 
         padding: '0 1rem'
       }}>
         <img src="/logo.png" alt="Logo Institucional" style={{ height: '75px', objectFit: 'contain' }} />
@@ -282,7 +282,7 @@ export default function StudentView({ dni, password, year, onBack, isStaff }) {
         display: 'grid', 
         gridTemplateColumns: 'repeat(4, 1fr)', 
         gap: '0.5rem', 
-        marginBottom: '0.75rem', 
+        marginBottom: '0.4rem', 
         padding: '0.4rem 1rem', 
         background: 'rgba(255,255,255,0.03)', 
         borderRadius: '8px', 
@@ -410,11 +410,11 @@ export default function StudentView({ dni, password, year, onBack, isStaff }) {
       </div>
 
 
-      <div className="boletin-footer" style={{ marginTop: '5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', textAlign: 'center' }}>
-        <div className="signature-line" style={{ paddingTop: '0.75rem' }}>
+      <div className="boletin-footer" style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', textAlign: 'center' }}>
+        <div className="signature-line" style={{ paddingTop: '0.4rem' }}>
           <p className="label">Firma de la Autoridad Educativa</p>
         </div>
-        <div className="signature-line" style={{ paddingTop: '0.75rem' }}>
+        <div className="signature-line" style={{ paddingTop: '0.4rem' }}>
           <p className="label">Firma del Padre, Madre o Tutor</p>
         </div>
       </div>

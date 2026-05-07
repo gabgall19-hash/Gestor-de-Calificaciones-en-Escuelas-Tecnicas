@@ -498,6 +498,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           rotationFilteredStudents={rotationFilteredStudents}
           setShowNomenclaturaModal={setShowNomenclaturaModal}
           setEditingObsStudent={setEditingObsStudent}
+          onPreviewStudent={onPreviewStudent}
         />
       )}
 
@@ -580,7 +581,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
       {page === 'materias' && <AcademicManager isMobile={isMobile} user={user} data={data} selectedCourseId={selectedCourseId} materiasSearch={materiasSearch} setMateriasSearch={setMateriasSearch} handleUpdateLocks={handleUpdateLocks} />}
       {page === 'pases' && <PasesPanel isMobile={isMobile} user={user} data={data} pasesSearch={pasesSearch} setPasesSearch={setPasesSearch} setEditingPase={setEditingPase} undoPase={undoPase} onPreviewStudent={onPreviewStudent} onViewFicha={handleViewFicha} />}
       {page === 'anuncios' && <AnunciosPanel isMobile={isMobile} data={data} post={post} loadData={loadData} />}
-      {page === 'egresados' && <EgresadosPanel data={data} onViewFicha={handleViewFicha} onUpdateGraduate={updateStudentField} />}
+      {page === 'egresados' && <EgresadosPanel isMobile={isMobile} data={data} onViewFicha={handleViewFicha} onUpdateGraduate={updateStudentField} />}
 
       {page === 'settings' && (
         <SettingsPanel
