@@ -53,3 +53,10 @@ xls/
 # Data & Scratch
 db/
 scratch/
+db_*.json
+materias_dump.json
+
+# Evitar subir datos sensibles reales
+scripts/*.sql
+scripts/*.cjs
+db/migrations/*.sql
