@@ -6,6 +6,14 @@
 
 ## 📜 Changelog
 
+### 🚀 [3.6.3] - 2026-05-10 (Database Optimization and Performance)
+**"Cloudflare D1 Query Refactoring and Indexing"**
+
+#### ✨ New Features and Improvements
+*   **⚡ D1 "Rows Read" Optimization**:
+    *   **SQL Indexing**: Added critical indexes to `historial_escolar` and `alumnos` tables to prevent full-table scans during dashboard and summary loads.
+    *   **Query Aggregation (O(1) Reads)**: Completely refactored the `year_summary` API endpoint. Replaced the N+1 nested subquery pattern with three highly efficient `GROUP BY` queries, mathematically reducing daily "Rows Read" consumption by over 95%.
+
 ### 🚀 [3.6.2] - 2026-05-07 (Report Optimization and Grades UX)
 **"Grades Panel Redesign, Single-Page Bulletin, and Graduate Mobile UX"**
 

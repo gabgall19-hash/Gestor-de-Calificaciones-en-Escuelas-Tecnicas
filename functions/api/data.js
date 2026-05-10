@@ -76,78 +76,83 @@ export async function onRequestGet({ env, request }) {
           (SELECT COUNT(*) FROM historial_escolar WHERE course_id IN (SELECT id FROM cursos WHERE year_id = ?) AND UPPER(estado_final) LIKE '%EGRESADO%' AND UPPER(estado_final) NOT LIKE '%RECIBIDO%') as graduated_debt
       `).bind(yearId, yearId, yearId, yearId, yearId, yearId, yearId, yearId).first();
 
-      // Detalles por curso
-      const courses = await env.DB.prepare(`
-        SELECT 
-          c.id,
-          (c.ano || ' ' || c.division || ' ' || c.turno) as label,
-          t.nombre as tecnicatura,
-          (
-            SELECT COUNT(DISTINCT al.id) 
-            FROM alumnos al 
-            WHERE al.course_id = c.id AND al.estado = 1 AND UPPER(COALESCE(al.genero, '')) = 'MASCULINO'
-          ) + (
-            SELECT COUNT(DISTINCT h.alumno_id) 
-            FROM historial_escolar h 
-            JOIN alumnos al ON h.alumno_id = al.id
-            WHERE h.course_id = c.id AND UPPER(COALESCE(al.genero, '')) = 'MASCULINO'
-          ) as males,
-          (
-            SELECT COUNT(DISTINCT al.id) 
-            FROM alumnos al 
-            WHERE al.course_id = c.id AND al.estado = 1 AND UPPER(COALESCE(al.genero, '')) = 'FEMENINO'
-          ) + (
-            SELECT COUNT(DISTINCT h.alumno_id) 
-            FROM historial_escolar h 
-            JOIN alumnos al ON h.alumno_id = al.id
-            WHERE h.course_id = c.id AND UPPER(COALESCE(al.genero, '')) = 'FEMENINO'
-          ) as females,
-          (
-            SELECT COUNT(DISTINCT id) FROM (
-              SELECT al.id FROM alumnos al WHERE al.course_id = c.id AND al.estado = 1
-              UNION
-              SELECT h.alumno_id FROM historial_escolar h WHERE h.course_id = c.id
-            )
-          ) as total_students,
-          (
-            SELECT COUNT(DISTINCT h.alumno_id) 
-            FROM historial_escolar h 
-            WHERE h.course_id = c.id
-            AND UPPER(h.estado_final) LIKE '%REPITENTE%'
-          ) as repeaters,
-          (
-            SELECT COUNT(DISTINCT h.alumno_id) 
-            FROM historial_escolar h 
-            WHERE h.course_id = c.id
-            AND UPPER(h.estado_final) LIKE '%PROMOVIDO%'
-          ) as promoted,
-          (
-            SELECT COUNT(DISTINCT h.alumno_id) 
-            FROM historial_escolar h 
-            WHERE h.course_id = c.id
-            AND UPPER(h.estado_final) LIKE '%PROMOCIONADO%'
-          ) as promoted_with_debt,
-          (
-            SELECT COUNT(DISTINCT h.alumno_id) 
-            FROM historial_escolar h 
-            WHERE h.course_id = c.id
-            AND UPPER(h.estado_final) LIKE '%RECIBIDO%'
-          ) as graduated_ok,
-          (
-            SELECT COUNT(DISTINCT h.alumno_id) 
-            FROM historial_escolar h 
-            WHERE h.course_id = c.id
-            AND UPPER(h.estado_final) LIKE '%EGRESADO%' 
-            AND UPPER(h.estado_final) NOT LIKE '%RECIBIDO%'
-          ) as graduated_debt
+      // Detalles por curso (Optimizado para evitar subconsultas N+1)
+      const { results: rawCourses } = await env.DB.prepare(`
+        SELECT c.id, (c.ano || ' ' || c.division || ' ' || c.turno) as label, t.nombre as tecnicatura
         FROM cursos c
         JOIN tecnicaturas t ON c.tecnicatura_id = t.id
         WHERE c.year_id = ?
-        GROUP BY c.id, c.ano, c.division, c.turno, t.nombre
         ORDER BY c.ano, c.division
       `).bind(yearId).all();
 
-      return json({ totals, courses: courses.results });
+      let courses = [];
+      if (rawCourses.length > 0) {
+        const courseIds = rawCourses.map(c => c.id);
+        const inClause = courseIds.map(() => '?').join(',');
+        
+        const { results: alumnosAgg } = await env.DB.prepare(`
+          SELECT course_id, UPPER(COALESCE(genero, '')) as genero, COUNT(DISTINCT id) as cnt
+          FROM alumnos
+          WHERE estado = 1 AND course_id IN (${inClause})
+          GROUP BY course_id, UPPER(COALESCE(genero, ''))
+        `).bind(...courseIds).all();
+
+        const { results: historialAgg } = await env.DB.prepare(`
+          SELECT 
+            h.course_id, 
+            UPPER(COALESCE(al.genero, '')) as genero, 
+            UPPER(h.estado_final) as estado_final, 
+            COUNT(DISTINCT h.alumno_id) as cnt
+          FROM historial_escolar h
+          LEFT JOIN alumnos al ON h.alumno_id = al.id
+          WHERE h.course_id IN (${inClause})
+          GROUP BY h.course_id, UPPER(COALESCE(al.genero, '')), UPPER(h.estado_final)
+        `).bind(...courseIds).all();
+
+        const { results: activeTotalsAgg } = await env.DB.prepare(`
+          SELECT course_id, COUNT(DISTINCT id) as cnt FROM (
+              SELECT course_id, id FROM alumnos WHERE estado = 1 AND course_id IN (${inClause})
+              UNION
+              SELECT course_id, alumno_id as id FROM historial_escolar WHERE course_id IN (${inClause})
+          ) GROUP BY course_id
+        `).bind(...courseIds, ...courseIds).all();
+
+        const courseMap = {};
+        rawCourses.forEach(c => {
+          courseMap[c.id] = {
+            ...c,
+            males: 0, females: 0, total_students: 0,
+            repeaters: 0, promoted: 0, promoted_with_debt: 0, graduated_ok: 0, graduated_debt: 0
+          };
+        });
+
+        // Procesar sumas de alumnos
+        alumnosAgg.forEach(row => {
+          if (row.genero === 'MASCULINO') courseMap[row.course_id].males += row.cnt;
+          if (row.genero === 'FEMENINO') courseMap[row.course_id].females += row.cnt;
+        });
+
+        // Procesar sumas de historial
+        historialAgg.forEach(row => {
+          if (row.genero === 'MASCULINO') courseMap[row.course_id].males += row.cnt;
+          if (row.genero === 'FEMENINO') courseMap[row.course_id].females += row.cnt;
+          
+          if (row.estado_final.includes('REPITENTE')) courseMap[row.course_id].repeaters += row.cnt;
+          if (row.estado_final.includes('PROMOVIDO')) courseMap[row.course_id].promoted += row.cnt;
+          if (row.estado_final.includes('PROMOCIONADO')) courseMap[row.course_id].promoted_with_debt += row.cnt;
+          if (row.estado_final.includes('RECIBIDO')) courseMap[row.course_id].graduated_ok += row.cnt;
+          if (row.estado_final.includes('EGRESADO') && !row.estado_final.includes('RECIBIDO')) courseMap[row.course_id].graduated_debt += row.cnt;
+        });
+
+        // Totales únicos
+        activeTotalsAgg.forEach(row => {
+          courseMap[row.course_id].total_students += row.cnt;
+        });
+
+        courses = rawCourses.map(c => courseMap[c.id]);
+      }
+
+      return json({ totals, courses });
     }
 
     if (type === 'asistencia') return await handleAttendanceLoad(env, request, url);
