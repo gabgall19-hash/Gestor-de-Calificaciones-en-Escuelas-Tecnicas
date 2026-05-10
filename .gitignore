@@ -31,7 +31,8 @@ wrangler.toml
 .gemini
 
 # Institucional
-REPORTE_PROFESORES_2026.txt
+reports/
+public/
 lint_output.txt
 xls/
 

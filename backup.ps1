@@ -13,7 +13,7 @@ Write-Host "Iniciando empaquetado del proyecto: $zipName..." -ForegroundColor Cy
 
 # Comprimir el proyecto actual excluyendo carpetas pesadas
 # Usamos un filtro para excluir lo innecesario
-Get-ChildItem -Path . -Exclude "node_modules", ".git", ".wrangler", "dist", ".gemini" | 
+Get-ChildItem -Path . -Exclude "node_modules", ".git", ".wrangler", "dist", ".gemini", "reports", "public" | 
     Compress-Archive -DestinationPath $tempZip -Force
 
 Write-Host "Sincronizando con Google Drive ($destinationPath)..." -ForegroundColor Yellow
