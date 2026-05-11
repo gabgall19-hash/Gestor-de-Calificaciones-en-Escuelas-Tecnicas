@@ -112,7 +112,7 @@ const PasesPanel = ({ user, data, isMobile, pasesSearch, setPasesSearch, setEdit
                             <FileText size={14} />
                           </button>
                           <button className="icon-btn" style={{ color: '#3498db' }} onClick={() => onPreviewStudent(pase.dni)} title="Ver Boletín"><Eye size={14} /></button>
-                          {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol) && <button className="icon-btn danger" onClick={() => undoPase(pase)} title="Deshacer Pase"><RotateCcw size={14} /></button>}
+                          {['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares'].includes(user.rol) && <button className="icon-btn danger" onClick={() => undoPase(pase.id)} title="Deshacer Pase"><RotateCcw size={14} /></button>}
                         </div>
                       </td>
                     </>
