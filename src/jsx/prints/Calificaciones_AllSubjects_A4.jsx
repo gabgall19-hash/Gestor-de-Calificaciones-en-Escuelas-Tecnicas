@@ -23,7 +23,8 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
     const subjectKey = `${activeCourse.id}-${subject.id}`;
     
     // 1. Try to get professors from schedule assignments (meta or grid)
-    let assignedProfessors = [];
+    let actualProfs = [];
+    let substituteProfs = [];
     const normName = normalize(subject.nombre);
     
     if (scheduleRes && scheduleRes.grid_data) {
@@ -31,35 +32,34 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
         const parsed = typeof scheduleRes.grid_data === 'string' ? JSON.parse(scheduleRes.grid_data) : scheduleRes.grid_data;
         const scheduleAssignments = parsed.meta?.subjectAssignments || {};
         
+        let foundAss = null;
+        
         // A. Match by ID key (standard)
         const idKey = `subject-${subject.id}`;
         if (scheduleAssignments[idKey]) {
-          const ass = scheduleAssignments[idKey];
-          const actual = Array.isArray(ass.actualTeachers) ? ass.actualTeachers : [ass.actualTeacherName];
-          const substitute = Array.isArray(ass.substituteTeachers) ? ass.substituteTeachers : [ass.substituteTeacherName];
-          assignedProfessors.push(...actual, ...substitute);
-        }
-        
-        // B. Match by canonical/name keys
-        if (assignedProfessors.length === 0) {
+          foundAss = scheduleAssignments[idKey];
+        } else {
+          // B. Match by canonical/name keys
           const nameKey = `subject-name-${normName}`;
           const canonicalKey = `subject-canonical-${normName.replace('ingles tecnico', 'ingles').replace('ingl tecnico', 'ingles')}`;
-          const ass = scheduleAssignments[nameKey] || scheduleAssignments[canonicalKey];
-          if (ass) {
-            const actual = Array.isArray(ass.actualTeachers) ? ass.actualTeachers : [ass.actualTeacherName];
-            const substitute = Array.isArray(ass.substituteTeachers) ? ass.substituteTeachers : [ass.substituteTeacherName];
-            assignedProfessors.push(...actual, ...substitute);
-          }
+          foundAss = scheduleAssignments[nameKey] || scheduleAssignments[canonicalKey];
+        }
+
+        if (foundAss) {
+          const actual = Array.isArray(foundAss.actualTeachers) ? foundAss.actualTeachers : [foundAss.actualTeacherName];
+          const substitute = Array.isArray(foundAss.substituteTeachers) ? foundAss.substituteTeachers : [foundAss.substituteTeacherName];
+          actualProfs.push(...actual);
+          substituteProfs.push(...substitute);
         }
 
         // C. Match by searching the grid cells directly (ultimate fallback)
-        if (assignedProfessors.length === 0 && Array.isArray(parsed.grid)) {
+        if (actualProfs.length === 0 && substituteProfs.length === 0 && Array.isArray(parsed.grid)) {
           parsed.grid.forEach(row => {
             if (row.days) {
               Object.values(row.days).forEach(cell => {
                 const cellSubName = normalize(cell.subject);
                 if (Number(cell.subject_id) === Number(subject.id) || cellSubName === normName || (cellSubName.includes('lengua extranjera') && normName.includes('lengua extranjera'))) {
-                  if (cell.teacher) assignedProfessors.push(cell.teacher);
+                  if (cell.teacher) actualProfs.push(cell.teacher);
                 }
               });
             }
@@ -70,28 +70,53 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
       }
     }
 
-    // Clean up and format assigned professors
-    assignedProfessors = assignedProfessors
-      .filter(Boolean)
-      .map(name => {
-        const clean = name.replace('Prof. ', '').trim();
-        return clean ? `Prof. ${clean}` : null;
-      })
-      .filter(Boolean);
+    // Clean up and format lists
+    const cleanProf = (name) => {
+      const clean = (name || '').replace('Prof. ', '').replace('SUP. ', '').trim();
+      return clean || null;
+    };
+
+    actualProfs = [...new Set(actualProfs.map(cleanProf).filter(Boolean))];
+    substituteProfs = [...new Set(substituteProfs.map(cleanProf).filter(Boolean))];
 
     // 2. Fallback to data.users (broadened role check)
-    if (assignedProfessors.length === 0) {
-      assignedProfessors = (data.users || [])
+    if (actualProfs.length === 0 && substituteProfs.length === 0) {
+      actualProfs = (data.users || [])
         .filter(u => {
           const assignments = String(u.professor_subject_ids || '').split(',').map(s => s.trim());
           const isAssigned = assignments.includes(subjectKey);
           const hasTeachingRole = ['profesor', 'preceptor', 'preceptor_taller', 'preceptor_ef'].includes(u.rol) || u.is_professor_hybrid === 1;
           return isAssigned && hasTeachingRole;
         })
-        .map(u => `Prof. ${u.nombre}`);
+        .map(u => u.nombre);
     }
 
-    const professors = [...new Set(assignedProfessors)].join(' / ') || '________________';
+    const isModular = (subject.tipo || '').toLowerCase().includes('modular');
+    let professors = '';
+
+    if (isModular) {
+      // Talleres Modulares: PROF. X / PROF. Y
+      const allProfs = [...actualProfs, ...substituteProfs];
+      const p1 = allProfs[0] ? `PROF. ${allProfs[0]}` : 'PROF. ________________';
+      const p2 = allProfs[1] ? `PROF. ${allProfs[1]}` : 'PROF. ________________';
+      
+      if (allProfs.length > 2) {
+        professors = allProfs.map(p => `PROF. ${p}`).join(' / ');
+      } else {
+        professors = `${p1} / ${p2}`;
+      }
+    } else {
+      // Materias Comunes: PROF. X / SUP. Y
+      const profPart = actualProfs.length > 0 
+        ? actualProfs.map(p => `PROF. ${p}`).join(' / ') 
+        : 'PROF. ________________';
+      
+      const supPart = substituteProfs.length > 0
+        ? substituteProfs.map(p => `SUP. ${p}`).join(' / ')
+        : 'SUP. ________________';
+
+      professors = `${profPart} / ${supPart}`;
+    }
 
     const students = [...data.students].sort((a, b) => a.apellido.localeCompare(b.apellido));
 
