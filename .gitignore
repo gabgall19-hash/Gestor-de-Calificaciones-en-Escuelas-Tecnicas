@@ -32,7 +32,6 @@ wrangler.toml
 
 # Institucional
 reports/
-public/
 lint_output.txt
 xls/
 
