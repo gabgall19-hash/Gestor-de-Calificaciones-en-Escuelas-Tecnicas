@@ -173,7 +173,6 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
               <div class="sub-title">Ciclo Lectivo 2026</div>
             </div>
             <div class="inst-right" style="width: 100px; display: flex; flex-direction: column; align-items: center; align-self: flex-start;">
-              <div style="font-size: 8pt; font-weight: 900; color: #000; margin-bottom: 2px;">N° ORDEN</div>
               <div style="border: 2px solid #000; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 22pt; font-weight: 900; color: #000;">
                 ${index + 1}
               </div>
