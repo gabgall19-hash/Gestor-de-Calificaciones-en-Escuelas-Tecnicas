@@ -36,13 +36,13 @@ export const handlePrintParteSemanal_AllGrades = (data, allSchedules) => {
     const renderAttendanceTable = (cols, startIdx) => `
       <table class="attendance-table" style="width: 49%;">
         <colgroup>
-          <col style="width: 28px;">
+          <col style="width: 25px;">
           <col style="width: auto;">
-          <col style="width: 25px;">
-          <col style="width: 25px;">
-          <col style="width: 25px;">
-          <col style="width: 25px;">
-          <col style="width: 25px;">
+          <col style="width: 22px;">
+          <col style="width: 22px;">
+          <col style="width: 22px;">
+          <col style="width: 22px;">
+          <col style="width: 22px;">
         </colgroup>
         <thead>
           <tr class="date-row">
@@ -165,8 +165,8 @@ export const handlePrintParteSemanal_AllGrades = (data, allSchedules) => {
           body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; background: #eee; color: black; }
           .no-print-toolbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #333; color: white; display: flex; align-items: center; justify-content: center; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
           .btn-print { background: #10b981; color: white; border: none; padding: 10px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; }
-          .printable-page { width: 210mm; min-height: 297mm; padding: 8mm 8mm; margin: 80px auto 20px; background: white; box-sizing: border-box; page-break-after: always; }
-          @page { size: A4; margin: 0; }
+          .printable-page { width: 210mm; min-height: 297mm; padding: 5mm; margin: 80px auto 20px; background: white; box-sizing: border-box; page-break-after: always; }
+          @page { size: A4; margin: 5mm; }
           .header-main { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; margin-bottom: 5px; }
           .header-left, .header-right { text-align: center; }
           .shield-img { height: 70px; }
@@ -191,17 +191,17 @@ export const handlePrintParteSemanal_AllGrades = (data, allSchedules) => {
           .sched-date-cell { background: white !important; }
           .row-break { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; font-weight: 900; letter-spacing: 5px; vertical-align: middle !important; height: 15px !important; }
           .row-break td { height: 15px !important; min-height: 15px !important; line-height: 15px !important; padding: 0 !important; }
-          .cell-subject { font-weight: 900; display: block; line-height: 1; margin-top: 3px; padding: 0 2px; }
-          .cell-teacher { font-size: 0.48rem; font-style: italic; color: #333; display: block; margin-top: 2px; padding: 0 2px; }
+          .cell-subject { font-weight: 900; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1; margin-top: 3px; padding: 0 2px; }
+          .cell-teacher { font-size: 0.48rem; font-style: italic; color: #333; display: block; margin-top: 2px; padding: 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .signature-line { border-top: 1px solid black; width: 100%; margin-top: 6px; height: 24px; display: block; }
           .footer-suplentes { margin-top: 5px; display: grid; grid-template-columns: 1fr 1fr 1fr; border: 1px solid black; }
           .suplente-box { border-right: 1px solid black; padding: 2px; font-size: 0.58rem; font-weight: 900; text-align: center; }
           .suplente-box:last-child { border-right: none; }
           @media print {
-            body { background: white; padding: 0; }
+            body { background: white; padding: 0; margin: 0; }
             .no-print-toolbar { display: none; }
-            .printable-page { margin: 0; box-shadow: none; width: 100%; height: auto; padding: 5mm; }
-            .row-break { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; }
+            .printable-page { margin: 0; padding: 0; box-shadow: none; width: 100%; height: auto; }
+            .row-break { background: #e5e5e5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           }
         </style>
       </head>
