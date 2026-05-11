@@ -97,8 +97,8 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
     if (isModular) {
       // Talleres Modulares: PROF. X / PROF. Y
       const allProfs = [...actualProfs, ...substituteProfs];
-      const p1 = allProfs[0] ? `PROF. ${allProfs[0]}` : 'PROF. ________________';
-      const p2 = allProfs[1] ? `PROF. ${allProfs[1]}` : 'PROF. ________________';
+      const p1 = allProfs[0] ? `PROF. ${allProfs[0]}` : 'PROF. <span style="display:inline-block; width:150px;"></span>';
+      const p2 = allProfs[1] ? `PROF. ${allProfs[1]}` : 'PROF. <span style="display:inline-block; width:150px;"></span>';
       
       if (allProfs.length > 2) {
         professors = allProfs.map(p => `PROF. ${p}`).join(' / ');
@@ -109,11 +109,11 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
       // Materias Comunes: PROF. X / SUP. Y
       const profPart = actualProfs.length > 0 
         ? actualProfs.map(p => `PROF. ${p}`).join(' / ') 
-        : 'PROF. ________________';
+        : 'PROF. <span style="display:inline-block; width:150px;"></span>';
       
       const supPart = substituteProfs.length > 0
         ? substituteProfs.map(p => `SUP. ${p}`).join(' / ')
-        : 'SUP. ________________';
+        : 'SUP. <span style="display:inline-block; width:150px;"></span>';
 
       professors = `${profPart} / ${supPart}`;
     }
