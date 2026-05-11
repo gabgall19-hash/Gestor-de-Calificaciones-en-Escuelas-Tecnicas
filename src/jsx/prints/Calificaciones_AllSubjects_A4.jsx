@@ -19,7 +19,7 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
   }
 
   const win = window.open('', '_blank');
-  const subjectsHTML = data.subjects.map(subject => {
+  const subjectsHTML = data.subjects.map((subject, index) => {
     const subjectKey = `${activeCourse.id}-${subject.id}`;
     
     // 1. Try to get professors from schedule assignments (meta or grid)
@@ -172,19 +172,24 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
               <div class="main-title" style="margin-bottom: 0; font-size: 14pt;">PLANILLA DE CALIFICACIONES</div>
               <div class="sub-title">Ciclo Lectivo 2026</div>
             </div>
-            <div style="width: 100px;"></div>
+            <div class="inst-right" style="width: 100px; display: flex; flex-direction: column; align-items: center; align-self: flex-start;">
+              <div style="font-size: 8pt; font-weight: 900; color: #000; margin-bottom: 2px;">N° ORDEN</div>
+              <div style="border: 2px solid #000; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 22pt; font-weight: 900; color: #000;">
+                ${index + 1}
+              </div>
+            </div>
           </div>
 
           <div class="info-boxes">
             <div class="info-row" style="display: flex; align-items: stretch;">
               <div class="info-label" style="width: 140px; color: #000; font-size: 8pt; font-weight: 900;">ESPACIO CURRICULAR:</div>
-              <div class="info-value-box" style="flex: 1; min-width: 450px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${subject.nombre}</div>
+              <div class="info-value-box" style="flex: 1; min-width: 300px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${subject.nombre}</div>
               <div class="info-label" style="width: 60px; margin-left:15px; color: #000; font-size: 8pt; font-weight: 900;">CURSO:</div>
               <div class="info-value-box" style="width: 40px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${activeCourse.ano}</div>
             </div>
             <div class="info-row" style="display: flex; align-items: stretch; margin-top: 4px;">
               <div class="info-label" style="width: 140px; color: #000; font-size: 8pt; font-weight: 900;">DOCENTES A CARGO:</div>
-              <div class="info-value-box" style="flex: 1; min-width: 450px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${professors}</div>
+              <div class="info-value-box" style="flex: 1; min-width: 300px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${professors}</div>
               <div class="info-label" style="width: 60px; margin-left: 15px; color: #000; font-size: 8pt; font-weight: 900;">DIVISION:</div>
               <div class="info-value-box" style="width: 40px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${activeCourse.division}</div>
             </div>
@@ -338,7 +343,7 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
           <div class="info-boxes" style="margin-bottom: 25px;">
             <div class="info-row" style="display: flex; align-items: stretch;">
               <div class="info-label" style="width: 140px; color: #000; font-size: 8pt; font-weight: 900;">ESPACIO CURRICULAR:</div>
-              <div class="info-value-box" style="flex: 1; min-width: 450px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${subject.nombre}</div>
+              <div class="info-value-box" style="flex: 1; min-width: 300px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${subject.nombre}</div>
               <div class="info-label" style="width: 60px; margin-left: 15px; color: #000; font-size: 8pt; font-weight: 900;">CURSO:</div>
               <div class="info-value-box" style="width: 40px; text-align: center; color: #000; border: 1.5px solid #000; padding: 2px;">${activeCourse.ano}</div>
             </div>
@@ -438,7 +443,7 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
           }
           @page {
             size: A4;
-            margin: 15mm 10mm;
+            margin: 5mm;
           }
           .printable-page { width: 210mm; min-height: 297mm; padding: 10mm; box-sizing: border-box; background: white !important; margin-bottom: 40px; position: relative; color: black !important; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border-radius: 2px; margin-left: auto; margin-right: auto; }
           .printable-page * { color: black !important; }
@@ -477,7 +482,7 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
           @media print {
             body { background: white !important; padding: 0 !important; margin: 0 !important; }
             .no-print-toolbar { display: none !important; }
-            .printable-page { margin: 0 !important; padding: 0 !important; width: 100% !important; height: auto !important; min-height: 0 !important; max-height: 265mm; overflow: hidden; box-shadow: none !important; background: white !important; border: none !important; }
+            .printable-page { margin: 0 !important; padding: 5mm !important; width: 100% !important; height: auto !important; min-height: 0 !important; max-height: 287mm; overflow: hidden; box-shadow: none !important; background: white !important; border: none !important; box-sizing: border-box !important; }
             .printable-page + .printable-page { page-break-before: always; break-before: page; }
             .planilla-table th { background: #f3f4f6 !important; -webkit-print-color-adjust: exact; }
           }
