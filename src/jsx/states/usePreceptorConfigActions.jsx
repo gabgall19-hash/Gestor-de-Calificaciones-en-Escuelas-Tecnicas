@@ -61,6 +61,16 @@ export default function usePreceptorConfigActions(deps) {
     }
   };
 
+  const handleUpdateEndCycleButton = async (enabled) => {
+    try {
+      await post('config', { action: 'update_end_cycle_btn', valor: String(enabled) });
+      showToast('Configuración de botón de fin de ciclo actualizada', 'success');
+      await loadData(selectedCourseId, selectedYearId);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
   const handleUpdatePreceptorMode = async (role, mode) => {
     try {
       await post('config', { action: 'update_preceptor_mode', role, mode });
@@ -75,6 +85,16 @@ export default function usePreceptorConfigActions(deps) {
     try {
       await post('config', { action: 'update_password_msg', valor: msg });
       showToast('Mensaje de contraseña actualizado', 'success');
+      await loadData(selectedCourseId, selectedYearId);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleUpdateTabVisibility = async (visibilityMap) => {
+    try {
+      await post('config', { action: 'update_tab_visibility', valor: JSON.stringify(visibilityMap) });
+      showToast('Visibilidad de pestañas actualizada', 'success');
       await loadData(selectedCourseId, selectedYearId);
     } catch (err) {
       alert(err.message);
@@ -192,6 +212,7 @@ export default function usePreceptorConfigActions(deps) {
     handleUpdateSystemMode,
     handleUpdateMobileLogin,
     handleUpdateRACModular,
+    handleUpdateEndCycleButton,
     handleUpdatePreceptorMode,
     handleUpdatePasswordMsg,
     savePrevias,
@@ -204,6 +225,7 @@ export default function usePreceptorConfigActions(deps) {
     onPrintRAC_AllStudents,
     onPrintParteDiario,
     onPrintParteDiarioGlobal,
-    onPrintParteConInformacion
+    onPrintParteConInformacion,
+    handleUpdateTabVisibility
   };
 }

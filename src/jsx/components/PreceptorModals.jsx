@@ -395,10 +395,39 @@ export default function PreceptorModals(props) {
             </select>
 
             {!['admin', 'secretaria_de_alumnos', 'jefe_de_auxiliares', 'director', 'vicedirector', 'regente_profesores'].includes(userForm.rol) && (userForm.rol === 'preceptor' || userForm.rol === 'preceptor_taller' || userForm.rol === 'preceptor_ef') && (
-              <select className="input-field" value={userForm.preceptor_course_id || ''} onChange={(e) => setUserForm((prev) => ({ ...prev, preceptor_course_id: e.target.value }))}>
-                <option value="">-- Seleccionar Curso --</option>
-                {data.allCourses.map((course) => <option key={course.id} value={course.id}>{course.year_nombre} · {course.label} · {simplifyTecName(course.tecnicatura_nombre)}</option>)}
-              </select>
+              <div className="course-assignments" style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '4px', opacity: 0.7, fontWeight: 'bold', color: 'var(--primary)' }}>Cursos Asignados (Preceptoría):</label>
+                {(userForm.preceptor_course_ids?.length > 0 ? userForm.preceptor_course_ids : ['']).map((cid, idx) => (
+                  <div key={idx} style={{ display: 'flex', gap: '8px' }}>
+                    <select 
+                      className="input-field" 
+                      style={{ flex: 1 }}
+                      value={cid} 
+                      onChange={(e) => {
+                        const newIds = [...(userForm.preceptor_course_ids?.length > 0 ? userForm.preceptor_course_ids : [''])];
+                        newIds[idx] = e.target.value;
+                        setUserForm(prev => ({ ...prev, preceptor_course_ids: newIds }));
+                      }}
+                    >
+                      <option value="">-- Seleccionar Curso --</option>
+                      {data.allCourses.map((course) => <option key={course.id} value={course.id}>{course.year_nombre} · {course.label} · {simplifyTecName(course.tecnicatura_nombre)}</option>)}
+                    </select>
+                    {idx > 0 && (
+                      <button type="button" className="icon-btn danger" onClick={() => setUserForm(prev => ({ ...prev, preceptor_course_ids: prev.preceptor_course_ids.filter((_, i) => i !== idx) }))}>
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ fontSize: '0.75rem', padding: '8px', marginTop: '4px', background: 'rgba(255,255,255,0.05)' }}
+                  onClick={() => setUserForm(prev => ({ ...prev, preceptor_course_ids: [...(prev.preceptor_course_ids?.length > 0 ? prev.preceptor_course_ids : ['']), ''] }))}
+                >
+                  <Plus size={14} /> Agregar otro curso
+                </button>
+              </div>
             )}
 
             {/* Read-only view of subjects assigned via Schedules (Hidden for high-level roles) */}

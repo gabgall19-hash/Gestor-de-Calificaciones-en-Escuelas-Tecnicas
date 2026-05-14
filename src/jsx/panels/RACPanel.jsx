@@ -19,7 +19,7 @@ const RACPanel = ({
           <h2>Registro Anual de Calificaciones (RAC)</h2>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          {canEndCycle && (
+          {canEndCycle && data.config.end_cycle_btn_enabled !== 'false' && (
             <button 
               className="btn btn-primary" 
               style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)', border: 'none' }}

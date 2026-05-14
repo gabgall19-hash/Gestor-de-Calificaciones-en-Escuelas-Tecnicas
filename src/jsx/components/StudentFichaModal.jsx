@@ -239,7 +239,19 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
             </p>
           </div>
         </div>
-        {!fullPage && <button className="icon-btn" onClick={onClose}><X size={20} /></button>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {isEditing ? (
+              <>
+                <button className="btn" onClick={() => setIsEditing(false)} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>Cancelar</button>
+                <button className="btn btn-primary" onClick={onSave} style={{ padding: '8px 20px', fontSize: '0.85rem' }}><Save size={16} /> Guardar</button>
+              </>
+            ) : (
+              <button className="btn btn-primary" onClick={() => setIsEditing(true)} style={{ padding: '8px 20px', fontSize: '0.85rem' }}>Editar Información</button>
+            )}
+          </div>
+          {!fullPage && <button className="icon-btn" onClick={onClose}><X size={20} /></button>}
+        </div>
       </div>
 
       <div className={fullPage ? "" : "custom-scroll"} style={fullPage ? {} : { maxHeight: '70vh', overflowY: 'auto', paddingRight: '10px' }}>
@@ -540,16 +552,7 @@ const StudentFichaModal = ({ student, onClose, onSave, isEditing, setIsEditing, 
         </div>
       </div>
 
-      <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem', paddingTop: '2rem', borderTop: '1px solid var(--glass-border)' }}>
-        {isEditing ? (
-          <>
-            <button className="btn" onClick={() => setIsEditing(false)} style={{ padding: '0.8rem 2rem' }}>Cancelar</button>
-            <button className="btn btn-primary" onClick={onSave} style={{ padding: '0.8rem 2.5rem' }}><Save size={20} /> Guardar Cambios</button>
-          </>
-        ) : (
-          <button className="btn btn-primary" onClick={() => setIsEditing(true)} style={{ padding: '0.8rem 2.5rem' }}>Editar Información</button>
-        )}
-      </div>
+      {/* Botones inferiores eliminados (movidos arriba) */}
     </div>
   );
 

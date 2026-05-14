@@ -120,6 +120,7 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     handleUpdatePreceptorMode,
     handleUpdateMobileLogin,
     handleUpdateRACModular,
+    handleUpdateEndCycleButton,
     addYear,
     editYear,
     deleteYear,
@@ -231,8 +232,11 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
     if (user.rol !== 'profesor' || isHybrid) list.push({ id: 'horarios', label: 'Horarios', icon: <Calendar size={16} /> });
     list.push({ id: 'planillas', label: 'Generar Planillas', icon: <Save size={16} /> });
     
-    return isMobile ? list.filter((tab) => tab.id !== 'rac') : list;
-  }, [isMobile, user.rol, user.is_professor_hybrid]);
+    const visibility = data?.config?.tab_visibility || {};
+    const filtered = list.filter(tab => visibility[tab.id] !== false);
+
+    return isMobile ? filtered.filter((tab) => tab.id !== 'rac') : filtered;
+  }, [isMobile, user.rol, user.is_professor_hybrid, data?.config?.tab_visibility]);
 
   React.useEffect(() => {
     if (isMobile && page === 'rac') {
@@ -605,6 +609,8 @@ export default function PreceptorPanel({ user, onLogout, onPreviewStudent, showT
           handleUpdateMobileLogin={handleUpdateMobileLogin}
           handleUpdatePeriods={logic.handleUpdatePeriods}
           handleUpdateRACModular={handleUpdateRACModular}
+          handleUpdateEndCycleButton={handleUpdateEndCycleButton}
+          handleUpdateTabVisibility={logic.handleUpdateTabVisibility}
           addYear={addYear}
           editYear={editYear}
           deleteYear={deleteYear}

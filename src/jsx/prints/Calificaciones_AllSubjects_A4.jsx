@@ -254,11 +254,11 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
                 <th colspan="5" class="trim-header" style="font-size: 6.5pt; font-weight: 900;">1ER TRIMESTRE:</th>
                 <th colspan="5" class="trim-header" style="font-size: 6.5pt; font-weight: 900;">2DO TRIMESTRE:</th>
                 <th colspan="5" class="trim-header" style="font-size: 6.5pt; font-weight: 900;">3ER TRIMESTRE:</th>
-                <th rowspan="3" style="width: 15px; font-size: 4.5pt;">DIC</th>
-                <th rowspan="3" style="width: 15px; font-size: 4.5pt;">FEB</th>
-                <th rowspan="3" style="width: 15px; font-size: 4.5pt;">MAR</th>
-                <th rowspan="3" style="width: 15px; font-size: 4pt; line-height: 1; background: #eee;">OTRAS<br/>INST.</th>
-                <th rowspan="3" class="def-cell" style="width: 25px; font-size: 5pt;">DEF.</th>
+                <th rowspan="3" style="width: 15px; font-size: 6pt;">DIC</th>
+                <th rowspan="3" style="width: 15px; font-size: 6pt;">FEB</th>
+                <th rowspan="3" style="width: 15px; font-size: 6pt;">MAR</th>
+                <th rowspan="3" style="width: 15px; font-size: 5pt; line-height: 1; background: #eee;">OTRAS<br/>INST.</th>
+                <th rowspan="3" class="def-cell" style="width: 25px; font-size: 6pt;">DEF.</th>
               </tr>
               <tr>
                 <th colspan="5" class="trim-header" style="font-size: 5.5pt; font-weight: normal; font-style: italic;">CALIF. TRIMESTRAL</th>
@@ -306,11 +306,11 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
                 <th colspan="3" class="trim-header" style="font-size: 6.5pt; font-weight: 900;">1ER TRIMESTRE:</th>
                 <th colspan="3" class="trim-header" style="font-size: 6.5pt; font-weight: 900;">2DO TRIMESTRE:</th>
                 <th colspan="3" class="trim-header" style="font-size: 6.5pt; font-weight: 900;">3ER TRIMESTRE:</th>
-                <th rowspan="3" style="width: 20px; font-size: 5pt; line-height: 1;">DIC</th>
-                <th rowspan="3" style="width: 20px; font-size: 5pt; line-height: 1;">FEB</th>
-                <th rowspan="3" style="width: 20px; font-size: 5pt; line-height: 1;">MAR</th>
-                <th rowspan="3" style="width: 20px; font-size: 4pt; line-height: 1; background: #eee;">OTRAS<br/>INST.</th>
-                <th rowspan="3" class="def-cell" style="font-size: 5pt; line-height: 1;">DEF.</th>
+                <th rowspan="3" style="width: 20px; font-size: 6pt; line-height: 1;">DIC</th>
+                <th rowspan="3" style="width: 20px; font-size: 6pt; line-height: 1;">FEB</th>
+                <th rowspan="3" style="width: 20px; font-size: 6pt; line-height: 1;">MAR</th>
+                <th rowspan="3" style="width: 20px; font-size: 5pt; line-height: 1; background: #eee;">OTRAS<br/>INST.</th>
+                <th rowspan="3" class="def-cell" style="font-size: 6pt; line-height: 1;">DEF.</th>
               </tr>
               <tr>
                 <th colspan="3" class="trim-header" style="font-size: 5.5pt; font-weight: normal; font-style: italic;">CALIF. TRIMESTRAL</th>
@@ -318,14 +318,14 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
                 <th colspan="3" class="trim-header" style="font-size: 5.5pt; font-weight: normal; font-style: italic;">CALIF. TRIMESTRAL</th>
               </tr>
               <tr>
-                <th style="font-size: 6pt; border: 1px solid #000;">ORIENTA</th>
-                <th style="font-size: 6pt; border: 1px solid #000;">NUMERO</th>
+                <th style="font-size: 5pt; border: 1px solid #000;">ORIENT.</th>
+                <th style="font-size: 5pt; border: 1px solid #000;">NUMERO</th>
                 <th style="font-size: 6pt; border: 1px solid #000;">LETRAS</th>
-                <th style="font-size: 6pt; border: 1px solid #000;">ORIENTA</th>
-                <th style="font-size: 6pt; border: 1px solid #000;">NUMERO</th>
+                <th style="font-size: 5pt; border: 1px solid #000;">ORIENT.</th>
+                <th style="font-size: 5pt; border: 1px solid #000;">NUMERO</th>
                 <th style="font-size: 6pt; border: 1px solid #000;">LETRAS</th>
-                <th style="font-size: 6pt; border: 1px solid #000;">ORIENTA</th>
-                <th style="font-size: 6pt; border: 1px solid #000;">NUMERO</th>
+                <th style="font-size: 5pt; border: 1px solid #000;">ORIENT.</th>
+                <th style="font-size: 5pt; border: 1px solid #000;">NUMERO</th>
                 <th style="font-size: 6pt; border: 1px solid #000;">LETRAS</th>
               </tr>
             </thead>
@@ -392,6 +392,8 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
               <tr><td>1er. CUATRIMESTRE</td><td></td><td></td></tr>
               <tr><td>2do. INFORME ORIENTADOR</td><td></td><td></td></tr>
               <tr><td>2do. CUATRIMESTRE</td><td></td><td></td></tr>
+              <tr><td>3er. INFORME ORIENTADOR</td><td></td><td></td></tr>
+              <tr><td>3er. CUATRIMESTRE</td><td></td><td></td></tr>
             </tbody>
           </table>
 
@@ -485,6 +487,7 @@ export const handlePrintPlanillas_AllSubjects = (data, selectedCourseId, schedul
           .official-table th { background: rgba(0,0,0,0.05); font-weight: bold; border: 1px solid #000; }
           .planilla-table { width: 100%; border-collapse: collapse; font-size: 7pt; border: 1.5px solid #000; margin-top: 5px; color: #000; table-layout: fixed; }
           .planilla-table th, .planilla-table td { border: 1px solid #000; padding: 0 !important; text-align: center; overflow: hidden; color: #000; height: var(--dynamic-row-height, 4.4mm) !important; }
+          .planilla-table td.student-name-cell { text-align: left !important; padding-left: 2px !important; text-transform: uppercase; }
           .planilla-table th { background: #eee !important; font-weight: bold; text-transform: uppercase; border: 1.5px solid #000; height: auto !important; padding: 2px 1px !important; }
           .trim-header { font-size: 9pt; font-style: italic; }
           .spacer-cell { background: #eee !important; border: 1px solid #000 !important; }

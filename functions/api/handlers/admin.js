@@ -93,11 +93,13 @@ export async function handleConfig(env, request, userId, body) {
   if (action === 'update_mode') return updateAjuste('period_view_mode', valor);
   if (action === 'update_mobile') return updateAjuste('mobile_login_enabled', valor);
   if (action === 'update_rac_modular') return updateAjuste('rac_modular_enabled', valor);
+  if (action === 'update_end_cycle_btn') return updateAjuste('end_cycle_btn_enabled', valor);
   if (action === 'update_password_msg') return updateAjuste('password_not_set_msg', valor);
   if (action === 'update_preceptor_mode') {
     const { role, mode } = body;
     return updateAjuste(`${role}_mode`, mode);
   }
+  if (action === 'update_tab_visibility') return updateAjuste('tab_visibility', valor);
   if (action === 'update_periods') {
     const statements = periodos.map(p => env.DB.prepare('UPDATE periodos SET activo = ? WHERE id = ?').bind(p.activo ? 1 : 0, p.id));
     await env.DB.batch(statements);

@@ -124,16 +124,36 @@ const StudentManager = ({
                 </div>
               </div>
             ))
-          ) : (paginatedStudents.map((student) => {
+          ) : (paginatedStudents.map((student, index) => {
+            const orderNumber = (currentPage - 1) * itemsPerPage + index + 1;
             return (
               <div 
                 key={student.id} 
                 className="student-item"
                 style={{ 
                   ...(student.estado === 0 ? { opacity: 0.6, background: 'rgba(0,0,0,0.1)' } : {}),
-                  padding: '1rem 1.2rem' // Estirar un poco más cada item
+                  padding: '1rem 1.2rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1.2rem'
                 }}
               >
+                <div style={{
+                  minWidth: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'rgba(99, 102, 241, 0.08)',
+                  color: 'var(--primary)',
+                  borderRadius: '50%',
+                  fontSize: '0.8rem',
+                  fontWeight: 'bold',
+                  border: '1px solid rgba(99, 102, 241, 0.2)',
+                  flexShrink: 0
+                }}>
+                  {orderNumber}
+                </div>
                 <div style={{ flex: 1 }}>
                   <strong style={{ fontSize: '1rem', ...(student.estado === 0 ? { textDecoration: 'line-through' } : {}) }}>{student.apellido}, {student.nombre}</strong> 
                   {student.estado === 0 && <span className="badge badge-danger" style={{ fontSize: '0.6rem', verticalAlign: 'middle', marginLeft: '4px' }}>INACTIVO / PASE</span>}

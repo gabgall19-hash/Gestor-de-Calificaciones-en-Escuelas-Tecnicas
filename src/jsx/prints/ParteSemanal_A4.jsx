@@ -1,4 +1,4 @@
-import { formatDNI, getCoursePreceptor } from '../functions/PreceptorHelpers';
+import { formatDNI, getCoursePreceptor, abbreviateSubject } from '../functions/PreceptorHelpers';
 
 export const handlePrintParteSemanal = (data, course, scheduleData) => {
   const win = window.open('', '_blank');
@@ -286,7 +286,7 @@ export const handlePrintParteSemanal = (data, course, scheduleData) => {
                         }
                         return `
                           <td>
-                            <span class="cell-subject">${subject}</span>
+                            <span class="cell-subject">${abbreviateSubject(subject, 25)}</span>
                             <span class="cell-teacher">${d?.teacher ? (d.teacher.startsWith('Prof.') ? d.teacher : 'Prof. ' + d.teacher) : ''}</span>
                             <span class="signature-line"></span>
                           </td>

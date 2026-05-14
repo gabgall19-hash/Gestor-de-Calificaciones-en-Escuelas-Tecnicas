@@ -1,4 +1,4 @@
-import { getCoursePreceptor } from '../functions/PreceptorHelpers';
+import { getCoursePreceptor, abbreviateSubject } from '../functions/PreceptorHelpers';
 
 export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, selectedMonth, attendanceMap) => {
   const win = window.open('', '_blank');
@@ -111,7 +111,7 @@ export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, sele
       </div>
 
       <div class="title-row">
-        <div>Partes de Asistencia Mensual</div>
+        <div>Parte Semanal de Asistencia</div>
         <div>Curso: ${course.ano} ${course.division}</div>
         <div>Mes: ${[...new Set(week.map(d => monthNames[d.getMonth()]))].join('/')}</div>
       </div>
@@ -163,7 +163,7 @@ export const handlePrintParteSemanal_AllWeek = (data, course, scheduleData, sele
                     }
                     return `
                       <td>
-                        <span class="cell-subject">${subject}</span>
+                        <span class="cell-subject">${abbreviateSubject(subject, 25)}</span>
                         <span class="cell-teacher">${d?.teacher ? (d.teacher.startsWith('Prof.') ? d.teacher : 'Prof. ' + d.teacher) : ''}</span>
                         <span class="signature-line"></span>
                       </td>

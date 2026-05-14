@@ -416,6 +416,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     handleUpdateSystemMode,
     handleUpdateMobileLogin,
     handleUpdateRACModular,
+    handleUpdateEndCycleButton,
     handleUpdatePreceptorMode,
     handleUpdatePasswordMsg,
     savePrevias,
@@ -428,7 +429,8 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     onPrintRAC_AllStudents,
     onPrintParteDiario,
     onPrintParteDiarioGlobal,
-    onPrintParteConInformacion
+    onPrintParteConInformacion,
+    handleUpdateTabVisibility
   } = usePreceptorConfigActions({
     data,
     user,
@@ -463,7 +465,7 @@ export default function usePreceptorLogic({ user, onPreviewStudent, showToast })
     createUser, editUser, startEditUser, deleteUser, handleResetPassword, setYearAsCurrent, copyYearInfo, handleSetPassword,
     startEndCycle, handleEndCycleConfirm, handleViewFicha, getHistorial, startCreateTec, startEditTec, addTec, editTec, removeTec,
     handleUpdateLocks, handleUpdateSystemMode, handleUpdateMobileLogin, handleUpdateRACModular, handleUpdatePreceptorMode,
-    handleUpdatePasswordMsg,
+    handleUpdatePasswordMsg, handleUpdateTabVisibility, handleUpdateEndCycleButton,
     duplicateTec, savePrevias, deletePrevia, page, setPage, handleUpdatePeriods,
     onPrintAllCourses, onPrintSeguimientoGlobal, onPrintPlanillasCurso, onPrintRAC_Student, onPrintRAC_AllStudents, onPrintParteDiario, onPrintParteDiarioGlobal, onPrintParteConInformacion,
     academicYearSummary, setAcademicYearSummary, getYearSummary, populateYearCourses

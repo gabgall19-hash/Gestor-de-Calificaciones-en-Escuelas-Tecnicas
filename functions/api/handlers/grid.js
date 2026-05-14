@@ -205,7 +205,13 @@ export async function handleGrid(env, request, url) {
   const tecs = results[idx.tecs].results;
   const subjects = results[idx.subjects].results;
   const periods = results[idx.periods].results;
-  const config = results[idx.config].results.reduce((acc, curr) => ({ ...acc, [curr.clave]: curr.valor }), {});
+  const config = results[idx.config].results.reduce((acc, curr) => {
+    let val = curr.valor;
+    if (curr.clave === 'tab_visibility') {
+      try { val = JSON.parse(val); } catch (e) { val = {}; }
+    }
+    return { ...acc, [curr.clave]: val };
+  }, {});
   const pases = idx.pases !== -1 ? results[idx.pases].results : [];
   const reportUsers = idx.reportUsers !== -1 ? results[idx.reportUsers].results : (idx.users !== -1 ? results[idx.users].results : []);
   const anuncios = results[idx.anuncios].results;

@@ -48,9 +48,9 @@ export const handlePrintSeguimientoGlobal = async (data, selectedYearId, user, s
             <div class="boletin-info-grid">
               <div><strong>CURSO:</strong> ${course.ano} ${course.division} · <strong>TURNO:</strong> ${course.turno}</div>
               <div style="text-align: right;"><strong>${yearText}</strong></div>
-              <div style="grid-column: span 2; margin-top: 5px; opacity: 0.9;">
-                <strong>TECNICATURA:</strong> ${course.tecnicatura_nombre}<br/>
-                <strong style="margin-top: 5px; display: inline-block;">PRECEPTOR:</strong> ${getCoursePreceptor(data, course.id)}
+              <div style="grid-column: span 2; margin-top: 8px; display: flex; justify-content: space-between; align-items: baseline;">
+                <div><strong>TECNICATURA:</strong> ${course.tecnicatura_nombre}</div>
+                <div><strong>PRECEPTOR:</strong> ${getCoursePreceptor(data, course.id)}</div>
               </div>
             </div>
           </div>
@@ -93,8 +93,8 @@ export const handlePrintSeguimientoGlobal = async (data, selectedYearId, user, s
             .printable-page * { color: black !important; }
             .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; border: 1px solid #000; }
             .print-table th, .print-table td { border: 1px solid #000; padding: 8px 12px; text-align: left; }
-            .print-table th { background: #f8fafc; font-weight: 900; text-transform: uppercase; font-size: 0.8rem; }
-            .boletin-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; margin-top: 1rem; border: 1px solid #000; padding: 15px; font-size: 0.85rem; }
+            .print-table th { background: #eee !important; font-weight: 900; text-transform: uppercase; font-size: 0.8rem; -webkit-print-color-adjust: exact; }
+            .boletin-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; margin-top: 1rem; border: 1px solid #000; padding: 15px; font-size: 0.85rem; background: #f4f4f4; -webkit-print-color-adjust: exact; }
             .no-print-toolbar { position: fixed; top: 0; left: 0; right: 0; height: 70px; display: flex; align-items: center; justify-content: center; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); gap: 1.5rem; }
             .btn-print { background: #6366f1; color: white; border: none; padding: 0.7rem 2rem; border-radius: 8px; font-weight: bold; cursor: pointer; }
             @media print {

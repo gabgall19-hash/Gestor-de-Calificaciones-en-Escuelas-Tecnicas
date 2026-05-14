@@ -1,5 +1,6 @@
 import React from 'react';
-import { Users, Settings, Plus, Eye, Wrench, Trash2, Smartphone, Unlock, Lock, Copy, BookOpen, Check, ArrowUpCircle, AlertTriangle } from 'lucide-react';
+import { Users, Settings, Plus, Eye, Wrench, Trash2, Smartphone, Unlock, Lock, Copy, BookOpen, Check, ArrowUpCircle, AlertTriangle, ListChecks } from 'lucide-react';
+import Modal from '../UI/Modal';
 
 const SettingsPanel = ({
   user, data, isMobile,
@@ -15,17 +16,67 @@ const SettingsPanel = ({
   prepareEditCourse, toggleCourseActive,
   handleUpdateMobileLogin,
   handleUpdateRACModular,
+  handleUpdateEndCycleButton,
   handleUpdatePasswordMsg,
   setYearAsCurrent, copyYearInfo,
   setUserError,
-  getYearSummary, academicYearSummary, setAcademicYearSummary,
-  populateYearCourses
+  academicYearSummary, setAcademicYearSummary,
+  populateYearCourses, handleUpdateTabVisibility
 }) => {
   const [userSearch, setUserSearch] = React.useState('');
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [showTabsModal, setShowTabsModal] = React.useState(false);
   const usersPerPage = 10;
+
+  const currentVisibility = data?.config?.tab_visibility || {};
+
+  const tabsToManage = [
+    { id: 'asistencia', label: 'Asistencia' },
+    { id: 'grades', label: 'Notas' },
+    { id: 'materias', label: 'Materias' },
+    { id: 'students', label: 'Alumnos' },
+    { id: 'pases', label: 'Pases' },
+    { id: 'rac', label: 'RAC' },
+    { id: 'historial', label: 'Historial' },
+    { id: 'egresados', label: 'Egresados' },
+    { id: 'anuncios', label: 'Anuncios' },
+    { id: 'horarios', label: 'Horarios' },
+    { id: 'planillas', label: 'Planillas' },
+  ];
   return (
     <section className="page-section management-grid">
+      {showTabsModal && (
+        <Modal title="Modificaciones de Pestañas" onClose={() => setShowTabsModal(false)}>
+          <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1.5rem' }}>Oculta módulos del menú principal para todos los usuarios.</p>
+          <div className="stack-form" style={{ gap: '12px' }}>
+            {tabsToManage.map(tab => {
+              const isVisible = currentVisibility[tab.id] !== false; // Default true
+              return (
+                <div key={tab.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
+                  <span style={{ fontWeight: '600', fontSize: '0.9rem' }}>{tab.label}</span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                      className={`btn ${!isVisible ? 'btn-danger' : ''}`} 
+                      style={{ fontSize: '0.7rem', padding: '4px 10px', background: !isVisible ? '#ef4444' : 'rgba(255,255,255,0.1)' }}
+                      onClick={() => handleUpdateTabVisibility({ ...currentVisibility, [tab.id]: false })}
+                    >
+                      OCULTO
+                    </button>
+                    <button 
+                      className={`btn ${isVisible ? 'btn-primary' : ''}`} 
+                      style={{ fontSize: '0.7rem', padding: '4px 10px', background: isVisible ? 'var(--primary)' : 'rgba(255,255,255,0.1)' }}
+                      onClick={() => handleUpdateTabVisibility({ ...currentVisibility, [tab.id]: true })}
+                    >
+                      VISIBLE
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <button className="btn btn-primary" style={{ width: '100%', marginTop: '1.5rem' }} onClick={() => setShowTabsModal(false)}>Cerrar</button>
+        </Modal>
+      )}
       <section className="management-card" style={{ display: 'flex', flexDirection: 'column' }}>
         <div className="section-title"><Users size={16} /><h2>Gestión de Usuarios</h2></div>
         <div className="section-toolbar-left" style={{ marginBottom: '1.2rem' }}>
@@ -453,6 +504,25 @@ const SettingsPanel = ({
                 {data.config.rac_modular_enabled === 'true' ? 'Activado' : 'Desactivado'}
               </button>
             </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertTriangle size={16} /> Botón de Fin de Ciclo
+                </h3>
+                <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>Habilitar/Deshabilitar botón de Terminación de Ciclo en RAC.</p>
+              </div>
+              <button
+                className={`btn ${data.config.end_cycle_btn_enabled !== 'false' ? 'btn-primary' : ''}`}
+                style={{
+                  background: data.config.end_cycle_btn_enabled !== 'false' ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
+                  minWidth: '120px', padding: '8px'
+                }}
+                onClick={() => handleUpdateEndCycleButton(data.config.end_cycle_btn_enabled !== 'false' ? 'false' : 'true')}
+              >
+                {data.config.end_cycle_btn_enabled !== 'false' ? 'Habilitado' : 'Deshabilitado'}
+              </button>
+            </div>
           </div>
 
           {/* Mensaje de Contraseña no Definida */}
@@ -479,6 +549,25 @@ const SettingsPanel = ({
                 }}
               >
                 Guardar
+              </button>
+            </div>
+          </div>
+
+          {/* Modificación de Pestañas */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.2rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', gap: '1rem', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h3 style={{ fontSize: '1rem', color: 'var(--primary)', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ListChecks size={16} /> Visibilidad de Módulos
+                </h3>
+                <p style={{ fontSize: '0.75rem', opacity: 0.6 }}>Ocultar o mostrar pestañas globalmente.</p>
+              </div>
+              <button
+                className="btn btn-primary"
+                style={{ minWidth: '120px', padding: '8px' }}
+                onClick={() => setShowTabsModal(true)}
+              >
+                Modificaciones de Pestañas
               </button>
             </div>
           </div>

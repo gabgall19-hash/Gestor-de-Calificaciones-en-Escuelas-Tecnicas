@@ -132,7 +132,9 @@ export default function usePreceptorAdminActions(deps) {
     try {
       const payload = {
         ...userForm,
-        preceptor_course_id: ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userForm.rol) ? Number(userForm.preceptor_course_id) : null,
+        preceptor_course_id: ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userForm.rol) 
+          ? (Array.isArray(userForm.preceptor_course_ids) ? userForm.preceptor_course_ids.filter(Boolean).join(',') : userForm.preceptor_course_id || null) 
+          : null,
         professor_course_ids: Array.isArray(userForm.professor_course_ids) ? userForm.professor_course_ids : [],
         professor_subject_ids: Array.isArray(userForm.professor_subject_ids) ? userForm.professor_subject_ids : [],
         is_professor_hybrid: !!userForm.is_professor_hybrid
@@ -153,7 +155,9 @@ export default function usePreceptorAdminActions(deps) {
     try {
       const payload = {
         ...userForm,
-        preceptor_course_id: ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userForm.rol) ? Number(userForm.preceptor_course_id) : null,
+        preceptor_course_id: ['preceptor', 'preceptor_taller', 'preceptor_ef'].includes(userForm.rol) 
+          ? (Array.isArray(userForm.preceptor_course_ids) ? userForm.preceptor_course_ids.filter(Boolean).join(',') : userForm.preceptor_course_id || null) 
+          : null,
         professor_course_ids: Array.isArray(userForm.professor_course_ids) ? userForm.professor_course_ids : [],
         professor_subject_ids: Array.isArray(userForm.professor_subject_ids) ? userForm.professor_subject_ids : [],
         is_professor_hybrid: !!userForm.is_professor_hybrid
@@ -178,6 +182,7 @@ export default function usePreceptorAdminActions(deps) {
       password: '',
       rol: userRow.rol,
       preceptor_course_id: userRow.preceptor_course_id,
+      preceptor_course_ids: String(userRow.preceptor_course_id || '').split(',').filter(Boolean).map(String),
       is_professor_hybrid: !!userRow.is_professor_hybrid,
       professor_course_ids: String(userRow.professor_course_ids || '').split(',').filter(Boolean).map(Number),
       professor_subject_ids: String(userRow.professor_subject_ids || '').split(',').filter(Boolean)

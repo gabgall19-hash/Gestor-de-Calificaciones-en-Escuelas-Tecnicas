@@ -6,6 +6,23 @@
 
 ## 📜 Changelog
 
+### 🚀 [3.6.4] - 2026-05-13 (Administrative Reporting and Preceptor Management)
+**"Multi-Course Preceptor Assignments and Smart Subject Abbreviations"**
+
+#### ✨ New Features and Improvements
+*   **👥 Multi-Course Preceptor Assignment**:
+    *   **Double Shift Support**: Preceptors can now be assigned to multiple courses simultaneously.
+    *   **Dynamic UI**: Integrated a dynamic assignment list with a (+) button in the User Management modal for effortless multi-course mapping.
+    *   **Global Synchronization**: All institutional reports (Attendance, Seguimiento, RAC) now automatically recognize and display the preceptor's name for every assigned course.
+*   **🖨️ Smart Subject Abbreviations (Parte Semanal)**:
+    *   **Intelligent Thresholding**: Implemented an automatic abbreviation engine that shortens subject names only when they exceed 25 characters, preserving readability for shorter titles.
+    *   **Institutional Nomenclature**: Standardized abbreviations for long technical terms (e.g., *Mantenimiento* → *Mant.*, *Sistemas* → *Sist.*, *Técnico* → *Téc.*) to ensure perfect fit within the weekly schedule grid.
+*   **📐 Report Layout & Styling Refinement**:
+    *   **Seguimiento A4**: Realigned the Preceptor field to the right of the Technical Career for a more professional balance.
+    *   **Visual Hierarchy**: Applied a subtle light gray background (`#f4f4f4`) to the information headers in Seguimiento and AllGrades reports to improve scannability.
+    *   **Academic Back-Page (Grades)**: Added missing institutional rows ("3er. Informe Orientador" and "3er. Cuatrimestre") to the academic grade sheet (dorsal).
+    *   **Precision Alignment**: Fixed student name alignment (Left-aligned with 2px padding) to prevent text collision with table borders.
+
 ### 🚀 [3.6.3] - 2026-05-10 (Database Optimization and Performance)
 **"Cloudflare D1 Query Refactoring and Indexing"**
 

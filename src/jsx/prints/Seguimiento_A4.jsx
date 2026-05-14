@@ -1,4 +1,4 @@
-﻿import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
+import { formatDNI, numberToWords, simplifyTecName, allWorkshopNames, getCoursePreceptor } from '../functions/PreceptorHelpers';
 
 export const handlePrintAllCourses = (data) => {
   const win = window.open('', '_blank');
@@ -27,9 +27,9 @@ export const handlePrintAllCourses = (data) => {
           <div class="boletin-info-grid">
             <div><strong>CURSO:</strong> ${course.ano} ${course.division} · <strong>TURNO:</strong> ${course.turno}</div>
             <div style="text-align: right;"><strong>${yearText}</strong></div>
-            <div style="grid-column: span 2; margin-top: 5px; opacity: 0.9;">
-              <strong>TECNICATURA:</strong> ${course.tecnicatura_nombre}<br/>
-              <strong style="margin-top: 5px; display: inline-block;">PRECEPTOR:</strong> ${getCoursePreceptor(data, course.id)}
+            <div style="grid-column: span 2; margin-top: 8px; display: flex; justify-content: space-between; align-items: baseline;">
+              <div><strong>TECNICATURA:</strong> ${course.tecnicatura_nombre}</div>
+              <div><strong>PRECEPTOR:</strong> ${getCoursePreceptor(data, course.id)}</div>
             </div>
           </div>
         </div>
@@ -141,6 +141,8 @@ export const handlePrintAllCourses = (data) => {
             padding: 15px; 
             text-align: left; 
             font-size: 0.95rem;
+            background: #f4f4f4;
+            -webkit-print-color-adjust: exact;
           }
           .print-table { 
             width: 100%; 

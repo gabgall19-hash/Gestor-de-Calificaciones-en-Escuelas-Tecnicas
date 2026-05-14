@@ -1,4 +1,4 @@
-import { getCoursePreceptor } from '../functions/PreceptorHelpers';
+import { getCoursePreceptor, abbreviateSubject } from '../functions/PreceptorHelpers';
 
 export const handlePrintParteSemanal_AllGrades = (data, allSchedules) => {
   const win = window.open('', '_blank');
@@ -78,7 +78,7 @@ export const handlePrintParteSemanal_AllGrades = (data, allSchedules) => {
         </div>
 
         <div class="title-row">
-          <div>Parte Semanal de Asistencia Institucional</div>
+          <div>Parte Semanal de Asistencia</div>
           <div>Curso: ${course.ano} ${course.division}</div>
           <div>Mes: ${currentMonth}</div>
         </div>
@@ -134,7 +134,7 @@ export const handlePrintParteSemanal_AllGrades = (data, allSchedules) => {
                       }
                       return `
                         <td>
-                          <span class="cell-subject">${subject}</span>
+                          <span class="cell-subject">${abbreviateSubject(subject, 25)}</span>
                           <span class="cell-teacher">${d?.teacher ? (d.teacher.startsWith('Prof.') ? d.teacher : 'Prof. ' + d.teacher) : ''}</span>
                           <span class="signature-line"></span>
                         </td>
