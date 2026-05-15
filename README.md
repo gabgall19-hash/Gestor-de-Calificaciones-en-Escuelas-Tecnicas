@@ -1,19 +1,19 @@
-# 🎓 School Management System - Industrial N°6
+# School Management Platform
 
 > **Professional administrative suite for grades, student management, and institutional reporting.**
 
-## 📖 Overview
+## Overview
 This School Management System is a specialized administrative platform tailored for **Technical Industrial Schools**. It streamlines academic processes, from real-time grade entry and attendance tracking to the generation of complex institutional reports. Built on a modern serverless architecture, it ensures high availability, security, and performance for the entire educational community.
 
-## ✨ Key Features
-*   **📊 Advanced Grade Management**: Specialized support for Basic and Upper academic cycles with technical career tracking.
-*   **👥 Multi-Role Security**: Granular permissions for Administrators, Preceptors, Teachers, and Secretaries.
-*   **🖨️ Precision Reporting**: High-fidelity A4 print engine for bulletins, weekly schedules, and daily institutional reports.
-*   **📅 Attendance Ecosystem**: Multi-sector tracking (Theory, Workshop, Physical Education) with automated statistics.
-*   **📂 Digital Student Records**: Centralized repository for student data, academic history, and document attachments via ImgBB.
-*   **📱 Mobile Ready**: Fully responsive interface and native Android integration through Capacitor.
+## Key Features
+*   **Advanced Grade Management**: Specialized support for Basic and Upper academic cycles with technical career tracking.
+*   **Multi-Role Security**: Granular permissions for Administrators, Preceptors, Teachers, and Secretaries.
+*   **Precision Reporting**: High-fidelity A4 print engine for bulletins, weekly schedules, and daily institutional reports.
+*   **Attendance Ecosystem**: Multi-sector tracking (Theory, Workshop, Physical Education) with automated statistics.
+*   **Digital Student Records**: Centralized repository for student data, academic history, and document attachments via ImgBB.
+*   **Mobile Ready**: Fully responsive interface and native Android integration through Capacitor.
 
-## 🛠️ Technology Stack
+## Technology Stack
 *   **Frontend**: React 19, Vite, React Router 7, Lucide Icons.
 *   **Backend**: Cloudflare Pages Functions (Serverless).
 *   **Database**: Cloudflare D1 (SQL).
